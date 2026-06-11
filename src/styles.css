@@ -1,0 +1,369 @@
+:root {
+  font-family: "Manrope", sans-serif;
+  color: #f7f5f0;
+  background: #090909;
+  font-synthesis: none;
+  --gold: #d4af37;
+  --gold-dark: #a8861d;
+  --muted: #a0a0a0;
+  --panel: #141414;
+  --line: rgba(255,255,255,.08);
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: #090909; color: #f7f5f0; }
+body, button, input, select, textarea { font-family: "Manrope", sans-serif; }
+a { color: inherit; text-decoration: none; }
+button, input, select, textarea { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+input, select, textarea { color-scheme: dark; }
+
+.header { height: 86px; padding: 0 4.5vw; display: flex; align-items: center; gap: 34px; position: fixed; top: 0; left: 0; right: 0; z-index: 20; border-bottom: 1px solid transparent; background: transparent; transition: background .35s ease, border-color .35s ease, backdrop-filter .35s ease, box-shadow .35s ease; }
+.header.scrolled { background: rgba(9,9,9,.9); border-color: rgba(255,255,255,.06); backdrop-filter: blur(18px); box-shadow: 0 10px 35px rgba(0,0,0,.5); }
+.brand { display: inline-flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.brand img { display: block; width: 178px; height: 58px; object-fit: contain; object-position: left center; }
+.nav { margin-left: auto; display: flex; align-items: center; gap: clamp(16px,2vw,32px); }
+.nav a { font-size: 12px; color: #ddd; position: relative; padding: 34px 0; white-space: nowrap; }
+.header.scrolled .nav a, .header.scrolled .phone-link, .header.scrolled .menu-toggle { color: #f7f5f0; }
+.nav a::after { content: ""; position: absolute; left: 0; right: 100%; bottom: 25px; height: 1px; background: var(--gold); transition: .3s; }
+.nav a:hover::after { right: 0; }
+.header-actions { display: flex; align-items: center; gap: 20px; }
+.phone-link { color: #ddd; font-size: 11px; display: flex; gap: 7px; align-items: center; white-space: nowrap; }
+.menu-toggle { display: none; background: none; border: 0; color: #fff; padding: 10px; }
+.menu-toggle span { display: block; width: 24px; height: 1px; margin: 5px 0; background: currentColor; }
+
+.btn { min-height: 50px; padding: 0 26px; display: inline-flex; align-items: center; justify-content: center; gap: 14px; position: relative; overflow: hidden; isolation: isolate; color: #fff; text-transform: uppercase; letter-spacing: .12em; font-size: 10px; font-weight: 700; border: 1px solid rgba(212,175,55,.7); border-radius: 999px; background: linear-gradient(145deg,#191919 0%,#030303 48%,#151515 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.1), inset 0 -12px 24px rgba(0,0,0,.55), 0 8px 28px rgba(0,0,0,.3); cursor: pointer; transition: color .3s ease, border-color .3s ease, box-shadow .3s ease, transform .3s ease; }
+.btn::before { content: ""; position: absolute; z-index: -1; width: 160%; height: 220%; left: -130%; top: -60%; border-radius: 42%; background: radial-gradient(circle,rgba(212,175,55,.48) 0%,rgba(212,175,55,.14) 34%,transparent 68%); transform: rotate(12deg); transition: left .55s ease; }
+.btn:hover::before { left: 12%; }
+.btn:hover { color: #f3d77a; border-color: var(--gold); box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 0 28px rgba(212,175,55,.2), 0 12px 34px rgba(0,0,0,.4); transform: translateY(-2px); }
+.btn-gold { color: #fff; background: linear-gradient(145deg,#1b1b1b 0%,#030303 48%,#17140c 100%); }
+.btn-ghost { border-color: rgba(212,175,55,.48); }
+.btn-ghost:hover { color: var(--gold); border-color: var(--gold); }
+.btn-small { min-height: 40px; padding: 0 20px; }
+
+.hero { height: 100vh; position: relative; overflow: hidden; background: #000; display: flex; align-items: center; justify-content: center; }
+.hero-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+.hero-badge { position: absolute; bottom: 65px; right: 6.8vw; width: 90px; height: 90px; z-index: 10; object-fit: contain; pointer-events: none; opacity: 1; background: #000; border-radius: 50%; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5)); }
+.hero-flash { position: absolute; inset: 0; z-index: 3; background: #ffffff; opacity: 0; pointer-events: none; transition: opacity 0.6s ease-out; }
+.hero-flash.active { opacity: 1; transition: opacity 0.3s ease-in; }
+@keyframes slideDownEntrance {
+  0% {
+    transform: translateY(-150px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+.hero .booking-form {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 90% !important;
+  max-width: 480px !important;
+  background: rgba(20, 20, 20, 0.95) !important;
+  border-radius: 20px !important;
+  padding: 30px !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7) !important;
+  border: 1px solid rgba(212, 175, 55, 0.25) !important;
+  min-height: auto !important;
+  gap: 20px !important;
+  margin: 0 !important;
+  transform: translateY(-150px);
+  opacity: 0;
+  pointer-events: none;
+}
+.hero .booking-form.visible {
+  animation: slideDownEntrance 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: all;
+}
+.hero .booking-form .booking-tabs {
+  display: flex !important;
+  gap: 16px !important;
+  align-self: flex-start !important;
+  padding-right: 0 !important;
+  border-right: none !important;
+  margin-bottom: 5px !important;
+}
+.hero .booking-form .booking-tabs button {
+  background: transparent !important;
+  border: none !important;
+  color: #94a3b8 !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  padding: 8px 16px !important;
+  border-radius: 100px !important;
+  box-shadow: none !important;
+  cursor: pointer;
+  transition: all 0.2s !important;
+}
+.hero .booking-form .booking-tabs button.active {
+  background: rgba(212, 175, 55, 0.12) !important;
+  color: var(--gold) !important;
+}
+.hero .booking-form .form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.hero .booking-form .field-group {
+  background: #1c1c1c;
+  border-radius: 12px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-left: none !important;
+}
+.hero .booking-form .field-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #a0a0a0;
+  text-transform: none;
+  letter-spacing: normal;
+  display: block;
+}
+.hero .booking-form .field-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  position: relative;
+}
+.hero .booking-form .field-icon {
+  flex-shrink: 0;
+  color: var(--gold);
+}
+.hero .booking-form .field-input-wrapper input {
+  border: 0 !important;
+  background: transparent !important;
+  width: 100% !important;
+  outline: 0 !important;
+  color: #ffffff !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  padding: 0 !important;
+}
+.hero .booking-form .field-input-wrapper input::placeholder {
+  color: #64748b !important;
+}
+.hero .booking-form .swap-btn {
+  background: transparent;
+  border: none;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #a0a0a0;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: color 0.2s;
+}
+.hero .booking-form .swap-btn:hover {
+  color: #ffffff;
+}
+.hero .booking-form .btn-search {
+  width: 100% !important;
+  min-height: 52px !important;
+  background: linear-gradient(145deg, #1b1b1b 0%, #030303 48%, #17140c 100%) !important;
+  border: 1px solid rgba(212, 175, 55, 0.7) !important;
+  color: #ffffff !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.12em !important;
+  border-radius: 999px !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), inset 0 -12px 24px rgba(0, 0, 0, 0.55), 0 8px 28px rgba(0, 0, 0, 0.3) !important;
+  align-self: stretch !important;
+  display: inline-flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+}
+.hero .booking-form .btn-search::before {
+  display: none !important;
+}
+.hero .booking-form .btn-search:hover {
+  color: #f3d77a !important;
+  border-color: var(--gold) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 0 28px rgba(212, 175, 55, 0.2), 0 12px 34px rgba(0, 0, 0, 0.4) !important;
+  transform: translateY(-1px) !important;
+}
+h1,h2 { font-family: "Cormorant Garamond", serif; font-weight: 500; margin: 0; }
+
+.booking-form { width: 86%; max-width: 1380px; position: relative; z-index: 5; margin: -55px auto 0; min-height: 124px; padding: 22px 24px; background: rgba(20,20,20,.97); border: 1px solid rgba(212,175,55,.25); border-radius: var(--radius-lg); box-shadow: 0 30px 80px rgba(0,0,0,.6); display: grid; grid-template-columns: .8fr 1.4fr 1.35fr 1.35fr .75fr; align-items: center; gap: 0; overflow: hidden; }
+.booking-tabs { align-self: stretch; display: flex; align-items: center; gap: 5px; padding-right: 20px; }
+.booking-tabs button { min-height: 43px; padding: 0 15px; color: #888; background: transparent; border: 1px solid transparent; border-radius: 999px; font-size: 10px; font-weight: 700; cursor: pointer; transition: .25s ease; }
+.booking-tabs button:hover { color: #fff; }
+.booking-tabs button.active { color: var(--gold); border-color: rgba(212,175,55,.55); background: rgba(212,175,55,.07); box-shadow: inset 0 0 15px rgba(212,175,55,.06); }
+.booking-form label { padding: 5px 22px; border-left: 1px solid rgba(255,255,255,.08); min-width: 0; }
+.booking-form label span { display: block; margin-bottom: 9px; font-size: 7px; color: #888; letter-spacing: .14em; text-transform: uppercase; }
+.booking-form input { border: 0; background: transparent; width: 100%; outline: 0; color: #fff; font-size: 11px; min-width: 0; padding: 0; }
+.booking-form input::placeholder { color: #777; }
+.booking-submit { align-self: center; min-height: 58px; margin-left: 16px; padding: 0 24px; }
+
+.section { padding: 120px 7vw; }
+.section-heading { max-width: 670px; margin-bottom: 50px; }
+.section-heading.center { margin-left: auto; margin-right: auto; text-align: center; }
+.eyebrow { display: inline-flex; align-items: center; gap: 12px; color: var(--gold); font-size: 8px; text-transform: uppercase; letter-spacing: .25em; font-weight: 700; margin-bottom: 14px; }
+.eyebrow::before { content: ""; width: 26px; height: 1px; background: currentColor; }
+.section-heading.center .eyebrow::after { content: ""; width: 26px; height: 1px; background: currentColor; }
+.section-heading h2, .contact h2 { font-size: clamp(38px,4vw,58px); line-height: 1.02; letter-spacing: -.025em; }
+.section-heading p { color: var(--muted); font-size: 13px; line-height: 1.8; margin: 18px 0 0; }
+
+.services { background: #090909; }
+.service-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+.service-card { min-height: 345px; padding: 30px; border: 1px solid var(--line); border-radius: var(--radius-lg); display: flex; flex-direction: column; position: relative; overflow: hidden; background: linear-gradient(145deg,#141414,#0b0b0b); transition: .35s ease; }
+.service-card::before { content: ""; position: absolute; inset: 0; opacity: 0; background: radial-gradient(circle at 75% 20%,rgba(212,175,55,.16),transparent 45%); transition: .35s; }
+.service-card:hover { transform: translateY(-5px); border-color: rgba(184,134,11,.45); box-shadow: 0 20px 40px rgba(0,0,0,.6); z-index: 2; }
+.service-card:hover::before { opacity: 1; }
+.service-number { color: #3e3e3e; font: 500 12px "Cormorant Garamond"; align-self: flex-end; }
+.service-icon { width: 54px; height: 54px; color: var(--gold); border: 1px solid rgba(212,175,55,.35); border-radius: 16px; display: grid; place-items: center; margin: 15px 0 auto; }
+.service-icon svg { transform: none; }
+.service-copy { position: relative; }
+.service-copy h3, .vehicle-info h3, .step h3 { font: 500 23px "Cormorant Garamond"; margin: 0 0 10px; }
+.service-copy p, .step p { color: #a0a0a0; font-size: 11px; line-height: 1.7; }
+.service-copy a, .text-link { color: var(--gold); font-size: 8px; text-transform: uppercase; letter-spacing: .14em; display: inline-flex; gap: 9px; align-items: center; margin-top: 10px; font-weight: 700; }
+
+.fleet { background: #0c0c0c; }
+.fleet-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 18px; }
+.vehicle-card { background: #141414; border: 1px solid var(--line); border-radius: var(--radius-lg); transition: .3s; overflow: hidden; }
+.vehicle-card:hover { border-color: rgba(184,134,11,.45); transform: translateY(-4px); box-shadow: 0 20px 50px rgba(0,0,0,.6); }
+.vehicle-visual { height: 190px; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; background: radial-gradient(ellipse at 50% 65%,#252525 0%,#1a1a1a 45%,#0d0d0d 76%); }
+.vehicle-visual::after { content: ""; position: absolute; width: 85%; height: 20px; bottom: 27px; border-radius: 50%; background: rgba(0,0,0,.85); filter: blur(9px); }
+.vehicle-visual > span { position: absolute; top: 15px; left: 17px; color: #aaa; font-size: 7px; text-transform: uppercase; letter-spacing: .15em; }
+.car-silhouette { width: 72%; height: 54px; border-radius: 46% 24% 10% 10%; position: relative; z-index: 1; background: linear-gradient(160deg,#3e3e3e,#0d0d0d 45%,#252525 70%,#090909); box-shadow: inset 0 2px 2px rgba(255,255,255,.16); transform: skewX(-4deg); }
+.car-silhouette::before { content: ""; position: absolute; width: 50%; height: 34px; top: -26px; left: 25%; border-radius: 65% 55% 0 0; background: linear-gradient(145deg,#222 10%,#090909 60%); border-top: 1px solid #555; }
+.car-silhouette i,.car-silhouette b { position: absolute; width: 27px; height: 27px; border: 6px solid #090909; border-radius: 50%; background: #393939; bottom: -13px; z-index: 2; }
+.car-silhouette i { left: 12%; }.car-silhouette b { right: 12%; }
+.vehicle-4 .car-silhouette,.vehicle-5 .car-silhouette { height: 75px; border-radius: 18px 10px 8px 8px; }
+.vehicle-4 .car-silhouette::before,.vehicle-5 .car-silhouette::before { width: 22%; height: 25px; top: -13px; left: 6%; border-radius: 70% 0 0 0; }
+.vehicle-8 .vehicle-visual, .vehicle-3 .vehicle-visual { background: radial-gradient(ellipse at 50% 65%,#2f2a1b 0%,#1f1c12 38%,#0d0d0d 72%); }
+.vehicle-info { padding: 21px; }
+.vehicle-info small { color: var(--gold); font-size: 6px; letter-spacing: .2em; }
+.vehicle-info h3 { margin-top: 5px; font-size: 22px; }
+.vehicle-specs { display: flex; gap: 20px; padding: 14px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.vehicle-specs span { display: flex; align-items: center; gap: 6px; color: #aaa; font-size: 9px; }
+.vehicle-select { color: #eee; font-size: 8px; text-transform: uppercase; letter-spacing: .15em; display: flex; justify-content: space-between; align-items: center; padding-top: 16px; transition: .2s; }
+.vehicle-select:hover { color: var(--gold); }
+
+.process { background: #090909; }
+.steps { max-width: 1180px; margin: 75px auto 0; display: grid; grid-template-columns: repeat(4,1fr); position: relative; }
+.steps::before { content: ""; position: absolute; left: 12%; right: 12%; top: 44px; border-top: 1px solid rgba(255,255,255,.08); }
+.step { text-align: center; position: relative; padding: 0 25px; }
+.step > span { color: #2a2a2a; font: 600 60px/1 "Cormorant Garamond"; }
+.step-dot { width: 9px; height: 9px; background: var(--gold); border: 3px solid #090909; outline: 1px solid var(--gold); border-radius: 50%; margin: -17px auto 28px; position: relative; z-index: 2; }
+.step h3 { font-size: 20px; }
+
+.trust { min-height: 660px; display: grid; grid-template-columns: 1fr 1fr; background: #0c0c0c; }
+.trust-image { position: relative; min-height: 620px; background: linear-gradient(90deg,transparent 50%,#0c0c0c 100%),linear-gradient(0deg,rgba(0,0,0,.4),transparent),url("/images/luxury-hero.png") 69% center/cover no-repeat; filter: saturate(.85); }
+.experience { position: absolute; right: 3vw; bottom: 12%; width: 180px; height: 180px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #141414; border: 1px solid rgba(212,175,55,.2); border-radius: var(--radius-lg); text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+.experience strong { color: var(--gold); font: 500 65px/1 "Cormorant Garamond"; }
+.experience span { color: #aaa; font-size: 7px; line-height: 1.6; letter-spacing: .2em; }
+.trust-content { display: flex; flex-direction: column; justify-content: center; padding: 80px 10vw 80px 6vw; }
+.trust-content .section-heading { margin-bottom: 30px; }
+.trust-list { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+.trust-list div { display: flex; align-items: center; gap: 10px; color: #ccc; font-size: 10px; }
+.trust-list span { width: 24px; height: 24px; display: grid; place-items: center; border: 1px solid rgba(212,175,55,.2); border-radius: 8px; color: var(--gold); }
+
+.faq { background: #090909; }
+.faq-list { max-width: 940px; margin: 0 auto; display: grid; gap: 10px; }
+.faq-item { border: 1px solid var(--line); border-radius: var(--radius-md); overflow: hidden; background: #141414; }
+.faq-item button { width: 100%; padding: 24px 5px; background: transparent; color: #f7f5f0; border: 0; display: flex; justify-content: space-between; align-items: center; text-align: left; cursor: pointer; }
+.faq-item button span { font: 500 18px "Cormorant Garamond"; }
+.faq-item button i { color: var(--gold); font: normal 8px "Manrope"; margin-right: 24px; letter-spacing: .1em; }
+.faq-item button b { font-weight: 300; color: var(--gold); font-size: 22px; }
+.faq-answer { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .3s; }
+.faq-answer p { overflow: hidden; color: #a0a0a0; font-size: 11px; line-height: 1.8; margin: 0; max-width: 700px; }
+.faq-item.active .faq-answer { grid-template-rows: 1fr; }
+.faq-item.active .faq-answer p { padding: 0 55px 24px; }
+
+.contact { padding: 110px 10vw; display: grid; grid-template-columns: 1fr 1fr; gap: 8vw; align-items: center; position: relative; overflow: hidden; background: radial-gradient(circle at 20% 50%,rgba(212,175,55,.08),transparent 34%),#0c0c0c; border-top: 1px solid rgba(212,175,55,.12); }
+.contact::before { content: "A"; position: absolute; left: -40px; top: -120px; color: rgba(212,175,55,.015); font: 500 500px/1 "Cormorant Garamond"; }
+.contact-copy { position: relative; }
+.contact-copy > p { color: #aaa; font-size: 12px; line-height: 1.8; max-width: 520px; }
+.contact-methods { display: flex; gap: 45px; margin-top: 35px; }
+.contact-methods a { display: flex; flex-direction: column; }
+.contact-methods small { color: var(--gold); letter-spacing: .18em; font-size: 7px; margin-bottom: 7px; }
+.contact-methods strong { font: 500 17px "Cormorant Garamond"; color: #f7f5f0; }
+.contact-form { position: relative; background: #141414; border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 32px; box-shadow: 0 25px 70px rgba(0,0,0,.5); }
+.contact-form label { display: block; margin-bottom: 20px; }
+.contact-form label span { display: block; color: #a0a0a0; font-size: 7px; text-transform: uppercase; letter-spacing: .15em; margin-bottom: 8px; }
+.contact-form input,.contact-form textarea { width: 100%; background: transparent; border: 0; border-bottom: 1px solid rgba(255,255,255,.1); padding: 8px 0 12px; color: #fff; outline: 0; font-size: 11px; resize: vertical; }
+.contact-form input:focus,.contact-form textarea:focus { border-color: var(--gold); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+.contact-form .btn { width: 100%; }
+
+footer { background: #070707; padding: 70px 7vw 25px; }
+.footer-top { display: grid; grid-template-columns: 1.5fr repeat(4,1fr); gap: 45px; padding-bottom: 60px; }
+.footer-brand p { color: #aaa; font: 500 15px "Cormorant Garamond"; margin-top: 24px; }
+.footer-brand .brand img { width: 205px; height: 72px; }
+.socials { display: flex; gap: 8px; margin-top: 22px; }
+.socials a { width: 29px; height: 29px; border: 1px solid rgba(255,255,255,.1); border-radius: 50%; color: #aaa; display: grid; place-items: center; font-size: 8px; transition: .2s; }
+.socials a:hover { border-color: var(--gold); color: var(--gold); }
+.footer-column { display: flex; flex-direction: column; gap: 12px; }
+.footer-column h3 { color: var(--gold); font: 500 15px "Cormorant Garamond"; margin: 0 0 8px; }
+.footer-column a { color: #aaa; font-size: 9px; transition: .2s; }
+.footer-column a:hover { color: #fff; }
+.footer-bottom { border-top: 1px solid var(--line); padding-top: 24px; display: flex; justify-content: space-between; color: #888; font-size: 7px; letter-spacing: .08em; text-transform: uppercase; }
+.whatsapp { position: fixed; right: 22px; bottom: 22px; z-index: 30; height: 46px; padding: 0 18px; display: flex; align-items: center; gap: 8px; background: #111; border: 1px solid rgba(212,175,55,.55); border-radius: 999px; color: #ddd; text-transform: uppercase; font-size: 8px; letter-spacing: .1em; box-shadow: 0 12px 35px rgba(0,0,0,.28); }
+.whatsapp span { color: var(--gold); }
+
+@media (max-width: 1180px) {
+  .nav { display: none; }
+  .menu-toggle { display: block; margin-left: auto; order: 2; }
+  .header-actions { order: 1; }
+  .nav.open { display: flex; position: absolute; top: 86px; left: 0; right: 0; background: rgba(12,12,12,.97); flex-direction: column; align-items: stretch; gap: 0; padding: 15px 5vw 25px; border-bottom: 1px solid rgba(212,175,55,.15); box-shadow: 0 18px 35px rgba(0,0,0,.6); }
+  .nav.open a { color: #f7f5f0; }
+  .nav.open a { padding: 14px 0; }
+  .booking-form { grid-template-columns: 1fr 1fr; gap: 20px 0; padding: 25px; }
+  .booking-tabs { grid-column: 1/-1; }
+  .booking-submit { min-height: 60px; margin-right: 10px; }
+  .service-grid,.fleet-grid { grid-template-columns: repeat(2,1fr); }
+}
+
+@media (max-width: 760px) {
+  .header { height: 72px; padding: 0 20px; }
+  .header .brand img { width: 145px; height: 48px; }
+  .header-actions .phone-link { display: none; }
+  .header-actions .btn { display: none; }
+  .nav.open { top: 72px; }
+  .hero { height: 100vh; min-height: auto; }
+  .hero-video { inset: 0; width: 100%; height: 100%; object-position: center; }
+  .hero-badge { bottom: 42px; right: 45px; width: 65px; height: 65px; }
+  .booking-form { width: calc(100% - 30px); margin-top: -70px; grid-template-columns: 1fr; padding: 22px 18px; gap: 18px; }
+  .booking-tabs { grid-column: auto; padding: 0 0 5px; }
+  .booking-form label { padding: 4px 2px 15px; border-left: 0; border-bottom: 1px solid var(--line); }
+  .booking-submit { grid-column: auto; width: 100%; margin: 0; }
+  .section { padding: 85px 20px; }
+  .section-heading { margin-bottom: 35px; }
+  .service-grid,.fleet-grid { grid-template-columns: 1fr; }
+  .service-card { min-height: 295px; }
+  .steps { grid-template-columns: 1fr; gap: 45px; }
+  .steps::before { display: none; }
+  .trust { grid-template-columns: 1fr; }
+  .trust-image { min-height: 440px; }
+  .experience { right: 20px; bottom: -35px; width: 145px; height: 145px; }
+  .trust-content { padding: 90px 22px 75px; }
+  .trust-list { grid-template-columns: 1fr; }
+  .faq-item button span { font-size: 16px; }
+  .faq-item.active .faq-answer p { padding-left: 35px; }
+  .contact { grid-template-columns: 1fr; padding: 85px 20px; gap: 45px; }
+  .contact-methods { flex-direction: column; gap: 20px; }
+  .form-row { grid-template-columns: 1fr; gap: 0; }
+  .footer-top { grid-template-columns: 1fr 1fr; }
+  .footer-brand { grid-column: 1/-1; margin-bottom: 20px; }
+  .footer-bottom { flex-direction: column; gap: 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { scroll-behavior: auto !important; transition: none !important; }
+}
