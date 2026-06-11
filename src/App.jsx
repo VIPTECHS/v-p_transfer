@@ -169,7 +169,7 @@ function App() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowSearch(true);
-    }, 4000);
+    }, 5000);
     return () => clearTimeout(timer);
   }, []);
 
