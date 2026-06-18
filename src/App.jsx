@@ -1,25 +1,25 @@
 import React, { useEffect, useState } from "react";
 
 const services = [
-  ["plane", "Airport Transfer", "A seamless airport welcome with flight tracking and complimentary waiting time."],
-  ["steering", "Chauffeur-driven Car", "A professional chauffeur and immaculate vehicle, available by the hour or day."],
-  ["route", "Intercity Routes", "Private, comfortable long-distance travel between cities on your own schedule."],
-  ["helicopter", "Helicopter Charter", "Skip the traffic with exclusive point-to-point helicopter journeys."],
-  ["jet", "Private Jet Charter", "Bespoke private aviation with discreet, end-to-end ground coordination."],
-  ["yacht", "Yacht Charter", "Curated yacht experiences for private escapes, events and coastal transfers."],
-  ["taxi", "Airport Taxi", "Dependable fixed-price airport journeys with premium service standards."],
-  ["shuttle", "Airport Shuttle", "Efficient group transportation for hotels, events and travel partners."],
+  ["Chauffeur-driven Car", "Travel in luxury vehicles driven by experts for comfort and peace of mind.", "/images/services/Chauffeur-driven-Car.jpg"],
+  ["Intercity Routes", "Enjoy smooth, private journeys between cities with comfort and total flexibility.", "/images/services/Intercity-Routes.jpg"],
+  ["Airport Transfer", "Seamless airport rides delivered with comfort, punctuality, and reliability.", "/images/services/Airport-Transfer.jpg"],
+  ["Helicopter Charter", "Fly swiftly over city traffic in a private helicopter for time-saving travel.", "/images/services/Helicopter-Charter.jpg"],
+  ["Private Jet Charter", "Experience tailored jet flights offering privacy, speed, and absolute comfort.", "/images/services/Private-Jet-Charter.jpg"],
+  ["Yacht Charter", "Relax on luxury yachts perfect for leisure, private events, or coastal escapes.", "/images/services/Yacht-Charter.jpg"],
+  ["Airport Taxi", "Secure timely rides from the airport with fixed fares and courteous drivers.", "/images/services/Airport-Taxi.jpg"],
+  ["Airport Shuttle", "Travel affordably with shared rides that remain safe, quick, and efficient.", "/images/services/Airport-Shuttle.jpg"],
 ];
 
 const fleet = [
-  ["V Class Standard", "Up to 6", "6 bags", "Executive comfort"],
-  ["V Class Lux", "Up to 6", "6 bags", "Refined interior"],
-  ["V Class Ultra Lux", "Up to 5", "5 bags", "First-class cabin"],
-  ["Sprinter Standard", "Up to 13", "13 bags", "Group travel"],
-  ["Sprinter Ultra Lux", "Up to 9", "9 bags", "Private lounge"],
-  ["E Class", "Up to 3", "2 bags", "Business sedan"],
-  ["S Class", "Up to 3", "2 bags", "Flagship comfort"],
-  ["Maybach", "Up to 3", "2 bags", "The finest arrival"],
+  ["V Class Standard", "6 Passengers", "6 Luggage", "/images/fleet/v-class-standard.jpg"],
+  ["V Class Lux", "6 Passengers", "6 Luggage", "/images/fleet/v-class-lux.jpg"],
+  ["V Class Ultra Lux", "6 Passengers", "5 Luggage", "/images/fleet/v-class-ultra-lux.jpg"],
+  ["Sprinter Standard", "16 Passengers", "16 Luggage", "/images/fleet/sprinter-standard.jpg"],
+  ["Sprinter Ultra Lux", "9 Passengers", "9 Luggage", "/images/fleet/sprinter-ultra-lux.jpg"],
+  ["E Class", "3 Passengers", "3 Luggage", "/images/fleet/e-class.jpg"],
+  ["S Class", "2 Passengers", "3 Luggage", "/images/fleet/s-class.jpg"],
+  ["Maybach", "2 Passengers", "3 Luggage", "/images/fleet/maybach.jpg"],
 ];
 
 const faqs = [
@@ -75,7 +75,7 @@ function Header() {
         ))}
       </nav>
       <div className="header-actions">
-        <a className="phone-link" href="tel:+442045700700"><Icon name="phone" size={17}/> +44 20 4570 0700</a>
+        <a className="phone-link" href="tel:+908502554847"><Icon name="phone" size={16}/> +90 850 255 48 47</a>
         <a className="btn btn-gold btn-small" href="#booking">Book Now</a>
       </div>
     </header>
@@ -186,33 +186,53 @@ function App() {
             preload="auto"
             aria-label="Luxury VIP van interior"
           >
-            <source src="/videos/luxury-van-v3.mp4" type="video/mp4" />
+            <source src="/videos/vip-hero-0617.mp4" type="video/mp4" />
           </video>
           <BookingForm visible={showSearch} />
-          <img src="/images/vip-badge.png" alt="VIP badge" className="hero-badge" />
+        </section>
+
+        <section className="trust-strip" aria-label="Customer satisfaction and trusted partners">
+          <div className="trust-strip-copy">
+            <strong>Uncompromising Commitment to Customer Satisfaction</strong>
+            <p>We go above and beyond to ensure every journey is smooth, safe, and exceptional.</p>
+          </div>
+          <div className="trust-strip-brands">
+            <img className="partner-logo partner-logo-tripadvisor" src="/images/partners/tripadvisor.png" alt="Tripadvisor" />
+            <img className="partner-logo partner-logo-google" src="/images/partners/google-reviews.png" alt="Google Reviews 5.0" />
+            <img className="partner-logo partner-logo-kitsab" src="/images/partners/kitsab.png" alt="KITSAB" />
+          </div>
         </section>
 
         <section className="section services" id="private-services">
-          <SectionHeading eyebrow="TAILORED JOURNEYS" title="Every journey, impeccably arranged." text="From the airport runway to the marina, our specialists coordinate every detail with absolute discretion." />
+          <SectionHeading eyebrow="OUR SERVICES" title="Premium transfer solutions, arranged with care." text="Discover a range of premium transfer solutions designed for comfort, reliability, and style." />
           <div className="service-grid">
-            {services.map(([icon, title, text], index) => (
+            {services.map(([title, text, image], index) => (
               <article className={`service-card service-${index + 1}`} key={title}>
-                <div className="service-number">0{index + 1}</div>
-                <div className="service-icon"><Icon name={icon} size={26}/></div>
-                <div className="service-copy"><h3>{title}</h3><p>{text}</p><a href="#contact">View Details <Icon name="arrow" size={16}/></a></div>
+                <div className="service-visual">
+                  <img src={image} alt={title} loading="lazy" />
+                </div>
+                <div className="service-copy">
+                  <h3>{title}</h3>
+                  <p>{text}</p>
+                </div>
               </article>
             ))}
           </div>
         </section>
 
         <section className="section fleet" id="fleet">
-          <SectionHeading center eyebrow="THE VIPTRANSFER.COM FLEET" title="Travel without compromise." text="A curated fleet of late-model vehicles, selected for comfort, presence and immaculate condition." />
+          <SectionHeading
+            center
+            eyebrow="OUR EXCLUSIVE VEHICLE COLLECTION"
+            title="Explore Our Premium Vehicle Fleet"
+            text="Discover our diverse range of vehicles, each offering exceptional comfort, style, and capacity to suit every journey. From elegant sedans to spacious vans, VIPTransfer.com ensures your ride matches your needs perfectly."
+          />
+          <p className="fleet-intro">At VIPTransfer.com, we take pride in our curated fleet of premium vehicles, ensuring safety, comfort, and elegance on every journey. Whether you’re booking an airport transfer, a corporate ride, or transport for a special occasion, our selection from sophisticated sedans to spacious luxury vans is meticulously maintained to deliver a flawless experience. Each vehicle offers generous capacity and refined interiors, reflecting our dedication to exceptional service. Choose the ideal car for your needs and travel with confidence, knowing VIPTransfer.com provides top-quality transportation solutions wherever you go.</p>
           <div className="fleet-grid">
-            {fleet.map(([name, passengers, bags, note], index) => (
+            {fleet.map(([name, passengers, bags, image]) => (
               <article className="vehicle-card" key={name}>
-                <div className={`vehicle-visual vehicle-${index + 1}`}>
-                  <span>{note}</span>
-                  <div className="car-silhouette"><i/><b/></div>
+                <div className="vehicle-visual">
+                  <img src={image} alt={name} loading="lazy" />
                 </div>
                 <div className="vehicle-info">
                   <div><small>PREMIUM COLLECTION</small><h3>{name}</h3></div>
@@ -236,14 +256,23 @@ function App() {
           </div>
         </section>
 
-        <section className="trust" id="corporate">
+        <section className="trust about" id="corporate">
           <div className="trust-image"><div className="experience"><strong>26+</strong><span>YEARS OF<br/>EXCELLENCE</span></div></div>
           <div className="trust-content">
-            <SectionHeading eyebrow="A STANDARD ABOVE" title="Built on experience. Defined by service." text="For more than two decades, we have looked after executives, families and distinguished guests with thoughtful, dependable travel." />
-            <div className="trust-list">
-              {["Professional, vetted chauffeurs", "Licensed travel agency", "24/7 global assistance", "Transparent fixed pricing", "Flight monitoring included", "Discreet corporate accounts"].map((item) => <div key={item}><span><Icon name="check" size={15}/></span>{item}</div>)}
+            <SectionHeading
+              eyebrow="ABOUT US"
+              title="Local insight. Global standards."
+              text="With more than 26 years of expertise, VIPTransfer.com combines local insight with global standards to deliver safe, luxurious, and seamless travel experiences worldwide."
+            />
+            <div className="about-story">
+              <p>At VIPTransfer.com, our story stretches back over 26 years, rooted in a family business deeply connected to the world of tourism. From humble beginnings, we have evolved into far more than just a transfer company, driven by our enduring passion for delivering exceptional travel experiences.</p>
+              <p>Through decades of expertise and strong partnerships around the globe, we have established a new standard in transportation, offering journeys defined by safety, comfort, and luxury. Our fleet of premium vehicles and professional drivers ensures that every transfer upholds the highest levels of service and care.</p>
+              <p>As a licensed travel agency, we specialise exclusively in pre-booked car services, guaranteeing reliability and peace of mind for our clients. Guided by our philosophy, <strong>“Local in the world,”</strong> we seamlessly blend local insight with global standards, bringing unique touches to every journey.</p>
+              <p>What began as an online service in Turkey has now expanded into the United States, the European Union, and the Far East. Day by day, we continue to grow our network, working towards our goal of serving more than 300 airports worldwide by 2025, ensuring that travellers across the globe can experience the VIPTransfer.com difference.</p>
+              <p>Beyond land transportation, we are committed to providing our guests with luxurious comfort in the air and at sea, creating seamless connections and unforgettable moments. Every journey with us is designed to transform travel into an experience where every detail matters, and each moment feels special.</p>
+              <p>Thousands of satisfied customers trust VIPTransfer.com for their travel needs, confident in our commitment to excellence, discretion, and personalised service. We invite you to discover a world where travel is more than simply reaching your destination; it’s about travelling in style, comfort, and complete peace of mind.</p>
             </div>
-            <a className="text-link" href="#contact">Discover the viptransfer.com standard <Icon name="arrow" size={17}/></a>
+            <p className="about-note">Our Turkey operations are carried out by <strong>Türsab A-14186 Dilkar Travel.</strong></p>
           </div>
         </section>
 
@@ -263,20 +292,35 @@ function App() {
 
         <section className="contact" id="contact">
           <div className="contact-copy">
-            <span className="eyebrow">YOUR JOURNEY AWAITS</span>
-            <h2>Reserve Your Premium Transfer Now.</h2>
-            <p>Our travel specialists are available around the clock to create a journey tailored entirely to you.</p>
-            <div className="contact-methods">
-              <a href="tel:+442045700700"><small>CALL US</small><strong>+44 20 4570 0700</strong></a>
-              <a href="mailto:info@viptransfer.com"><small>EMAIL US</small><strong>info@viptransfer.com</strong></a>
-            </div>
+            <span className="eyebrow">CONTACT</span>
+            <h2>Contact</h2>
+            <p>We’re here to help with your travel plans, bookings, or any questions. Reach out to the VIPTransfer.com team for prompt and professional assistance.</p>
           </div>
-          <form className="contact-form" onSubmit={(e) => e.preventDefault()}>
-            <div className="form-row"><label><span>Your name</span><input placeholder="Full name"/></label><label><span>Contact number</span><input type="tel" placeholder="+44"/></label></div>
-            <label><span>Email address</span><input type="email" placeholder="name@email.com"/></label>
-            <label><span>How can we assist?</span><textarea rows="3" placeholder="Tell us about your journey..."/></label>
-            <button className="btn btn-gold" type="submit">Send Enquiry <Icon name="arrow" size={18}/></button>
-          </form>
+          <div className="office-grid">
+            <article className="office-card">
+              <span className="office-number">01</span>
+              <h3>Istanbul Office</h3>
+              <p className="office-company">Dilkar Travel Türsab A-14186</p>
+              <address>Marmara Kule Esentepe mah kelebek sok no 2 D 176 Kartal / İstanbul</address>
+              <a href="mailto:info@viptransfer.com">info@viptransfer.com</a>
+              <a href="tel:+908502554847">+90 850 255 48 47</a>
+            </article>
+            <article className="office-card">
+              <span className="office-number">02</span>
+              <h3>Cyprus Office</h3>
+              <address>Ankara Cd. Green Star Plaza No:11 Alsancak Girne/KKTC</address>
+              <a href="mailto:info@viptransfer.com">info@viptransfer.com</a>
+              <a href="tel:+908502554847">+90 850 255 48 47</a>
+            </article>
+            <article className="office-card">
+              <span className="office-number">03</span>
+              <h3>England Office</h3>
+              <address>11 Coldbath Square<br/>London England</address>
+              <a href="mailto:info@viptransfer.com">info@viptransfer.com</a>
+              <a href="tel:+908502554847">+90 850 255 48 47</a>
+            </article>
+          </div>
+          <p className="operations-note">Our Turkey operations are carried out by <strong>Türsab A-14186 Dilkar Travel.</strong></p>
         </section>
       </main>
 
