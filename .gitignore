@@ -21,4 +21,7 @@ dist-ssr
 *.ntvsca*
 *.njsproj
 *.sln
-*.sw?
+scripts/airports.csv
+server/prisma/dev.db
+server/prisma/dev.db-journal
+server/.env
