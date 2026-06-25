@@ -57,10 +57,13 @@ export default function OperationsView({ navigate }) {
               {b.status === "pending" && (
                 <button
                   type="button"
-                  className="admin-btn admin-btn--ghost"
+                  className="status-action-btn status-action-btn--primary status-action-btn--inline"
                   onClick={() => updateBooking(b.id, { status: "confirmed" }).then(load)}
                 >
-                  Onayla
+                  <span className="status-action-btn-icon">✓</span>
+                  <span className="status-action-btn-text">
+                    <strong>Onayla</strong>
+                  </span>
                 </button>
               )}
             </div>

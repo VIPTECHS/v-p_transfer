@@ -2,20 +2,34 @@ import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { deleteBooking, fetchBooking, fetchDrivers, fetchVehicles, updateBooking } from "../api/admin";
 import { customerName, formatDateTime, statusLabel } from "./utils";
 import { WHATSAPP_URL } from "../data/content";
+import AgencyBookingFleetCard from "./AgencyBookingFleetCard";
+import BookingStatusPanel from "./BookingStatusPanel";
+import BookingAgencyRouting from "./BookingAgencyRouting";
+import { BookingDetailHeader, DetailRow, RouteCard, statusLabelTr } from "./bookingDetailShared";
 
 const BookingMap = lazy(() => import("./BookingMap"));
-
-const STATUSES = [
-  { value: "pending", label: "Bekliyor" },
-  { value: "confirmed", label: "Onaylandı" },
-  { value: "assigned", label: "Atandı" },
-  { value: "completed", label: "Tamamlandı" },
-  { value: "cancelled", label: "İptal" },
-];
 
 function waLink(phone, message) {
   const clean = (phone || "").replace(/\D/g, "") || WHATSAPP_URL.replace("https://wa.me/", "");
   return `https://wa.me/${clean}?text=${encodeURIComponent(message)}`;
+}
+
+function BookingMapSection({ booking, hasCoords }) {
+  return (
+    <div className="admin-detail-section booking-map-section">
+      <h3>Rota Haritası</h3>
+      {hasCoords ? (
+        <Suspense fallback={<div className="admin-loading booking-map-loading">Harita yükleniyor...</div>}>
+          <BookingMap booking={booking} />
+        </Suspense>
+      ) : (
+        <div className="booking-map-empty">
+          <span className="booking-map-empty-icon" aria-hidden>📍</span>
+          <p>Bu rezervasyon için konum bilgisi kaydedilmemiş.</p>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function BookingDetail({ id, onBack }) {
@@ -54,6 +68,11 @@ export default function BookingDetail({ id, onBack }) {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleCancel = async () => {
+    if (!window.confirm("Bu rezervasyonu iptal etmek istediğinize emin misiniz?")) return;
+    await handleStatusChange("cancelled");
   };
 
   const handleAssign = async () => {
@@ -107,41 +126,65 @@ export default function BookingDetail({ id, onBack }) {
     <>
       <button type="button" className="admin-back" onClick={onBack}>← Randevulara dön</button>
 
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
-        <h1 className="admin-page-title" style={{ margin: 0 }}>{booking.reference}</h1>
-        <span className={`admin-badge admin-badge--${booking.status}`}>{statusLabel(booking.status)}</span>
-      </div>
+      <BookingDetailHeader
+        reference={booking.reference}
+        title={customerName(booking)}
+        badges={
+          <>
+            <span className={`admin-badge admin-badge--${booking.status}`}>
+              {statusLabelTr(booking.status)}
+            </span>
+            <span className="admin-badge admin-badge--pending">
+              {booking.type === "hourly" ? "Saatlik" : "Transfer"}
+            </span>
+            {booking.returnTransfer && (
+              <span className="admin-badge admin-badge--confirmed">Dönüş</span>
+            )}
+          </>
+        }
+      />
 
       {error && <div className="admin-error">{error}</div>}
 
-      <div className="admin-detail-grid">
+      <BookingStatusPanel
+        status={booking.status}
+        saving={saving}
+        hasDriver={Boolean(booking.assignedDriverId || driverId)}
+        onStatusChange={handleStatusChange}
+        onCancel={handleCancel}
+        onDelete={handleDelete}
+        deleting={deleting}
+      />
+
+      <BookingAgencyRouting booking={booking} onUpdated={setBooking} />
+
+      <div className="booking-route-map-row">
+        <RouteCard
+          from={booking.fromLabel}
+          to={booking.toLabel}
+          pickupAt={booking.pickupAt}
+          type={booking.type}
+          durationHours={booking.durationHours}
+        />
+        <BookingMapSection booking={booking} hasCoords={hasCoords} />
+      </div>
+
+      <div className="admin-detail-grid agency-detail-grid">
+        <AgencyBookingFleetCard booking={booking} />
+
         <div className="admin-detail-section">
-          <h3>Müşteri</h3>
-          <Row label="Ad Soyad" value={customerName(booking)} />
-          <Row label="E-posta" value={booking.email} />
-          <Row label="Telefon" value={booking.phone} />
-          <Row label="Yolcu" value={booking.passengers} />
-          <Row label="Bagaj" value={booking.luggage} />
-          <Row label="Çocuk koltuğu" value={booking.childSeat} />
+          <h3>Müşteri Bilgileri</h3>
+          <DetailRow label="E-posta" value={booking.email} />
+          <DetailRow label="Telefon" value={booking.phone} />
+          <DetailRow label="Çocuk koltuğu" value={booking.childSeat} />
+          {booking.flightNumber && <DetailRow label="Uçuş" value={booking.flightNumber} />}
+          {booking.meetAndGreetName && <DetailRow label="Karşılama" value={booking.meetAndGreetName} />}
+          {booking.notes && <DetailRow label="Not" value={booking.notes} />}
         </div>
 
         <div className="admin-detail-section">
-          <h3>Yolculuk</h3>
-          <Row label="Tür" value={booking.type === "hourly" ? "Saatlik" : "Transfer"} />
-          <Row label="Tarih / Saat" value={formatDateTime(booking.pickupAt)} />
-          <Row label="Nereden" value={booking.fromLabel} />
-          {booking.toLabel && <Row label="Nereye" value={booking.toLabel} />}
-          {booking.durationHours && <Row label="Süre" value={`${booking.durationHours} saat`} />}
-          {booking.flightNumber && <Row label="Uçuş" value={booking.flightNumber} />}
-          {booking.meetAndGreetName && <Row label="Karşılama" value={booking.meetAndGreetName} />}
-          {booking.returnTransfer && <Row label="Dönüş" value="Evet" />}
-          <Row label="Araç tipi" value={booking.vehicle || "—"} />
-          {booking.notes && <Row label="Not" value={booking.notes} />}
-        </div>
-
-        <div className="admin-detail-section">
-          <h3>Atama</h3>
-          <label className="admin-detail-row">
+          <h3>Şoför & Araç Atama</h3>
+          <label className="admin-detail-row admin-detail-row--field">
             <span>Şoför</span>
             <select value={driverId} onChange={(e) => setDriverId(e.target.value)}>
               <option value="">Seçin</option>
@@ -150,8 +193,8 @@ export default function BookingDetail({ id, onBack }) {
               ))}
             </select>
           </label>
-          <label className="admin-detail-row">
-            <span>Araç</span>
+          <label className="admin-detail-row admin-detail-row--field">
+            <span>Filo aracı</span>
             <select value={vehicleId} onChange={(e) => setVehicleId(e.target.value)}>
               <option value="">Seçin</option>
               {vehicles.map((v) => (
@@ -160,22 +203,13 @@ export default function BookingDetail({ id, onBack }) {
             </select>
           </label>
           <button type="button" className="admin-btn admin-btn--gold" onClick={handleAssign} disabled={saving}>
-            Atamayı Kaydet
+            {saving ? "Kaydediliyor..." : "Atamayı Kaydet"}
           </button>
         </div>
       </div>
 
-      {hasCoords && (
-        <div className="admin-detail-section" style={{ marginTop: 20 }}>
-          <h3>Harita</h3>
-          <Suspense fallback={<div className="admin-loading">Harita yükleniyor...</div>}>
-            <BookingMap booking={booking} />
-          </Suspense>
-        </div>
-      )}
-
       <div className="admin-detail-section" style={{ marginTop: 20 }}>
-        <h3>Mesajlar</h3>
+        <h3>WhatsApp Mesajları</h3>
         <div className="admin-detail-actions">
           <a className="admin-btn admin-btn--ghost" href={waLink(booking.phone, customerMsg("received"))} target="_blank" rel="noopener noreferrer">Rezervasyon alındı</a>
           <a className="admin-btn admin-btn--ghost" href={waLink(booking.phone, customerMsg("driver"))} target="_blank" rel="noopener noreferrer">Şoför bilgisi</a>
@@ -190,37 +224,11 @@ export default function BookingDetail({ id, onBack }) {
           {booking.statusLogs.map((log) => (
             <div key={log.id} className="admin-detail-row">
               <span>{formatDateTime(log.createdAt)}</span>
-              <span>{log.fromStatus ? `${log.fromStatus} → ` : ""}{log.toStatus}</span>
+              <span>{log.fromStatus ? `${statusLabel(log.fromStatus)} → ` : ""}{statusLabel(log.toStatus)}</span>
             </div>
           ))}
         </div>
       )}
-
-      <div className="admin-detail-actions">
-        {STATUSES.map((s) => (
-          <button
-            key={s.value}
-            type="button"
-            className={`admin-btn ${booking.status === s.value ? "admin-btn--gold" : "admin-btn--ghost"}`}
-            disabled={saving || booking.status === s.value}
-            onClick={() => handleStatusChange(s.value)}
-          >
-            {s.label}
-          </button>
-        ))}
-        <button type="button" className="admin-btn admin-btn--danger" disabled={deleting} onClick={handleDelete} style={{ marginLeft: "auto" }}>
-          {deleting ? "Siliniyor..." : "Sil"}
-        </button>
-      </div>
     </>
-  );
-}
-
-function Row({ label, value }) {
-  return (
-    <div className="admin-detail-row">
-      <span>{label}</span>
-      <span>{value}</span>
-    </div>
   );
 }

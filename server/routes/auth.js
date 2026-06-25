@@ -1,14 +1,44 @@
 import { Router } from "express";
-import { verifyAdminPassword } from "../middleware/auth.js";
+import bcrypt from "bcryptjs";
+import { verifyAdminPassword, signAgencyToken } from "../middleware/auth.js";
+import prisma from "../lib/prisma.js";
 
 const router = Router();
 
 router.post("/login", (req, res) => {
   const { password } = req.body;
   if (verifyAdminPassword(password)) {
-    return res.json({ success: true });
+    return res.json({ success: true, role: "admin" });
   }
   return res.status(401).json({ error: "INVALID_PASSWORD" });
+});
+
+router.post("/agency-login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ error: "VALIDATION" });
+    }
+
+    const agency = await prisma.agency.findUnique({
+      where: { username: username.trim().toLowerCase() },
+    });
+
+    if (!agency || !agency.isActive) {
+      return res.status(401).json({ error: "INVALID_CREDENTIALS" });
+    }
+
+    const valid = await bcrypt.compare(password, agency.passwordHash);
+    if (!valid) {
+      return res.status(401).json({ error: "INVALID_CREDENTIALS" });
+    }
+
+    const token = signAgencyToken(agency);
+    return res.json({ success: true, role: "agency", token, agencyId: agency.id, agencyName: agency.name });
+  } catch (error) {
+    console.error("POST /auth/agency-login", error);
+    return res.status(500).json({ error: "SERVER_ERROR" });
+  }
 });
 
 export default router;

@@ -7,8 +7,12 @@ import EnquiriesList from "./EnquiriesList";
 import OperationsView from "./OperationsView";
 import DriversList from "./DriversList";
 import VehiclesList from "./VehiclesList";
+import CountriesList from "./CountriesList";
+import CitiesList from "./CitiesList";
+import AgenciesList from "./AgenciesList";
 import AdminLogin from "./AdminLogin";
-import { clearAdminPassword, hasAdminPassword } from "../api/admin";
+import AgencyApp from "./AgencyApp";
+import { clearAdminPassword, hasAdminPassword, getSessionRole } from "../api/admin";
 import "./admin.css";
 
 const VIEWS = {
@@ -19,6 +23,9 @@ const VIEWS = {
   operations: OperationsView,
   drivers: DriversList,
   vehicles: VehiclesList,
+  countries: CountriesList,
+  cities: CitiesList,
+  agencies: AgenciesList,
 };
 
 const NAV = [
@@ -29,6 +36,9 @@ const NAV = [
   { id: "drivers", label: "Şoförler" },
   { id: "vehicles", label: "Araçlar" },
   { id: "enquiries", label: "Talepler" },
+  { id: "countries", label: "Ülkeler" },
+  { id: "cities", label: "Şehirler" },
+  { id: "agencies", label: "Acenteler" },
 ];
 
 function parseAdminRoute(pathname) {
@@ -44,6 +54,7 @@ function parseAdminRoute(pathname) {
 
 export default function AdminApp() {
   const [authenticated, setAuthenticated] = useState(() => hasAdminPassword());
+  const [role, setRole] = useState(() => getSessionRole());
   const [route, setRoute] = useState(() =>
     typeof window !== "undefined" ? parseAdminRoute(window.location.pathname) : { view: "dashboard" },
   );
@@ -55,19 +66,28 @@ export default function AdminApp() {
   }, []);
 
   useEffect(() => {
-    const onUnauthorized = () => setAuthenticated(false);
+    const onUnauthorized = () => { setAuthenticated(false); setRole(null); };
     window.addEventListener("vip-admin-unauthorized", onUnauthorized);
     return () => window.removeEventListener("vip-admin-unauthorized", onUnauthorized);
   }, []);
-
-  if (!authenticated) {
-    return <AdminLogin onSuccess={() => setAuthenticated(true)} />;
-  }
 
   const navigate = useCallback((path) => {
     window.history.pushState(null, "", path);
     setRoute(parseAdminRoute(path));
   }, []);
+
+  if (!authenticated) {
+    return (
+      <AdminLogin onSuccess={() => {
+        setAuthenticated(true);
+        setRole(getSessionRole());
+      }} />
+    );
+  }
+
+  if (role === "agency") {
+    return <AgencyApp onLogout={() => { clearAdminPassword(); setAuthenticated(false); setRole(null); }} />;
+  }
 
   const goTo = (view, id) => {
     if (view === "booking-detail" && id) {
@@ -108,6 +128,7 @@ export default function AdminApp() {
               onClick={() => {
                 clearAdminPassword();
                 setAuthenticated(false);
+                setRole(null);
               }}
             >
               Çıkış yap

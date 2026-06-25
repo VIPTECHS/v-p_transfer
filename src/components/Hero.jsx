@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useI18n } from "../i18n/I18nContext";
 import BookingForm from "./BookingForm";
 
-const HERO_VIDEO = "/videos/luxury-van-opens-v2.mp4";
+const HERO_VIDEO = "/videos/video_202606251333-ezremove.mp4";
 const HERO_POSTER = "/images/luxury-hero.png";
 
 export default function Hero({ onSearch }) {

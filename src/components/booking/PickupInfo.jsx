@@ -138,15 +138,76 @@ export default function PickupInfo({ state, dispatch }) {
           </div>
         </section>
 
-        {/* Additional info */}
+        {/* Extras */}
+        <section className="bw-section">
+          <h3 className="bw-section-title">{t("wizard.extras")}</h3>
+          <div className="bw-extras-grid">
+            {isAirport && (
+              <div className="bw-extra-card">
+                <div className="bw-extra-card-icon">✈️</div>
+                <div className="bw-extra-card-info">
+                  <span className="bw-extra-card-title">{t("wizard.airportFee")}</span>
+                  <span className="bw-extra-card-desc">{t("wizard.airportFeeDesc")}</span>
+                </div>
+                <span className="bw-extra-included">{t("wizard.included")}</span>
+              </div>
+            )}
+
+            <div className="bw-extra-card">
+              <div className="bw-extra-card-icon">🧸</div>
+              <div className="bw-extra-card-info">
+                <span className="bw-extra-card-title">{t("booking.details.childSeat")}</span>
+                <span className="bw-extra-card-desc">{t("wizard.childSeatDesc")}</span>
+              </div>
+              <div className="bw-extra-counter">
+                <button type="button" className="bw-counter-btn" onClick={() => dispatch({ type: "SET_CHILD_SEAT", payload: Math.max(0, state.childSeat - 1) })} disabled={state.childSeat === 0}>−</button>
+                <span className="bw-counter-value">{state.childSeat}</span>
+                <button type="button" className="bw-counter-btn" onClick={() => dispatch({ type: "SET_CHILD_SEAT", payload: state.childSeat + 1 })}>+</button>
+              </div>
+            </div>
+
+            <div className="bw-extra-card">
+              <div className="bw-extra-card-icon">🐾</div>
+              <div className="bw-extra-card-info">
+                <span className="bw-extra-card-title">{t("booking.details.pets")}</span>
+                <span className="bw-extra-card-desc">{t("wizard.petsDesc")}</span>
+              </div>
+              <div className="bw-extra-counter">
+                <button type="button" className="bw-counter-btn" onClick={() => dispatch({ type: "SET_PETS", payload: Math.max(0, state.pets - 1) })} disabled={state.pets === 0}>−</button>
+                <span className="bw-counter-value">{state.pets}</span>
+                <button type="button" className="bw-counter-btn" onClick={() => dispatch({ type: "SET_PETS", payload: state.pets + 1 })}>+</button>
+              </div>
+            </div>
+
+            <div className="bw-extra-card">
+              <div className="bw-extra-card-icon">🔄</div>
+              <div className="bw-extra-card-info">
+                <span className="bw-extra-card-title">{t("booking.returnTransfer")}</span>
+                <span className="bw-extra-card-desc">{t("wizard.returnDesc")}</span>
+              </div>
+              <label className="bw-toggle">
+                <input type="checkbox" checked={returnTransfer} onChange={(e) => dispatch({ type: "SET_RETURN", payload: e.target.checked })} />
+                <span className="bw-toggle-slider" />
+              </label>
+            </div>
+          </div>
+        </section>
+
+        {/* Airport & Notes */}
         <section className="bw-section">
           <h3 className="bw-section-title">{t("wizard.additionalInfo")}</h3>
           {isAirport && (
-            <label className="bw-field">
-              <span>{t("booking.flightNumber")}</span>
-              <p className="bw-field-hint">{t("wizard.flightHint")}</p>
-              <input type="text" value={flightNumber} onChange={(e) => dispatch({ type: "SET_FLIGHT", payload: e.target.value.toUpperCase() })} placeholder={t("booking.flightPlaceholder")} />
-            </label>
+            <>
+              <label className="bw-field">
+                <span>{t("booking.flightNumber")}</span>
+                <p className="bw-field-hint">{t("wizard.flightHint")}</p>
+                <input type="text" value={flightNumber} onChange={(e) => dispatch({ type: "SET_FLIGHT", payload: e.target.value.toUpperCase() })} placeholder={t("booking.flightPlaceholder")} />
+              </label>
+              <label className="bw-field">
+                <span>{t("booking.meetAndGreet")}</span>
+                <input type="text" value={meetAndGreetName} onChange={(e) => dispatch({ type: "SET_MEET_GREET", payload: e.target.value })} placeholder={t("booking.meetAndGreetPlaceholder")} />
+              </label>
+            </>
           )}
           <label className="bw-field">
             <span>{t("wizard.driverNotes")}</span>
@@ -159,29 +220,6 @@ export default function PickupInfo({ state, dispatch }) {
             />
           </label>
         </section>
-
-        {/* Extras */}
-        {isAirport && (
-          <section className="bw-section">
-            <h3 className="bw-section-title">{t("wizard.extras")}</h3>
-            <div className="bw-extra-row">
-              <div>
-                <span>{t("wizard.airportFee")} <span className="bw-req">*</span></span>
-              </div>
-              <span className="bw-extra-included">{t("wizard.included")}</span>
-            </div>
-            <label className="bw-checkbox">
-              <input type="checkbox" checked={returnTransfer} onChange={(e) => dispatch({ type: "SET_RETURN", payload: e.target.checked })} />
-              <span>{t("booking.returnTransfer")}</span>
-            </label>
-            {isAirport && (
-              <label className="bw-field">
-                <span>{t("booking.meetAndGreet")}</span>
-                <input type="text" value={meetAndGreetName} onChange={(e) => dispatch({ type: "SET_MEET_GREET", payload: e.target.value })} placeholder={t("booking.meetAndGreetPlaceholder")} />
-              </label>
-            )}
-          </section>
-        )}
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import { useI18n } from "../i18n/I18nContext";
 
-const footerColumns = ["corporate", "services", "private", "legal"];
+const footerColumns = ["corporate", "services", "legal"];
 
 export default function Footer() {
   const { t, dict } = useI18n();

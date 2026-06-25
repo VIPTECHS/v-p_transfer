@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchBookings } from "../api/admin";
 import { customerName, formatDateTime, statusLabel } from "./utils";
+import { agencyResponseBadgeClass, agencyResponseLabel } from "./agencyRouting";
 
 const STATUSES = [
   { value: "", label: "Tüm durumlar" },
@@ -75,6 +76,7 @@ export default function BookingsList({ navigate }) {
                 <th>Tarih / Saat</th>
                 <th>Güzergah</th>
                 <th>Araç</th>
+                <th>Acenta</th>
                 <th>Durum</th>
               </tr>
             </thead>
@@ -94,6 +96,14 @@ export default function BookingsList({ navigate }) {
                     {b.toLabel ? ` → ${b.toLabel}` : b.durationHours ? ` (${b.durationHours}sa)` : ""}
                   </td>
                   <td>{b.vehicle || "—"}</td>
+                  <td>
+                    <div className="agency-list-routing">
+                      <span>{b.routedAgency?.name || b.city?.name || "—"}</span>
+                      <span className={`admin-badge ${agencyResponseBadgeClass(b.agencyResponseStatus || (b.routedAgencyId ? "pending" : "open"))}`}>
+                        {agencyResponseLabel(b.agencyResponseStatus || (b.routedAgencyId ? "pending" : "open"))}
+                      </span>
+                    </div>
+                  </td>
                   <td>
                     <span className={`admin-badge admin-badge--${b.status}`}>
                       {statusLabel(b.status)}

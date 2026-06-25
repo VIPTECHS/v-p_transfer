@@ -2,9 +2,6 @@ export const serviceItems = [
   { key: "chauffeur", icon: "steering", image: "/images/services/Chauffeur-driven-Car.jpg" },
   { key: "intercity", icon: "route", image: "/images/services/Intercity-Routes.jpg" },
   { key: "airport", icon: "plane", image: "/images/services/Airport-Transfer.jpg" },
-  { key: "helicopter", icon: "helicopter", image: "/images/services/Helicopter-Charter.jpg" },
-  { key: "jet", icon: "jet", image: "/images/services/Private-Jet-Charter.jpg" },
-  { key: "yacht", icon: "yacht", image: "/images/services/Yacht-Charter.jpg" },
   { key: "taxi", icon: "taxi", image: "/images/services/Airport-Taxi.jpg" },
   { key: "shuttle", icon: "shuttle", image: "/images/services/Airport-Shuttle.jpg" },
 ];
@@ -27,7 +24,6 @@ export const blogKeys = ["b1", "b2", "b3"];
 export const navItems = [
   { key: "home", href: "#home" },
   { key: "corporate", href: "#corporate" },
-  { key: "privateServices", href: "#private-services" },
   { key: "airportTransfer", href: "#airport-transfer" },
   { key: "blog", href: "#blog" },
   { key: "help", href: "#help" },

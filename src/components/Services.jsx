@@ -7,7 +7,7 @@ export default function Services() {
   const { t } = useI18n();
 
   return (
-    <section className="section services" id="private-services">
+    <section className="section services" id="services">
       <SectionHeading
         eyebrow={t("services.eyebrow")}
         title={t("services.title")}

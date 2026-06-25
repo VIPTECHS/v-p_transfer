@@ -2,6 +2,7 @@ import { Router } from "express";
 import prisma from "../lib/prisma.js";
 import { generateReference } from "../lib/reference.js";
 import { notifyNewBooking, notifyStatusChange } from "../lib/notifications.js";
+import { matchBookingToCity } from "../lib/cityMatcher.js";
 import { requireAdmin } from "../middleware/auth.js";
 
 const router = Router();
@@ -41,10 +42,15 @@ function serializeBooking(booking) {
     ...booking,
     pickupAt: booking.pickupAt.toISOString(),
     lastNotifiedAt: booking.lastNotifiedAt?.toISOString() ?? null,
+    routedAt: booking.routedAt?.toISOString() ?? null,
+    agencyRespondedAt: booking.agencyRespondedAt?.toISOString() ?? null,
     createdAt: booking.createdAt.toISOString(),
     updatedAt: booking.updatedAt.toISOString(),
     assignedDriver: booking.assignedDriver || undefined,
     assignedVehicle: booking.assignedVehicle || undefined,
+    city: booking.city || undefined,
+    agency: booking.agency || undefined,
+    routedAgency: booking.routedAgency || undefined,
     statusLogs: booking.statusLogs?.map((log) => ({
       ...log,
       createdAt: log.createdAt.toISOString(),
@@ -61,6 +67,9 @@ async function logStatus(bookingId, fromStatus, toStatus, note) {
 const bookingInclude = {
   assignedDriver: true,
   assignedVehicle: true,
+  city: { include: { country: true } },
+  agency: { select: { id: true, name: true, phone: true, email: true } },
+  routedAgency: { select: { id: true, name: true, phone: true, email: true } },
   statusLogs: { orderBy: { createdAt: "desc" }, take: 20 },
 };
 
@@ -90,6 +99,15 @@ router.post("/", async (req, res) => {
         notificationStatus: "none",
       },
     });
+
+    const cityMatch = await matchBookingToCity(booking);
+    if (cityMatch.cityId) {
+      await prisma.booking.update({
+        where: { id: booking.id },
+        data: { cityId: cityMatch.cityId },
+      });
+      booking.cityId = cityMatch.cityId;
+    }
 
     await logStatus(booking.id, null, "pending", "Booking created");
     await notifyNewBooking(booking);
@@ -185,6 +203,8 @@ router.patch("/:id", requireAdmin, async (req, res) => {
     if (req.body.assignedVehicleId !== undefined) data.assignedVehicleId = req.body.assignedVehicleId || null;
     if (req.body.notificationStatus) data.notificationStatus = req.body.notificationStatus;
     if (req.body.lastNotifiedAt) data.lastNotifiedAt = new Date(req.body.lastNotifiedAt);
+    if (req.body.agencyId !== undefined) data.agencyId = req.body.agencyId || null;
+    if (req.body.cityId !== undefined) data.cityId = req.body.cityId || null;
 
     const booking = await prisma.booking.update({
       where: { id: req.params.id },
@@ -211,6 +231,78 @@ router.patch("/:id", requireAdmin, async (req, res) => {
     return res.json(serializeBooking(booking));
   } catch (error) {
     console.error("PATCH /bookings/:id", error);
+    return res.status(500).json({ error: "SERVER_ERROR" });
+  }
+});
+
+router.post("/:id/route-agency", requireAdmin, async (req, res) => {
+  try {
+    const { agencyId } = req.body;
+    if (!agencyId) return res.status(400).json({ error: "VALIDATION" });
+
+    const existing = await prisma.booking.findUnique({ where: { id: req.params.id } });
+    if (!existing) return res.status(404).json({ error: "NOT_FOUND" });
+
+    const agency = await prisma.agency.findFirst({
+      where: { id: agencyId, isActive: true },
+    });
+    if (!agency) return res.status(404).json({ error: "AGENCY_NOT_FOUND" });
+    if (existing.cityId && agency.cityId !== existing.cityId) {
+      return res.status(400).json({ error: "AGENCY_CITY_MISMATCH" });
+    }
+
+    const now = new Date();
+    const booking = await prisma.booking.update({
+      where: { id: existing.id },
+      data: {
+        routedAgencyId: agency.id,
+        routedAt: now,
+        agencyResponseStatus: "pending",
+        agencyRespondedAt: null,
+        agencyDeclineNote: null,
+        agencyId: null,
+        cityId: existing.cityId || agency.cityId,
+      },
+      include: bookingInclude,
+    });
+
+    await logStatus(
+      booking.id,
+      existing.status,
+      existing.status,
+      `${agency.name} acentasına yönlendirildi`,
+    );
+
+    return res.json(serializeBooking(booking));
+  } catch (error) {
+    console.error("POST /bookings/:id/route-agency", error);
+    return res.status(500).json({ error: "SERVER_ERROR" });
+  }
+});
+
+router.post("/:id/clear-agency-route", requireAdmin, async (req, res) => {
+  try {
+    const existing = await prisma.booking.findUnique({ where: { id: req.params.id } });
+    if (!existing) return res.status(404).json({ error: "NOT_FOUND" });
+
+    const booking = await prisma.booking.update({
+      where: { id: existing.id },
+      data: {
+        routedAgencyId: null,
+        routedAt: null,
+        agencyResponseStatus: null,
+        agencyRespondedAt: null,
+        agencyDeclineNote: null,
+        agencyId: null,
+      },
+      include: bookingInclude,
+    });
+
+    await logStatus(booking.id, existing.status, existing.status, "Acenta yönlendirmesi kaldırıldı — şehir havuzuna açıldı");
+
+    return res.json(serializeBooking(booking));
+  } catch (error) {
+    console.error("POST /bookings/:id/clear-agency-route", error);
     return res.status(500).json({ error: "SERVER_ERROR" });
   }
 });

@@ -1,9 +1,14 @@
 const API_URL = import.meta.env.VITE_BOOKING_API_URL || "/api";
 const ADMIN_KEY = "vip_admin_password";
+const AGENCY_TOKEN_KEY = "vip_agency_token";
+const AGENCY_INFO_KEY = "vip_agency_info";
 
 function adminHeaders() {
   const password = typeof sessionStorage !== "undefined" ? sessionStorage.getItem(ADMIN_KEY) : null;
-  return password ? { "X-Admin-Password": password } : {};
+  if (password) return { "X-Admin-Password": password };
+  const token = typeof sessionStorage !== "undefined" ? sessionStorage.getItem(AGENCY_TOKEN_KEY) : null;
+  if (token) return { Authorization: `Bearer ${token}` };
+  return {};
 }
 
 async function request(path, options = {}) {
@@ -43,10 +48,26 @@ export function setAdminPassword(password) {
 
 export function clearAdminPassword() {
   sessionStorage.removeItem(ADMIN_KEY);
+  sessionStorage.removeItem(AGENCY_TOKEN_KEY);
+  sessionStorage.removeItem(AGENCY_INFO_KEY);
 }
 
 export function hasAdminPassword() {
-  return typeof sessionStorage !== "undefined" && Boolean(sessionStorage.getItem(ADMIN_KEY));
+  if (typeof sessionStorage === "undefined") return false;
+  return Boolean(sessionStorage.getItem(ADMIN_KEY)) || Boolean(sessionStorage.getItem(AGENCY_TOKEN_KEY));
+}
+
+export function getSessionRole() {
+  if (typeof sessionStorage === "undefined") return null;
+  if (sessionStorage.getItem(ADMIN_KEY)) return "admin";
+  if (sessionStorage.getItem(AGENCY_TOKEN_KEY)) return "agency";
+  return null;
+}
+
+export function getAgencyInfo() {
+  if (typeof sessionStorage === "undefined") return null;
+  const raw = sessionStorage.getItem(AGENCY_INFO_KEY);
+  return raw ? JSON.parse(raw) : null;
 }
 
 export async function adminLogin(password) {
@@ -59,6 +80,67 @@ export async function adminLogin(password) {
   setAdminPassword(password);
   return { success: true };
 }
+
+export async function agencyLogin(username, password) {
+  const response = await fetch(`${API_URL.replace(/\/$/, "")}/auth/agency-login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ username, password }),
+  });
+  if (!response.ok) throw new Error("INVALID_CREDENTIALS");
+  const data = await response.json();
+  sessionStorage.setItem(AGENCY_TOKEN_KEY, data.token);
+  sessionStorage.setItem(AGENCY_INFO_KEY, JSON.stringify({ agencyId: data.agencyId, agencyName: data.agencyName }));
+  return data;
+}
+
+// --- Country/City/Agency API ---
+export function fetchCountries() { return request("/countries"); }
+export function createCountry(data) { return request("/countries", { method: "POST", body: JSON.stringify(data) }); }
+export function updateCountry(id, data) { return request(`/countries/${id}`, { method: "PATCH", body: JSON.stringify(data) }); }
+export function deleteCountry(id) { return request(`/countries/${id}`, { method: "DELETE" }); }
+
+export function fetchCities(params = {}) {
+  const query = new URLSearchParams();
+  if (params.countryId) query.set("countryId", params.countryId);
+  if (params.active) query.set("active", "true");
+  const qs = query.toString();
+  return request(`/cities${qs ? `?${qs}` : ""}`);
+}
+export function createCity(data) { return request("/cities", { method: "POST", body: JSON.stringify(data) }); }
+export function updateCity(id, data) { return request(`/cities/${id}`, { method: "PATCH", body: JSON.stringify(data) }); }
+export function deleteCity(id) { return request(`/cities/${id}`, { method: "DELETE" }); }
+
+export function fetchAgencies(params = {}) {
+  const query = new URLSearchParams();
+  if (params.cityId) query.set("cityId", params.cityId);
+  const qs = query.toString();
+  return request(`/agencies${qs ? `?${qs}` : ""}`);
+}
+export function createAgency(data) { return request("/agencies", { method: "POST", body: JSON.stringify(data) }); }
+export function updateAgency(id, data) { return request(`/agencies/${id}`, { method: "PATCH", body: JSON.stringify(data) }); }
+export function resetAgencyPassword(id, password) { return request(`/agencies/${id}/reset-password`, { method: "POST", body: JSON.stringify({ password }) }); }
+
+// --- Agency Panel API ---
+export function fetchAgencyProfile() { return request("/agency/profile"); }
+export function updateAgencyProfile(data) { return request("/agency/profile", { method: "PATCH", body: JSON.stringify(data) }); }
+export function fetchAgencyBookings(params = {}) {
+  const query = new URLSearchParams();
+  if (params.status) query.set("status", params.status);
+  if (params.from) query.set("from", params.from);
+  if (params.to) query.set("to", params.to);
+  const qs = query.toString();
+  return request(`/agency/bookings${qs ? `?${qs}` : ""}`);
+}
+export function fetchAgencyBooking(id) { return request(`/agency/bookings/${id}`); }
+export function acceptAgencyBooking(id) { return request(`/agency/bookings/${id}/accept`, { method: "POST" }); }
+export function declineAgencyBooking(id, note) {
+  return request(`/agency/bookings/${id}/decline`, {
+    method: "POST",
+    body: JSON.stringify({ note }),
+  });
+}
+export function fetchAgencyStats() { return request("/agency/stats"); }
 
 export function fetchStats() {
   return request("/stats");
@@ -83,6 +165,17 @@ export function updateBooking(id, data) {
     method: "PATCH",
     body: JSON.stringify(data),
   });
+}
+
+export function routeBookingToAgency(bookingId, agencyId) {
+  return request(`/bookings/${bookingId}/route-agency`, {
+    method: "POST",
+    body: JSON.stringify({ agencyId }),
+  });
+}
+
+export function clearAgencyRoute(bookingId) {
+  return request(`/bookings/${bookingId}/clear-agency-route`, { method: "POST" });
 }
 
 export function deleteBooking(id) {
