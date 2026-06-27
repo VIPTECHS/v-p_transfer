@@ -53,6 +53,18 @@ if (!isProd) {
   corsOrigins.push("http://localhost:5173", "http://127.0.0.1:5173");
 }
 
+if (process.env.RENDER_EXTERNAL_URL) {
+  corsOrigins.push(process.env.RENDER_EXTERNAL_URL.replace(/\/$/, ""));
+}
+
+function isAllowedOrigin(origin) {
+  if (!origin) return true;
+  if (corsOrigins.includes(origin)) return true;
+  // Render preview: static site + API on different *.onrender.com hosts
+  if (isProd && /^https:\/\/[\w-]+\.onrender\.com$/.test(origin)) return true;
+  return false;
+}
+
 app.use(
   helmet({
     contentSecurityPolicy: isProd
@@ -76,7 +88,7 @@ app.use(
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || corsOrigins.includes(origin)) {
+      if (isAllowedOrigin(origin)) {
         callback(null, true);
       } else {
         callback(new Error("CORS_NOT_ALLOWED"));
@@ -93,34 +105,25 @@ app.get("/health", (_req, res) => {
   res.json({ ok: true, env: process.env.NODE_ENV || "development" });
 });
 
-app.use("/auth", authRouter);
-app.use("/bookings", bookingsRouter);
-app.use("/enquiries", enquiriesRouter);
-app.use("/stats", requireAdmin, statsRouter);
-app.use("/drivers", driversRouter);
-app.use("/vehicles", vehiclesRouter);
-app.use("/operations", operationsRouter);
-app.use("/countries", requireAdmin, countriesRouter);
-app.use("/cities", requireAdmin, citiesRouter);
-app.use("/agencies", requireAdmin, agenciesRouter);
-app.use("/agency", requireAuth, requireRole("agency"), agencyPanelRouter);
+function mountRoutes(basePath, router, ...middleware) {
+  const stack = middleware.length ? [...middleware, router] : [router];
+  app.use(basePath, ...stack);
+  if (basePath !== "/api") {
+    app.use(`/api${basePath}`, ...stack);
+  }
+}
 
-// Production: frontend sends /api/* — rewrite to match routes above
-app.use("/api", (req, _res, next) => {
-  req.url = req.originalUrl.replace(/^\/api/, "");
-  next("route");
-});
-app.use("/api/auth", authRouter);
-app.use("/api/bookings", bookingsRouter);
-app.use("/api/enquiries", enquiriesRouter);
-app.use("/api/stats", requireAdmin, statsRouter);
-app.use("/api/drivers", driversRouter);
-app.use("/api/vehicles", vehiclesRouter);
-app.use("/api/operations", operationsRouter);
-app.use("/api/countries", requireAdmin, countriesRouter);
-app.use("/api/cities", requireAdmin, citiesRouter);
-app.use("/api/agencies", requireAdmin, agenciesRouter);
-app.use("/api/agency", requireAuth, requireRole("agency"), agencyPanelRouter);
+mountRoutes("/auth", authRouter);
+mountRoutes("/bookings", bookingsRouter);
+mountRoutes("/enquiries", enquiriesRouter);
+mountRoutes("/stats", statsRouter, requireAdmin);
+mountRoutes("/drivers", driversRouter);
+mountRoutes("/vehicles", vehiclesRouter);
+mountRoutes("/operations", operationsRouter);
+mountRoutes("/countries", countriesRouter, requireAdmin);
+mountRoutes("/cities", citiesRouter, requireAdmin);
+mountRoutes("/agencies", agenciesRouter, requireAdmin);
+mountRoutes("/agency", agencyPanelRouter, requireAuth, requireRole("agency"));
 
 function resolvePrerenderedHtml(distPath, urlPath) {
   const normalized = urlPath.replace(/\/$/, "") || "/";

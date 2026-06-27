@@ -138,7 +138,10 @@ export default function BookingWizard({ bookingData, onBack }) {
       });
     } catch (error) {
       setStatus("error");
-      setMessage(error.code === "API_UNAVAILABLE"
+      const unavailable = error.code === "API_UNAVAILABLE"
+        || error.code === "NOT_FOUND"
+        || error.status === 404;
+      setMessage(unavailable
         ? t("booking.details.serverUnavailable")
         : t("booking.details.error"));
     }
