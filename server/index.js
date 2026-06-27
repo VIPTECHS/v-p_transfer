@@ -17,6 +17,7 @@ import citiesRouter from "./routes/cities.js";
 import agenciesRouter from "./routes/agencies.js";
 import agencyPanelRouter from "./routes/agency-panel.js";
 import { rematchBookingsWithoutCity } from "./lib/cityMatcher.js";
+import { ensureMigrations } from "./lib/ensureMigrations.js";
 import { rateLimit } from "./middleware/rateLimit.js";
 import { requireAdmin, requireAuth, requireRole, validateAuthEnv } from "./middleware/auth.js";
 
@@ -30,6 +31,13 @@ try {
   validateAuthEnv();
 } catch (error) {
   console.error("Auth configuration error:", error.message);
+  process.exit(1);
+}
+
+try {
+  ensureMigrations();
+} catch (error) {
+  console.error("Database migration error:", error);
   process.exit(1);
 }
 

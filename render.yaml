@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: vip-transfer
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: file:./dev.db
+      - key: CORS_ORIGIN
+        value: https://viptransfer.com
+    disk:
+      name: vip-transfer-db
+      mountPath: /opt/render/project/src/server/prisma
+      sizeGB: 1
