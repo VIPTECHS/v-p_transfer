@@ -139,12 +139,14 @@ function send404(res) {
 </body></html>`);
 }
 
-// Production: serve built frontend
-if (isProd) {
-  const distPath = path.join(__dirname, "..", "dist");
-  app.use(express.static(distPath, { fallthrough: true }));
+// Production (or built dist present): serve frontend + SPA fallback for /admin
+const distPath = path.join(__dirname, "..", "dist");
+const serveFrontend = isProd || existsSync(distPath);
 
-  app.get("/{*splat}", (req, res) => {
+if (serveFrontend && existsSync(distPath)) {
+  app.use(express.static(distPath, { fallthrough: true, index: false }));
+
+  app.get("/{*splat}", (req, res, next) => {
     const urlPath = req.path;
 
     // Client-only admin SPA (not prerendered)
@@ -157,7 +159,12 @@ if (isProd) {
       return res.sendFile(htmlPath);
     }
 
-    return send404(res);
+    // Unknown path: still boot the SPA (deep links, client routes)
+    if (!path.extname(urlPath)) {
+      return res.sendFile(path.join(distPath, "index.html"));
+    }
+
+    return next();
   });
 }
 
