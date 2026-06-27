@@ -1,4 +1,12 @@
+import { useEffect } from "react";
 import { useI18n } from "../i18n/I18nContext";
+import {
+  absoluteUrl,
+  applyLandingSeo,
+  injectBreadcrumbLd,
+  injectServiceLd,
+  removeJsonLd,
+} from "../i18n/seo";
 import BookingForm from "./BookingForm";
 import Fleet from "./Fleet";
 import FAQ from "./FAQ";
@@ -8,6 +16,20 @@ export default function LandingPage({ page, onSearch }) {
   const { lang, t } = useI18n();
   const title = page.heroTitle[lang] || page.heroTitle.en;
   const subtitle = page.heroSubtitle[lang] || page.heroSubtitle.en;
+
+  useEffect(() => {
+    applyLandingSeo(page.slug, lang);
+    const pageUrl = absoluteUrl(lang === "tr" ? `/${page.slug}` : `/${lang}/${page.slug}`);
+    injectServiceLd({ name: title, description: subtitle, url: pageUrl });
+    injectBreadcrumbLd([
+      { name: "Home", url: absoluteUrl(lang === "tr" ? "/" : `/${lang}/`) },
+      { name: title, url: pageUrl },
+    ]);
+    return () => {
+      removeJsonLd("ld-service");
+      removeJsonLd("ld-breadcrumb");
+    };
+  }, [page.slug, lang, title, subtitle]);
 
   return (
     <main className="landing-page">
@@ -32,7 +54,7 @@ export default function LandingPage({ page, onSearch }) {
       </section>
 
       <TrustStrip />
-      <Fleet />
+      <Fleet onSearch={onSearch} />
       <FAQ />
       <section className="landing-cta">
         <a href="#booking" className="btn btn-gold">{t("nav.bookNow")}</a>

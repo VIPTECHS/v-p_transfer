@@ -4,6 +4,7 @@ import { submitBooking } from "../../api/booking";
 import { formatPickupDisplay } from "../../utils/datetime";
 import BookingConfirmModal from "../BookingConfirmModal";
 import StepBreadcrumb from "./StepBreadcrumb";
+import TripDetails from "./TripDetails";
 import ServiceSelection from "./ServiceSelection";
 import PickupInfo from "./PickupInfo";
 import Checkout from "./Checkout";
@@ -30,6 +31,7 @@ function reducer(state, action) {
   switch (action.type) {
     case "INIT": return { ...initialState, tripData: action.payload, step: 2 };
     case "SET_STEP": return { ...state, step: action.payload };
+    case "SET_TRIP": return { ...state, tripData: { ...state.tripData, ...action.payload } };
     case "SET_VEHICLE": return { ...state, selectedVehicle: action.payload };
     case "SET_PASSENGERS": return { ...state, passengers: action.payload };
     case "SET_LUGGAGE": return { ...state, luggage: action.payload };
@@ -48,7 +50,15 @@ function reducer(state, action) {
 
 export default function BookingWizard({ bookingData, onBack }) {
   const { t, lang } = useI18n();
-  const [state, dispatch] = useReducer(reducer, { ...initialState, tripData: bookingData, step: 2 });
+  const hasTrip = Boolean(
+    bookingData?.from && (bookingData?.type === "hourly" ? true : bookingData?.to),
+  );
+  const [state, dispatch] = useReducer(reducer, {
+    ...initialState,
+    tripData: bookingData || { type: "transfer" },
+    step: hasTrip ? 2 : 1,
+    selectedVehicle: bookingData?.vehicle || null,
+  });
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
   const [confirmed, setConfirmed] = useState(null);
@@ -141,8 +151,11 @@ export default function BookingWizard({ bookingData, onBack }) {
       <div className="bw-container">
         <StepBreadcrumb current={step} onGoTo={goTo} />
 
+        {step === 1 && (
+          <TripDetails state={state} dispatch={dispatch} onContinue={() => goTo(2)} />
+        )}
         {step === 2 && (
-          <ServiceSelection state={state} dispatch={dispatch} onContinue={handleContinue} />
+          <ServiceSelection state={state} dispatch={dispatch} onContinue={handleContinue} onEdit={handleEdit} />
         )}
         {step === 3 && (
           <PickupInfo state={state} dispatch={dispatch} />
@@ -165,7 +178,7 @@ export default function BookingWizard({ bookingData, onBack }) {
         )}
       </div>
 
-      {step < 4 && (
+      {step > 1 && step < 4 && (
         <StickyBottomBar
           vehicleName={vehicleName}
           onContinue={handleContinue}

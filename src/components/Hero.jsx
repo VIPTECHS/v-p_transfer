@@ -2,8 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useI18n } from "../i18n/I18nContext";
 import BookingForm from "./BookingForm";
 
-const HERO_VIDEO = "/videos/video_202606251333-ezremove.mp4";
-const HERO_POSTER = "/images/luxury-hero.png";
+const HERO_VIDEO = "/videos/video_ana.mp4";
 
 export default function Hero({ onSearch }) {
   const { t } = useI18n();
@@ -33,11 +32,7 @@ export default function Hero({ onSearch }) {
 
   return (
     <section className={`hero ${videoReady ? "hero-video-ready" : ""}`} id="home">
-      <div
-        className="hero-poster"
-        style={{ backgroundImage: `url("${HERO_POSTER}")` }}
-        aria-hidden="true"
-      />
+      <div className="hero-poster" aria-hidden="true" />
 
       {!isMobile && (
         <video
@@ -48,7 +43,6 @@ export default function Hero({ onSearch }) {
           loop
           playsInline
           preload="auto"
-          poster={HERO_POSTER}
           aria-label={t("hero.videoLabel")}
           onLoadedData={() => setVideoReady(true)}
           onPlaying={() => setVideoReady(true)}

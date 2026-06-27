@@ -2,14 +2,31 @@ import { useI18n } from "../i18n/I18nContext";
 
 const footerColumns = ["corporate", "services", "legal"];
 
-export default function Footer() {
-  const { t, dict } = useI18n();
+const footerLinkSlugs = {
+  corporate: ["about-us", "corporate-accounts", "travel-partners"],
+  services: ["airport-transfer", "chauffeur-service", "intercity-routes"],
+  legal: ["privacy-policy", "terms-conditions", "cookie-policy"],
+};
+
+export default function Footer({ navigate }) {
+  const { t, dict, lang } = useI18n();
+
+  const goTo = (slug) => (event) => {
+    event.preventDefault();
+    if (navigate) navigate(`/${slug}`);
+  };
+
+  const goHome = (event) => {
+    if (!navigate) return;
+    event.preventDefault();
+    navigate(`/${lang}/`);
+  };
 
   return (
     <footer>
       <div className="footer-top">
         <div className="footer-brand">
-          <a className="brand" href="#top">
+          <a className="brand" href={`/${lang}/`} onClick={goHome}>
             <img src="/images/viptransfer-logo.png" alt={t("brand.alt")} />
           </a>
           <p>{t("footer.tagline")}</p>
@@ -31,9 +48,12 @@ export default function Footer() {
         {footerColumns.map((column) => (
           <div className="footer-column" key={column}>
             <h3>{t(`footer.columns.${column}.title`)}</h3>
-            {dict.footer.columns[column].links.map((link) => (
-              <a href="#contact" key={link}>{link}</a>
-            ))}
+            {dict.footer.columns[column].links.map((link, i) => {
+              const slug = footerLinkSlugs[column][i];
+              return (
+                <a href={`/${slug}`} key={link} onClick={goTo(slug)}>{link}</a>
+              );
+            })}
           </div>
         ))}
       </div>

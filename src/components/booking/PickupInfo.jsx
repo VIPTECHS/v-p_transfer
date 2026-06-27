@@ -196,18 +196,16 @@ export default function PickupInfo({ state, dispatch }) {
         {/* Airport & Notes */}
         <section className="bw-section">
           <h3 className="bw-section-title">{t("wizard.additionalInfo")}</h3>
+          <label className="bw-field">
+            <span>{t("booking.flightNumber")}</span>
+            <p className="bw-field-hint">{t("wizard.flightHint")}</p>
+            <input type="text" value={flightNumber} onChange={(e) => dispatch({ type: "SET_FLIGHT", payload: e.target.value.toUpperCase() })} placeholder={t("booking.flightPlaceholder")} />
+          </label>
           {isAirport && (
-            <>
-              <label className="bw-field">
-                <span>{t("booking.flightNumber")}</span>
-                <p className="bw-field-hint">{t("wizard.flightHint")}</p>
-                <input type="text" value={flightNumber} onChange={(e) => dispatch({ type: "SET_FLIGHT", payload: e.target.value.toUpperCase() })} placeholder={t("booking.flightPlaceholder")} />
-              </label>
-              <label className="bw-field">
-                <span>{t("booking.meetAndGreet")}</span>
-                <input type="text" value={meetAndGreetName} onChange={(e) => dispatch({ type: "SET_MEET_GREET", payload: e.target.value })} placeholder={t("booking.meetAndGreetPlaceholder")} />
-              </label>
-            </>
+            <label className="bw-field">
+              <span>{t("booking.meetAndGreet")}</span>
+              <input type="text" value={meetAndGreetName} onChange={(e) => dispatch({ type: "SET_MEET_GREET", payload: e.target.value })} placeholder={t("booking.meetAndGreetPlaceholder")} />
+            </label>
           )}
           <label className="bw-field">
             <span>{t("wizard.driverNotes")}</span>

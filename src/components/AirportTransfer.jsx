@@ -10,7 +10,7 @@ export default function AirportTransfer() {
     <section className="section airport-transfer" id="airport-transfer">
       <div className="airport-transfer-grid">
         <div className="airport-transfer-visual">
-          <img src="/images/services/Airport-Transfer.jpg" alt={t("airportTransfer.title")} loading="lazy" />
+          <img src="/images/services/Airport-Transfer.png" alt={t("airportTransfer.title")} loading="lazy" />
         </div>
         <div className="airport-transfer-copy">
           <SectionHeading

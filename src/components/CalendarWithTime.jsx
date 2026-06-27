@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useI18n } from "../i18n/I18nContext";
+import { resolveIntlLocale } from "../i18n/locale";
 import {
   combineDateAndTime,
   dateToTimeValue,
@@ -200,10 +201,12 @@ function TimePicker({ value, onChange }) {
 
 const MONTH_NAMES_TR = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"];
 const MONTH_NAMES_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTH_NAMES_DE = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
+const MONTH_BY_LANG = { tr: MONTH_NAMES_TR, en: MONTH_NAMES_EN, de: MONTH_NAMES_DE };
 
 function MonthPicker({ viewDate, onSelect, lang }) {
   const year = viewDate.getFullYear();
-  const months = lang === "tr" ? MONTH_NAMES_TR : MONTH_NAMES_EN;
+  const months = MONTH_BY_LANG[lang] || MONTH_NAMES_EN;
   const current = viewDate.getMonth();
 
   return (
@@ -260,7 +263,7 @@ export default function CalendarWithTime({
     setStartTime(dateToTimeValue(value));
   }, [value]);
 
-  const locale = lang === "tr" ? "tr-TR" : "en-GB";
+  const locale = resolveIntlLocale(lang);
   const monthLabel = new Intl.DateTimeFormat(locale, { month: "long" }).format(viewDate);
   const yearLabel = viewDate.getFullYear();
   const weekdays = t("calendar.weekdays").split(",");

@@ -1,6 +1,9 @@
+import de from "./translations/de.js";
+
 export const languages = {
   en: { label: "EN", name: "English" },
   tr: { label: "TR", name: "Türkçe" },
+  de: { label: "DE", name: "Deutsch" },
 };
 
 export const translations = {
@@ -153,9 +156,9 @@ export const translations = {
         vClassLux: { name: "V Class Lux", passengers: "6 Passengers", bags: "6 Luggage" },
         vClassUltraLux: { name: "V Class Ultra Lux", passengers: "6 Passengers", bags: "5 Luggage" },
         sprinterStandard: { name: "Sprinter Standard", passengers: "16 Passengers", bags: "16 Luggage" },
-        sprinterUltraLux: { name: "Sprinter Ultra Lux", passengers: "9 Passengers", bags: "9 Luggage" },
+        sprinterUltraLux: { name: "Sprinter", passengers: "9 Passengers", bags: "9 Luggage" },
+        gls: { name: "GLS", passengers: "4 Passengers", bags: "4 Luggage" },
         eClass: { name: "E Class", passengers: "3 Passengers", bags: "3 Luggage" },
-        sClass: { name: "S Class", passengers: "2 Passengers", bags: "3 Luggage" },
         maybach: { name: "Maybach", passengers: "2 Passengers", bags: "3 Luggage" },
       },
     },
@@ -214,6 +217,10 @@ export const translations = {
       eyebrow: "FROM OUR JOURNEYS",
       title: "Moments from our transfers.",
       text: "A glimpse into the premium experiences we deliver every day.",
+      handle: "viptransfer",
+      likes: "likes",
+      viewComments: "View all comments",
+      follow: "Follow",
     },
     blog: {
       eyebrow: "INSIGHTS & UPDATES",
@@ -268,6 +275,7 @@ export const translations = {
         services: { title: "Services", links: ["Airport Transfer", "Chauffeur Service", "Intercity Routes"] },
         legal: { title: "Legal", links: ["Privacy Policy", "Terms & Conditions", "Cookie Policy"] },
       },
+      back: "Back to home",
     },
     whatsapp: {
       label: "WhatsApp",
@@ -485,9 +493,9 @@ export const translations = {
         vClassLux: { name: "V Class Lux", passengers: "6 Yolcu", bags: "6 Bagaj" },
         vClassUltraLux: { name: "V Class Ultra Lux", passengers: "6 Yolcu", bags: "5 Bagaj" },
         sprinterStandard: { name: "Sprinter Standard", passengers: "16 Yolcu", bags: "16 Bagaj" },
-        sprinterUltraLux: { name: "Sprinter Ultra Lux", passengers: "9 Yolcu", bags: "9 Bagaj" },
+        sprinterUltraLux: { name: "Sprinter", passengers: "9 Yolcu", bags: "9 Bagaj" },
+        gls: { name: "GLS", passengers: "4 Yolcu", bags: "4 Bagaj" },
         eClass: { name: "E Class", passengers: "3 Yolcu", bags: "3 Bagaj" },
-        sClass: { name: "S Class", passengers: "2 Yolcu", bags: "3 Bagaj" },
         maybach: { name: "Maybach", passengers: "2 Yolcu", bags: "3 Bagaj" },
       },
     },
@@ -546,6 +554,10 @@ export const translations = {
       eyebrow: "YOLCULUKLARIMIZDAN",
       title: "Transferlerimizden anlar.",
       text: "Her gün sunduğumuz premium deneyimlerden bir kesit.",
+      handle: "viptransfer",
+      likes: "beğenme",
+      viewComments: "Tüm yorumları gör",
+      follow: "Takip Et",
     },
     blog: {
       eyebrow: "İÇGÖRÜLER VE GÜNCELLEMELER",
@@ -600,6 +612,7 @@ export const translations = {
         services: { title: "Hizmetler", links: ["Havalimanı Transferi", "Şoförlü Hizmet", "Şehirlerarası Rotalar"] },
         legal: { title: "Yasal", links: ["Gizlilik Politikası", "Şartlar ve Koşullar", "Çerez Politikası"] },
       },
+      back: "Ana sayfaya dön",
     },
     whatsapp: {
       label: "WhatsApp",
@@ -668,6 +681,7 @@ export const translations = {
       keywords: "vip transfer, havalimanı transfer, lüks şoför, özel transfer, istanbul havalimanı transfer, antalya vip transfer",
     },
   },
+  de,
 };
 
 export function getNested(obj, path) {

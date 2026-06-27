@@ -15,7 +15,7 @@ export async function submitEnquiry(payload) {
   const response = await fetch(`${API_URL.replace(/\/$/, "")}/enquiries`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({ ...payload, website: payload.website || "" }),
   });
 
   if (!response.ok) {

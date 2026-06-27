@@ -12,17 +12,30 @@ import Blog from "./components/Blog";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
 import WhatsAppCTA from "./components/WhatsAppCTA";
-import BookingWizard from "./components/booking/BookingWizard";
 import BlogPost from "./components/BlogPost";
 import LandingPage from "./components/LandingPage";
+import SitePage from "./components/SitePage";
 import Testimonials from "./components/Testimonials";
 import Gallery from "./components/Gallery";
 import { getLandingPage } from "./data/landingPages";
+import { getSitePage } from "./data/sitePages";
+import { LANG_PREFIX_RE } from "./i18n/locale";
+import { useI18n } from "./i18n/I18nContext";
+import { applyHomeSeo } from "./i18n/seo";
 
 const AdminApp = lazy(() => import("./admin/AdminApp"));
+const BookingWizard = lazy(() => import("./components/booking/BookingWizard"));
+
+function HomeSeo() {
+  const { lang } = useI18n();
+  useEffect(() => {
+    applyHomeSeo(lang);
+  }, [lang]);
+  return null;
+}
 
 function parseRoute(pathname) {
-  const clean = pathname.replace(/^\/(tr|en)(?=\/|$)/, "");
+  const clean = pathname.replace(LANG_PREFIX_RE, "");
 
   if (clean.startsWith("/admin")) {
     return { type: "admin" };
@@ -31,8 +44,13 @@ function parseRoute(pathname) {
   const blogMatch = clean.match(/^\/blog\/([^/]+)\/?$/);
   if (blogMatch) return { type: "post", slug: decodeURIComponent(blogMatch[1]) };
 
-  const landing = getLandingPage(clean.replace(/^\//, "").replace(/\/$/, ""));
+  const slug = clean.replace(/^\//, "").replace(/\/$/, "");
+
+  const landing = getLandingPage(slug);
   if (landing) return { type: "landing", page: landing };
+
+  const sitePage = getSitePage(slug);
+  if (sitePage) return { type: "page", slug: sitePage.slug };
 
   return { type: "home" };
 }
@@ -56,6 +74,12 @@ export default function App() {
     window.scrollTo(0, 0);
   }, []);
 
+  const startBooking = useCallback(() => {
+    setRoute({ type: "home" });
+    setBookingData({ type: "transfer" });
+    window.scrollTo(0, 0);
+  }, []);
+
   if (route.type === "admin") {
     return (
       <Suspense fallback={<div style={{ minHeight: "100vh", background: "#0a0a0a", color: "#888", display: "grid", placeItems: "center" }}>Yükleniyor...</div>}>
@@ -67,9 +91,20 @@ export default function App() {
   if (route.type === "post") {
     return (
       <div id="top">
-        <Header />
+        <Header isHome={false} navigate={navigate} onBook={startBooking} />
         <BlogPost slug={route.slug} navigate={navigate} />
-        <Footer />
+        <Footer navigate={navigate} />
+        <WhatsAppCTA />
+      </div>
+    );
+  }
+
+  if (route.type === "page") {
+    return (
+      <div id="top">
+        <Header isHome={false} navigate={navigate} onBook={startBooking} />
+        <SitePage slug={route.slug} navigate={navigate} />
+        <Footer navigate={navigate} />
         <WhatsAppCTA />
       </div>
     );
@@ -78,9 +113,9 @@ export default function App() {
   if (route.type === "landing") {
     return (
       <div id="top">
-        <Header />
+        <Header isHome={false} navigate={navigate} onBook={startBooking} />
         <LandingPage page={route.page} onSearch={setBookingData} />
-        <Footer />
+        <Footer navigate={navigate} />
         <WhatsAppCTA />
       </div>
     );
@@ -89,9 +124,11 @@ export default function App() {
   if (bookingData) {
     return (
       <div id="top">
-        <Header />
-        <BookingWizard bookingData={bookingData} onBack={() => setBookingData(null)} />
-        <Footer />
+        <Header isHome={false} navigate={navigate} onBook={startBooking} />
+        <Suspense fallback={<div className="bw-page" style={{ minHeight: "60vh", display: "grid", placeItems: "center" }}>…</div>}>
+          <BookingWizard bookingData={bookingData} onBack={() => setBookingData(null)} />
+        </Suspense>
+        <Footer navigate={navigate} />
         <WhatsAppCTA />
       </div>
     );
@@ -99,13 +136,14 @@ export default function App() {
 
   return (
     <div id="top">
-      <Header />
+      <HomeSeo />
+      <Header isHome navigate={navigate} onBook={startBooking} />
       <main>
         <Hero onSearch={setBookingData} />
         <TrustStrip />
         <AirportTransfer />
         <Services />
-        <Fleet />
+        <Fleet onSearch={setBookingData} />
         <Process />
         <About />
         <Testimonials />
@@ -114,7 +152,7 @@ export default function App() {
         <Blog navigate={navigate} />
         <Contact />
       </main>
-      <Footer />
+      <Footer navigate={navigate} />
       <WhatsAppCTA />
     </div>
   );

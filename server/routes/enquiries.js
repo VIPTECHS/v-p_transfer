@@ -1,6 +1,7 @@
 import { Router } from "express";
 import prisma from "../lib/prisma.js";
 import { requireAdmin } from "../middleware/auth.js";
+import { enquiryCreateSchema, parseBody } from "../lib/validation.js";
 
 const router = Router();
 
@@ -17,11 +18,16 @@ function serializeEnquiry(enquiry) {
 // POST /enquiries
 router.post("/", async (req, res) => {
   try {
-    const { name, email, phone, message } = req.body;
-
-    if (!name?.trim() || !email?.trim() || !message?.trim()) {
-      return res.status(400).json({ error: "VALIDATION" });
+    if (req.body?.website) {
+      return res.status(201).json({ success: true });
     }
+
+    const parsed = parseBody(enquiryCreateSchema, req.body);
+    if (!parsed.ok) {
+      return res.status(400).json({ error: parsed.error });
+    }
+
+    const { name, email, phone, message } = parsed.data;
 
     const enquiry = await prisma.enquiry.create({
       data: {

@@ -5,7 +5,7 @@ export const blogPosts = [
   {
     slug: "dogru-araci-secmek",
     key: "b1",
-    cover: "/images/fleet/v-class-lux.jpg",
+    cover: "/images/cars/gls.png",
     readTime: { tr: 6, en: 6 },
     date: { tr: "Mayıs 2026", en: "May 2026" },
     content: {
@@ -84,7 +84,7 @@ export const blogPosts = [
   {
     slug: "istanbul-havalimani-transferleri",
     key: "b2",
-    cover: "/images/services/Airport-Transfer.jpg",
+    cover: "/images/blog/istanbul-airport.jpg",
     readTime: { tr: 7, en: 7 },
     date: { tr: "Nisan 2026", en: "April 2026" },
     content: {
@@ -163,7 +163,7 @@ export const blogPosts = [
   {
     slug: "kurumsal-seyahat-soforlu-hizmet",
     key: "b3",
-    cover: "/images/services/Intercity-Routes.jpg",
+    cover: "/images/blog/corporate-travel.jpg",
     readTime: { tr: 6, en: 6 },
     date: { tr: "Mart 2026", en: "March 2026" },
     content: {

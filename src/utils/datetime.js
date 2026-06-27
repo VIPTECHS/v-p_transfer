@@ -27,8 +27,10 @@ export function fromPickupISO(value) {
   return Number.isNaN(parsed.getTime()) ? defaultPickupDate() : parsed;
 }
 
+import { resolveIntlLocale } from "../i18n/locale";
+
 export function formatPickupDisplay(date, locale = "en") {
-  return new Intl.DateTimeFormat(locale === "tr" ? "tr-TR" : "en-GB", {
+  return new Intl.DateTimeFormat(resolveIntlLocale(locale), {
     weekday: "short",
     day: "numeric",
     month: "short",

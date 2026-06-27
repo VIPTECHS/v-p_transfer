@@ -22,7 +22,7 @@ export async function submitBooking(payload) {
     response = await fetch(`${API_URL.replace(/\/$/, "")}/bookings`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ ...payload, website: "" }),
     });
   } catch {
     const error = new Error("API_UNAVAILABLE");

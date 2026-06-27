@@ -1,13 +1,13 @@
 const API_URL = import.meta.env.VITE_BOOKING_API_URL || "/api";
-const ADMIN_KEY = "vip_admin_password";
+const ADMIN_TOKEN_KEY = "vip_admin_token";
 const AGENCY_TOKEN_KEY = "vip_agency_token";
 const AGENCY_INFO_KEY = "vip_agency_info";
 
 function adminHeaders() {
-  const password = typeof sessionStorage !== "undefined" ? sessionStorage.getItem(ADMIN_KEY) : null;
-  if (password) return { "X-Admin-Password": password };
-  const token = typeof sessionStorage !== "undefined" ? sessionStorage.getItem(AGENCY_TOKEN_KEY) : null;
-  if (token) return { Authorization: `Bearer ${token}` };
+  const adminToken = typeof sessionStorage !== "undefined" ? sessionStorage.getItem(ADMIN_TOKEN_KEY) : null;
+  if (adminToken) return { Authorization: `Bearer ${adminToken}` };
+  const agencyToken = typeof sessionStorage !== "undefined" ? sessionStorage.getItem(AGENCY_TOKEN_KEY) : null;
+  if (agencyToken) return { Authorization: `Bearer ${agencyToken}` };
   return {};
 }
 
@@ -23,7 +23,7 @@ async function request(path, options = {}) {
   });
 
   if (response.status === 401) {
-    clearAdminPassword();
+    clearAdminSession();
     if (typeof window !== "undefined") {
       window.dispatchEvent(new Event("vip-admin-unauthorized"));
     }
@@ -42,24 +42,34 @@ async function request(path, options = {}) {
   return response.json();
 }
 
-export function setAdminPassword(password) {
-  sessionStorage.setItem(ADMIN_KEY, password);
+export function setAdminToken(token) {
+  sessionStorage.setItem(ADMIN_TOKEN_KEY, token);
 }
 
-export function clearAdminPassword() {
-  sessionStorage.removeItem(ADMIN_KEY);
+export function clearAdminSession() {
+  sessionStorage.removeItem(ADMIN_TOKEN_KEY);
   sessionStorage.removeItem(AGENCY_TOKEN_KEY);
   sessionStorage.removeItem(AGENCY_INFO_KEY);
 }
 
-export function hasAdminPassword() {
+/** @deprecated use clearAdminSession */
+export function clearAdminPassword() {
+  clearAdminSession();
+}
+
+export function hasAdminSession() {
   if (typeof sessionStorage === "undefined") return false;
-  return Boolean(sessionStorage.getItem(ADMIN_KEY)) || Boolean(sessionStorage.getItem(AGENCY_TOKEN_KEY));
+  return Boolean(sessionStorage.getItem(ADMIN_TOKEN_KEY)) || Boolean(sessionStorage.getItem(AGENCY_TOKEN_KEY));
+}
+
+/** @deprecated use hasAdminSession */
+export function hasAdminPassword() {
+  return hasAdminSession();
 }
 
 export function getSessionRole() {
   if (typeof sessionStorage === "undefined") return null;
-  if (sessionStorage.getItem(ADMIN_KEY)) return "admin";
+  if (sessionStorage.getItem(ADMIN_TOKEN_KEY)) return "admin";
   if (sessionStorage.getItem(AGENCY_TOKEN_KEY)) return "agency";
   return null;
 }
@@ -77,8 +87,10 @@ export async function adminLogin(password) {
     body: JSON.stringify({ password }),
   });
   if (!response.ok) throw new Error("INVALID_PASSWORD");
-  setAdminPassword(password);
-  return { success: true };
+  const data = await response.json();
+  if (!data.token) throw new Error("INVALID_PASSWORD");
+  setAdminToken(data.token);
+  return data;
 }
 
 export async function agencyLogin(username, password) {

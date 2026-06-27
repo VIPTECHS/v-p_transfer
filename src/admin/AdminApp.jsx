@@ -13,6 +13,7 @@ import AgenciesList from "./AgenciesList";
 import AdminLogin from "./AdminLogin";
 import AgencyApp from "./AgencyApp";
 import { clearAdminPassword, hasAdminPassword, getSessionRole } from "../api/admin";
+import { LANG_PREFIX_RE } from "../i18n/locale";
 import "./admin.css";
 
 const VIEWS = {
@@ -42,7 +43,7 @@ const NAV = [
 ];
 
 function parseAdminRoute(pathname) {
-  const clean = pathname.replace(/^\/(tr|en)(?=\/|$)/, "");
+  const clean = pathname.replace(LANG_PREFIX_RE, "");
   const match = clean.match(/^\/admin(?:\/([^/]+))?(?:\/([^/]+))?/);
   if (!match) return { view: "dashboard" };
   const view = match[1] || "dashboard";

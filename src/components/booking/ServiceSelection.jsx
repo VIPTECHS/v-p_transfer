@@ -8,6 +8,7 @@ export default function ServiceSelection({
   state,
   dispatch,
   onContinue,
+  onEdit,
 }) {
   const { t } = useI18n();
   const [showStopsModal, setShowStopsModal] = useState(false);
@@ -28,6 +29,7 @@ export default function ServiceSelection({
         onChildSeatChange={(v) => dispatch({ type: "SET_CHILD_SEAT", payload: v })}
         onPetsChange={(v) => dispatch({ type: "SET_PETS", payload: v })}
         onAddStops={() => setShowStopsModal(true)}
+        onEdit={onEdit}
         editable
         showCounters
       />

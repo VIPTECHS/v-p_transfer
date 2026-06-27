@@ -108,6 +108,7 @@ export default function TripSidebar({
             <div className="bw-sidebar-loc">
               <span>{from || "—"}</span>
             </div>
+            {onEdit && <button type="button" className="bw-sidebar-edit" onClick={() => onEdit(1)}>{t("wizard.edit")}</button>}
           </div>
 
           {/* Stops */}

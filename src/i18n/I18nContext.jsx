@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { getNested, interpolate, translations } from "./translations";
+import { detectBrowserLang, OG_LOCALES } from "./locale";
+import { upsertJsonLd } from "./seo";
 
 const I18nContext = createContext(null);
 const STORAGE_KEY = "viptransfer-lang";
@@ -15,8 +17,7 @@ function getInitialLang() {
   if (fromPath) return fromPath;
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved && translations[saved]) return saved;
-  const browser = navigator.language?.startsWith("tr") ? "tr" : "en";
-  return translations[browser] ? browser : "en";
+  return detectBrowserLang();
 }
 
 function setMeta(selector, attr, value) {
@@ -24,29 +25,10 @@ function setMeta(selector, attr, value) {
   if (el) el.setAttribute(attr, value);
 }
 
-function upsertJsonLd(id, data) {
-  let el = document.getElementById(id);
-  if (!el) {
-    el = document.createElement("script");
-    el.type = "application/ld+json";
-    el.id = id;
-    document.head.appendChild(el);
-  }
-  el.textContent = JSON.stringify(data);
-}
-
 function applyHead(lang, dict) {
-  const seo = dict.seo || {};
-  if (seo.title) document.title = seo.title;
-  setMeta('meta[name="description"]', "content", seo.description || "");
-  setMeta('meta[property="og:title"]', "content", seo.ogTitle || seo.title || "");
-  setMeta('meta[property="og:description"]', "content", seo.description || "");
-  setMeta('meta[name="twitter:title"]', "content", seo.ogTitle || seo.title || "");
-  setMeta('meta[name="twitter:description"]', "content", seo.description || "");
-  setMeta('meta[property="og:locale"]', "content", lang === "tr" ? "tr_TR" : "en_US");
+  setMeta('meta[property="og:locale"]', "content", OG_LOCALES[lang] || OG_LOCALES.en);
   document.documentElement.lang = lang;
 
-  // FAQPage structured data from translations
   const faqItems = dict.faq?.items;
   if (faqItems) {
     upsertJsonLd("ld-faq", {

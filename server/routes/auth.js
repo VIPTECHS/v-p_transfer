@@ -1,19 +1,27 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
-import { verifyAdminPassword, signAgencyToken } from "../middleware/auth.js";
+import { verifyAdminPassword, signAgencyToken, signAdminToken } from "../middleware/auth.js";
+import { loginRateLimit } from "../middleware/rateLimit.js";
 import prisma from "../lib/prisma.js";
 
 const router = Router();
 
-router.post("/login", (req, res) => {
-  const { password } = req.body;
-  if (verifyAdminPassword(password)) {
-    return res.json({ success: true, role: "admin" });
+router.post("/login", loginRateLimit, async (req, res) => {
+  try {
+    const { password } = req.body;
+    const valid = await verifyAdminPassword(password);
+    if (!valid) {
+      return res.status(401).json({ error: "INVALID_PASSWORD" });
+    }
+    const token = signAdminToken();
+    return res.json({ success: true, role: "admin", token });
+  } catch (error) {
+    console.error("POST /auth/login", error);
+    return res.status(500).json({ error: "SERVER_ERROR" });
   }
-  return res.status(401).json({ error: "INVALID_PASSWORD" });
 });
 
-router.post("/agency-login", async (req, res) => {
+router.post("/agency-login", loginRateLimit, async (req, res) => {
   try {
     const { username, password } = req.body;
     if (!username || !password) {
@@ -34,7 +42,13 @@ router.post("/agency-login", async (req, res) => {
     }
 
     const token = signAgencyToken(agency);
-    return res.json({ success: true, role: "agency", token, agencyId: agency.id, agencyName: agency.name });
+    return res.json({
+      success: true,
+      role: "agency",
+      token,
+      agencyId: agency.id,
+      agencyName: agency.name,
+    });
   } catch (error) {
     console.error("POST /auth/agency-login", error);
     return res.status(500).json({ error: "SERVER_ERROR" });

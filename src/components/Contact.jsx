@@ -43,6 +43,13 @@ export default function Contact() {
     setStatus("loading");
     setFeedback("");
 
+    const honeypot = event.currentTarget.elements.website?.value;
+    if (honeypot) {
+      setStatus("success");
+      setFeedback(t("contact.success"));
+      return;
+    }
+
     try {
       await submitEnquiry({ name, email, message });
       setStatus("success");
@@ -108,6 +115,10 @@ export default function Contact() {
             <label>
               <span>{t("contact.messageLabel")}</span>
               <textarea rows={4} value={message} onChange={(e) => setMessage(e.target.value)} required />
+            </label>
+            <label className="hp-field" aria-hidden="true">
+              <span>Website</span>
+              <input type="text" name="website" tabIndex={-1} autoComplete="off" />
             </label>
             <button className="btn btn-gold" type="submit" disabled={status === "loading"}>
               {status === "loading" ? t("contact.submitting") : t("contact.submit")}

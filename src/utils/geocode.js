@@ -4,7 +4,9 @@ const NOMINATIM = "https://nominatim.openstreetmap.org";
 let airportDbPromise = null;
 
 function langCode(lang) {
-  return lang === "tr" ? "tr" : "en";
+  if (lang === "tr") return "tr";
+  if (lang === "de") return "de";
+  return "en";
 }
 
 function loadAirportDb() {

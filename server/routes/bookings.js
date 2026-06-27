@@ -4,6 +4,7 @@ import { generateReference } from "../lib/reference.js";
 import { notifyNewBooking, notifyStatusChange } from "../lib/notifications.js";
 import { matchBookingToCity } from "../lib/cityMatcher.js";
 import { requireAdmin } from "../middleware/auth.js";
+import { bookingCreateSchema, parseBody } from "../lib/validation.js";
 
 const router = Router();
 
@@ -76,7 +77,24 @@ const bookingInclude = {
 // POST /bookings — public
 router.post("/", async (req, res) => {
   try {
-    const payload = mapBookingPayload(req.body);
+    if (req.body?.website) {
+      return res.status(201).json({ success: true, reference: "VT-SPAM" });
+    }
+
+    const parsed = parseBody(bookingCreateSchema, {
+      ...req.body,
+      passengers: Number(req.body.passengers) || 1,
+      luggage: Number(req.body.luggage) || 0,
+      childSeat: Number(req.body.childSeat) || 0,
+      durationHours: req.body.durationHours != null ? Number(req.body.durationHours) : undefined,
+      returnTransfer: Boolean(req.body.returnTransfer),
+    });
+
+    if (!parsed.ok) {
+      return res.status(400).json({ error: parsed.error });
+    }
+
+    const payload = mapBookingPayload(parsed.data);
 
     if (!payload.pickupAt || Number.isNaN(payload.pickupAt.getTime())) {
       return res.status(400).json({ error: "INVALID_PICKUP" });

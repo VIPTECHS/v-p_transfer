@@ -15,11 +15,20 @@ npm run dev:all
 ## Admin security
 Set in `server/prisma/.env` or environment:
 ```
-ADMIN_PASSWORD=your-secure-password
+JWT_SECRET=<random-32-byte-hex>
+ADMIN_PASSWORD_HASH=<bcrypt-hash>
 ```
-Admin panel login sends `X-Admin-Password` header on API requests.
 
-Optional bearer token:
+Generate password hash:
+```bash
+node server/scripts/hash-admin-password.mjs "your-secure-password"
+```
+
+Admin login returns a JWT; the panel stores it in sessionStorage and sends `Authorization: Bearer <token>` on API requests.
+
+Dev fallback (not for production): plain `ADMIN_PASSWORD` without hash.
+
+Optional machine token:
 ```
 ADMIN_API_TOKEN=your-token
 ```
