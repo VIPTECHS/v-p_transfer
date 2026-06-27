@@ -32,4 +32,4 @@ RUN mkdir -p /app/data
 COPY --from=base /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=base /app/server/prisma ./server/prisma
 
-CMD npx prisma db push --schema=server/prisma/schema.prisma --skip-generate && node server/index.js
+CMD npx prisma migrate deploy --schema=server/prisma/schema.prisma && node server/index.js

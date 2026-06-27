@@ -167,7 +167,7 @@ app.use((err, _req, res, _next) => {
 
 app.listen(PORT, async () => {
   console.log(`API server running on http://localhost:${PORT}`);
-  console.log(`Database: ${path.join(__dirname, "prisma", "dev.db")}`);
+  console.log(`Database: ${process.env.DATABASE_URL || "file:./dev.db (default)"}`);
   try {
     const matched = await rematchBookingsWithoutCity();
     if (matched > 0) console.log(`City matcher: ${matched} booking(s) linked to cities`);
