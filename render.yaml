@@ -3,8 +3,9 @@ services:
     name: vip-transfer
     runtime: node
     plan: free
-    buildCommand: npm install && npm run build
-    startCommand: npm start
+    healthCheckPath: /health
+    buildCommand: npm install && npm run build:render
+    startCommand: npm run render:start
     envVars:
       - key: NODE_ENV
         value: production
