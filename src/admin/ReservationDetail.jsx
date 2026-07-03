@@ -514,7 +514,7 @@ export default function ReservationDetail({ id, onBack }) {
         </div>
 
         <div className="reservation-transfers-main">
-        <table className="transfers-table">
+        <table className="transfers-table transfers-table--responsive">
           <thead>
             <tr>
               <th>#</th>
@@ -531,10 +531,10 @@ export default function ReservationDetail({ id, onBack }) {
           <tbody>
             {reservation.transfers?.map((t, i) => (
               <tr key={t.id}>
-                <td>
+                <td className="transfer-num-cell">
                   <span className={`transfer-num transfer-num--${i < 3 ? i + 1 : "default"}`}>{i + 1}</span>
                 </td>
-                <td>
+                <td data-label="Sefer Kodu">
                   <input
                     type="text"
                     className="transfer-input"
@@ -544,7 +544,7 @@ export default function ReservationDetail({ id, onBack }) {
                     onBlur={() => handleTransferBlur(t, "flightCode")}
                   />
                 </td>
-                <td>
+                <td data-label="Nereden">
                   <TransferLocationField
                     variant="from"
                     placeholder="İstanbul Havalimanı (IST)"
@@ -554,8 +554,8 @@ export default function ReservationDetail({ id, onBack }) {
                     onCommit={(point) => handleTransferLocationCommit(t, "from", point)}
                   />
                 </td>
-                <td><ArrowRight size={14} className="transfer-arrow" /></td>
-                <td>
+                <td className="transfer-arrow-cell"><ArrowRight size={14} className="transfer-arrow" /></td>
+                <td data-label="Nereye">
                   <TransferLocationField
                     variant="to"
                     placeholder="Kemer, Antalya"
@@ -565,7 +565,7 @@ export default function ReservationDetail({ id, onBack }) {
                     onCommit={(point) => handleTransferLocationCommit(t, "to", point)}
                   />
                 </td>
-                <td>
+                <td data-label="Tarih">
                   <input
                     type="date"
                     className="transfer-input transfer-input--date"
@@ -574,7 +574,7 @@ export default function ReservationDetail({ id, onBack }) {
                     onBlur={() => handleTransferBlur(t, "transferDate")}
                   />
                 </td>
-                <td>
+                <td data-label="Saat">
                   <input
                     type="time"
                     className="transfer-input transfer-input--time"
@@ -583,7 +583,7 @@ export default function ReservationDetail({ id, onBack }) {
                     onBlur={() => handleTransferBlur(t, "transferTime")}
                   />
                 </td>
-                <td>
+                <td data-label="Tip">
                   <select
                     className="transfer-type-select"
                     value={transferDrafts[t.id]?.type ?? t.type}
@@ -597,7 +597,7 @@ export default function ReservationDetail({ id, onBack }) {
                     ))}
                   </select>
                 </td>
-                <td>
+                <td className="transfer-actions-cell">
                   <div className="transfer-actions">
                     <button type="button" className="transfer-action-btn transfer-action-btn--delete" onClick={() => handleDeleteTransfer(t.id)}>
                       <Trash2 size={14} />
@@ -613,8 +613,8 @@ export default function ReservationDetail({ id, onBack }) {
           <div className="admin-empty">Henüz transfer eklenmemiş</div>
         )}
 
-        <div style={{ marginTop: 12 }}>
-          <button type="button" className="admin-btn admin-btn--primary" onClick={handleAddTransfer} style={{ fontSize: 12 }}>
+        <div className="reservation-transfers-add">
+          <button type="button" className="admin-btn admin-btn--primary" onClick={handleAddTransfer}>
             <Plus size={12} /> Transfer Ekle
           </button>
         </div>

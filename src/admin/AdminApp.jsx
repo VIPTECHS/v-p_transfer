@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   LayoutDashboard, CalendarCheck, ArrowLeftRight,
   Users, Building2, Car, UserCog,
-  CreditCard, BarChart3, Settings, ChevronUp,
+  CreditCard, BarChart3, Settings, ChevronUp, Menu, X,
 } from "lucide-react";
 import Dashboard from "./Dashboard";
 import ReservationsList from "./ReservationsList";
@@ -60,6 +60,7 @@ function parseAdminRoute(pathname) {
 export default function AdminApp() {
   const [authenticated, setAuthenticated] = useState(() => hasAdminPassword());
   const [role, setRole] = useState(() => getSessionRole());
+  const [menuOpen, setMenuOpen] = useState(false);
   const [route, setRoute] = useState(() =>
     typeof window !== "undefined" ? parseAdminRoute(window.location.pathname) : { view: "dashboard" },
   );
@@ -76,6 +77,16 @@ export default function AdminApp() {
     return () => window.removeEventListener("vip-admin-unauthorized", onUnauthorized);
   }, []);
 
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [route.view, route.id]);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return undefined;
+    document.body.style.overflow = menuOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [menuOpen]);
+
   const navigate = useCallback((path) => {
     window.history.pushState(null, "", path);
     setRoute(parseAdminRoute(path));
@@ -91,6 +102,7 @@ export default function AdminApp() {
   }
 
   const goTo = (view, id) => {
+    setMenuOpen(false);
     if (view === "reservation-detail" && id) {
       navigate(`/admin/reservation/${id}`);
     } else {
@@ -102,11 +114,25 @@ export default function AdminApp() {
   const ViewComponent = VIEWS[route.view];
 
   return (
-    <div className="admin-root">
+    <div className={`admin-root${menuOpen ? " admin-root--menu-open" : ""}`}>
       <div className="admin-layout">
-        <aside className="admin-sidebar">
+        <button
+          type="button"
+          className="admin-sidebar-backdrop"
+          aria-label="Menüyü kapat"
+          onClick={() => setMenuOpen(false)}
+        />
+        <aside className={`admin-sidebar${menuOpen ? " admin-sidebar--open" : ""}`}>
           <div className="admin-brand">
             <h1><span className="brand-vip">VIP</span>TRANSFER.COM</h1>
+            <button
+              type="button"
+              className="admin-sidebar-close"
+              aria-label="Menüyü kapat"
+              onClick={() => setMenuOpen(false)}
+            >
+              <X size={18} />
+            </button>
           </div>
           <nav className="admin-nav" aria-label="Admin navigation">
             {NAV.map(({ id, label, icon: Icon }) => (
@@ -142,6 +168,19 @@ export default function AdminApp() {
           </div>
         </aside>
 
+        <div className="admin-content">
+          <header className="admin-mobile-topbar">
+            <button
+              type="button"
+              className="admin-mobile-menu-btn"
+              aria-label="Menüyü aç"
+              onClick={() => setMenuOpen(true)}
+            >
+              <Menu size={20} />
+            </button>
+            <span className="admin-mobile-topbar-title">VIPTRANSFER Admin</span>
+          </header>
+
         <main className="admin-main">
           {route.view === "reservation-detail" ? (
             <ReservationDetail id={route.id} onBack={() => goTo("reservations")} navigate={goTo} />
@@ -151,6 +190,7 @@ export default function AdminApp() {
             <Dashboard navigate={goTo} />
           )}
         </main>
+        </div>
       </div>
     </div>
   );

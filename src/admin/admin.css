@@ -27,6 +27,39 @@
 .admin-brand {
   padding: 20px 20px 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-sidebar-close {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.admin-sidebar-backdrop {
+  display: none;
+}
+
+.admin-content {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.admin-mobile-topbar {
+  display: none;
 }
 
 .admin-brand h1 {
@@ -902,6 +935,10 @@
   gap: 4px;
 }
 
+.reservation-transfers-add {
+  margin-top: 12px;
+}
+
 .transfer-action-btn {
   background: none;
   border: none;
@@ -1236,43 +1273,356 @@
   .admin-layout {
     grid-template-columns: 1fr;
   }
+
+  .admin-sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    border: 0;
+    padding: 0;
+    background: rgba(15, 23, 42, 0.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .admin-root--menu-open .admin-sidebar-backdrop {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
   .admin-sidebar {
-    position: static;
-    height: auto;
-    flex-direction: row;
-    flex-wrap: wrap;
-    padding: 12px;
-  }
-  .admin-brand {
-    border-bottom: 0;
-  }
-  .admin-nav {
-    flex-direction: row;
-    flex-wrap: wrap;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 100;
+    width: min(280px, 88vw);
+    height: 100vh;
+    transform: translateX(-105%);
+    transition: transform 0.24s ease;
+    box-shadow: 8px 0 32px rgba(0, 0, 0, 0.18);
+    flex-direction: column;
+    flex-wrap: nowrap;
     padding: 0;
   }
-  .admin-sidebar-footer,
-  .admin-avatar {
-    display: none;
+
+  .admin-sidebar--open {
+    transform: translateX(0);
   }
+
+  .admin-sidebar-close {
+    display: inline-flex;
+  }
+
+  .admin-brand {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .admin-nav {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    padding: 12px 10px;
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .admin-mobile-topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: #1e2a3a;
+    color: #fff;
+    position: sticky;
+    top: 0;
+    z-index: 40;
+  }
+
+  .admin-mobile-menu-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    cursor: pointer;
+  }
+
+  .admin-mobile-topbar-title {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
   .admin-main {
-    padding: 20px 16px;
+    padding: 16px;
+    flex: 1;
   }
+
+  .admin-page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .admin-page-header h1 {
+    font-size: 20px;
+  }
+
+  .admin-page-header .admin-btn,
+  .reservation-transfers-header .admin-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .admin-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-filters input,
+  .admin-filters select,
+  .admin-search-form {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+  }
+
+  .admin-stats-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .admin-stat-card {
+    padding: 14px;
+  }
+
+  .admin-stat-value {
+    font-size: 18px;
+  }
+
   .admin-detail-grid,
   .reservation-detail-three-col {
     grid-template-columns: 1fr;
   }
+
   .reservation-info-card {
     grid-template-columns: 1fr;
   }
+
   .reservation-info-card > div:not(:last-child) {
     border-right: none;
     border-bottom: 1px solid #e5e7eb;
   }
+
   .reservation-header {
     flex-direction: column;
     gap: 12px;
+    align-items: stretch;
+    margin-bottom: 16px;
+  }
+
+  .reservation-header-left {
     align-items: flex-start;
+  }
+
+  .reservation-header-left h1 {
+    font-size: 17px;
+    line-height: 1.35;
+  }
+
+  .reservation-header-ref {
+    display: block;
+    margin-top: 4px;
+    font-size: 13px;
+  }
+
+  .reservation-header-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .reservation-header-actions .admin-btn {
+    justify-content: center;
+    width: 100%;
+    padding: 10px 12px;
+  }
+
+  .reservation-header-actions .admin-btn--primary {
+    grid-column: 1 / -1;
+  }
+
+  .reservation-transfers {
+    padding: 14px;
+  }
+
+  .reservation-transfers-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .reservation-transfers-add .admin-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .passenger-row {
+    grid-template-columns: 28px 1fr;
+    gap: 10px;
+  }
+
+  .passenger-row > div {
+    grid-column: 2;
+  }
+
+  .passenger-delete {
+    grid-column: 2;
+    justify-self: end;
+  }
+
+  .summary-row {
+    gap: 16px;
+  }
+
+  .summary-stat {
+    min-width: calc(50% - 8px);
+  }
+
+  .admin-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .transfers-table--responsive thead {
+    display: none;
+  }
+
+  .transfers-table--responsive tbody tr {
+    display: block;
+    position: relative;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 14px 14px 10px;
+    margin-bottom: 12px;
+    background: #fafafa;
+  }
+
+  .transfers-table--responsive tbody tr:last-child {
+    margin-bottom: 0;
+  }
+
+  .transfers-table--responsive td {
+    display: block;
+    padding: 0 0 12px;
+    border: none;
+  }
+
+  .transfers-table--responsive td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6b7280;
+    margin-bottom: 6px;
+  }
+
+  .transfers-table--responsive td.transfer-arrow-cell {
+    display: none;
+  }
+
+  .transfers-table--responsive td.transfer-num-cell {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 12px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .transfers-table--responsive td.transfer-num-cell::before {
+    content: "Transfer";
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6b7280;
+  }
+
+  .transfers-table--responsive td.transfer-actions-cell {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 0;
+  }
+
+  .transfers-table--responsive td.transfer-actions-cell::before {
+    display: none;
+  }
+
+  .transfer-location-field {
+    min-width: 0;
+  }
+
+  .transfer-input,
+  .transfer-type-select {
+    width: 100%;
+    min-width: 0;
+    font-size: 16px;
+  }
+
+  .transfer-input--date,
+  .transfer-input--time {
+    min-width: 0;
+  }
+
+  .transfer-location-results {
+    position: absolute;
+    left: 0;
+    right: 0;
+    max-height: min(240px, 40vh);
+    z-index: 120;
+  }
+
+  .admin-card:has(.admin-table) {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-tabs {
+    width: 100%;
+    flex-wrap: wrap;
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-stats-row {
+    grid-template-columns: 1fr;
+  }
+
+  .reservation-header-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .reservation-header-actions .admin-btn--primary {
+    grid-column: auto;
+    order: -1;
   }
 }
 
