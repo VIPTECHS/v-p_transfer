@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { createVehicle, fetchVehicles, updateVehicle } from "../api/admin";
+import { AdminBarChart, AdminChartCard } from "./components/AdminChart";
 
 export default function VehiclesList() {
   const [vehicles, setVehicles] = useState([]);
@@ -18,6 +19,11 @@ export default function VehiclesList() {
     load();
   };
 
+  const vehicleChartData = [
+    { label: "Aktif", value: vehicles.filter((v) => v.isActive).length, color: "#16a34a" },
+    { label: "Pasif", value: vehicles.filter((v) => !v.isActive).length, color: "#9ca3af" },
+  ];
+
   return (
     <>
       <h1 className="admin-page-title">Araçlar</h1>
@@ -27,6 +33,13 @@ export default function VehiclesList() {
         <input placeholder="Plaka" value={plate} onChange={(e) => setPlate(e.target.value)} />
         <button type="submit" className="admin-btn admin-btn--gold">Ekle</button>
       </form>
+
+      <div className="admin-page-charts">
+        <AdminChartCard title="Araç Durumu" subtitle="Aktif ve pasif araç sayıları">
+          <AdminBarChart data={vehicleChartData} />
+        </AdminChartCard>
+      </div>
+
       <div className="admin-card">
         <table className="admin-table">
           <thead><tr><th>Key</th><th>Ad</th><th>Plaka</th><th>Durum</th></tr></thead>

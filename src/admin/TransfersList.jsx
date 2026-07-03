@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { Plane, MapPin, ArrowRight, Search } from "lucide-react";
 import { fetchReservations } from "../api/admin";
+import { AdminBarChart, AdminChartCard, countBy } from "./components/AdminChart";
+
+const TYPE_LABELS = { arrival: "Varış", departure: "Dönüş", internal: "İç Transfer" };
 
 function formatDate(iso) {
   if (!iso) return "";
   return new Date(iso).toLocaleDateString("tr-TR");
 }
-
-const TYPE_LABELS = { arrival: "Varış", departure: "Dönüş", internal: "İç Transfer" };
 
 export default function TransfersList({ navigate }) {
   const [transfers, setTransfers] = useState([]);
@@ -57,6 +58,14 @@ export default function TransfersList({ navigate }) {
           />
         </div>
       </div>
+
+      {!loading && (
+        <div className="admin-page-charts">
+          <AdminChartCard title="Transfer Tipleri" subtitle="Varış, dönüş ve iç transfer sayıları">
+            <AdminBarChart data={countBy(filtered, (t) => t.type, TYPE_LABELS)} />
+          </AdminChartCard>
+        </div>
+      )}
 
       {loading ? (
         <div className="admin-loading">Yükleniyor...</div>

@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import { fetchPayments, fetchPaymentSummary } from "../api/admin";
 import PaymentBadge from "./components/PaymentBadge";
+import { AdminChartCard, AdminPieChart, countBy } from "./components/AdminChart";
+
+const PAYMENT_STATUS_LABELS = {
+  paid: "Ödendi",
+  partial: "Kısmi",
+  unpaid: "Ödenmedi",
+};
 
 function formatDate(iso) {
   if (!iso) return "";
@@ -47,6 +54,14 @@ export default function PaymentsView({ navigate }) {
             <div className="admin-stat-value">€ {(summary.totalProfit || 0).toFixed(2).replace(".", ",")}</div>
             <div className="admin-stat-label">Net Kâr</div>
           </div>
+        </div>
+      )}
+
+      {!loading && (
+        <div className="admin-page-charts">
+          <AdminChartCard title="Ödeme Durumu" subtitle="Kayıtların ödeme statüsüne göre dağılımı">
+            <AdminPieChart data={countBy(payments, (p) => p.paymentStatus, PAYMENT_STATUS_LABELS)} />
+          </AdminChartCard>
         </div>
       )}
 

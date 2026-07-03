@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Search, Pencil, X, Check } from "lucide-react";
 import { fetchSuppliers, createSupplier, updateSupplier, fetchCities } from "../api/admin";
+import { AdminBarChart, AdminChartCard, countBy } from "./components/AdminChart";
 
 export default function SuppliersList() {
   const [suppliers, setSuppliers] = useState([]);
@@ -55,6 +56,8 @@ export default function SuppliersList() {
     }
   };
 
+  const cityChartData = countBy(suppliers, (s) => s.city?.name || "Belirsiz").slice(0, 6);
+
   return (
     <>
       <div className="admin-page-header">
@@ -70,6 +73,14 @@ export default function SuppliersList() {
           <input type="text" placeholder="Ad, email, irtibat ara..." value={search} onChange={(e) => setSearch(e.target.value)} />
         </form>
       </div>
+
+      {!loading && (
+        <div className="admin-page-charts">
+          <AdminChartCard title="Şehir Dağılımı" subtitle="Tedarikçilerin bulunduğu şehirler">
+            <AdminBarChart data={cityChartData} />
+          </AdminChartCard>
+        </div>
+      )}
 
       {showForm && (
         <div className="admin-card" style={{ marginBottom: 16 }}>

@@ -19,6 +19,7 @@
     "prisma:generate": "prisma generate --schema=server/prisma/schema.prisma",
     "prisma:migrate": "prisma migrate dev --schema=server/prisma/schema.prisma",
     "seed": "node server/scripts/seed.mjs",
+    "seed:reservations": "node server/scripts/seed-reservations.mjs",
     "rematch-cities": "node server/scripts/rematch-cities.mjs",
     "dev:all": "npm run dev",
     "preview": "vite preview"

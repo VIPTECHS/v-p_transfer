@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Globe, MapPin, Mail, Settings as SettingsIcon } from "lucide-react";
+import { fetchCities, fetchCountries, fetchEnquiries } from "../api/admin";
 import CountriesList from "./CountriesList";
 import CitiesList from "./CitiesList";
 import EnquiriesList from "./EnquiriesList";
+import { AdminChartCard, AdminPieChart } from "./components/AdminChart";
 
 const TABS = [
   { id: "countries", label: "Ülkeler", icon: Globe },
@@ -13,6 +15,19 @@ const TABS = [
 
 export default function SettingsView() {
   const [tab, setTab] = useState("countries");
+  const [overviewChart, setOverviewChart] = useState([]);
+
+  useEffect(() => {
+    Promise.all([fetchCountries(), fetchCities(), fetchEnquiries()])
+      .then(([countries, cities, enquiries]) => {
+        setOverviewChart([
+          { label: "Ülkeler", value: countries.length, color: "#3b82f6" },
+          { label: "Şehirler", value: cities.length, color: "#16a34a" },
+          { label: "Talepler", value: enquiries.length, color: "#f59e0b" },
+        ]);
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <>
@@ -34,6 +49,12 @@ export default function SettingsView() {
             </button>
           );
         })}
+      </div>
+
+      <div className="admin-page-charts">
+        <AdminChartCard title="Sistem Özeti" subtitle="Ülke, şehir ve talep kayıt sayıları">
+          <AdminPieChart data={overviewChart} />
+        </AdminChartCard>
       </div>
 
       <div style={{ marginTop: 16 }}>

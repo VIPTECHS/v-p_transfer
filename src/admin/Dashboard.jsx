@@ -2,6 +2,15 @@ import { useEffect, useState } from "react";
 import { CalendarCheck, Users, Building2, TrendingUp } from "lucide-react";
 import { fetchReservations, fetchCustomers, fetchSuppliers, fetchPaymentSummary } from "../api/admin";
 import StatusBadge from "./components/StatusBadge";
+import { AdminChartCard, AdminPieChart, countBy } from "./components/AdminChart";
+
+const STATUS_LABELS = {
+  pending: "Bekliyor",
+  confirmed: "Onaylandı",
+  in_progress: "Devam Ediyor",
+  completed: "Tamamlandı",
+  cancelled: "İptal",
+};
 
 function formatDate(iso) {
   if (!iso) return "";
@@ -85,6 +94,12 @@ export default function Dashboard({ navigate }) {
           </div>
         </div>
       )}
+
+      <div className="admin-page-charts">
+        <AdminChartCard title="Rezervasyon Durumları" subtitle="Duruma göre dağılım">
+          <AdminPieChart data={countBy(reservations, (r) => r.status, STATUS_LABELS)} />
+        </AdminChartCard>
+      </div>
 
       <div className="admin-card">
         <div className="admin-card-header">

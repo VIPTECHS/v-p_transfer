@@ -244,11 +244,13 @@ router.patch("/:id/transfers/:transferId", requireAdmin, async (req, res) => {
 
     const data = {};
     if (req.body.flightCode !== undefined) data.flightCode = req.body.flightCode;
-    if (req.body.fromLabel) data.fromLabel = req.body.fromLabel;
-    if (req.body.toLabel) data.toLabel = req.body.toLabel;
-    if (req.body.transferDate) data.transferDate = new Date(req.body.transferDate);
+    if (req.body.fromLabel !== undefined) data.fromLabel = req.body.fromLabel;
+    if (req.body.toLabel !== undefined) data.toLabel = req.body.toLabel;
+    if (req.body.transferDate !== undefined) {
+      data.transferDate = req.body.transferDate ? new Date(req.body.transferDate) : null;
+    }
     if (req.body.transferTime !== undefined) data.transferTime = req.body.transferTime;
-    if (req.body.type) data.type = req.body.type;
+    if (req.body.type !== undefined) data.type = req.body.type;
     if (req.body.sortOrder !== undefined) data.sortOrder = req.body.sortOrder;
     if (req.body.notes !== undefined) data.notes = req.body.notes;
     if (req.body.fromLng !== undefined) data.fromLng = req.body.fromLng;

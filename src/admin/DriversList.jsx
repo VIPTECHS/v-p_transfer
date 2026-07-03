@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { createDriver, fetchDrivers, updateDriver } from "../api/admin";
+import { AdminBarChart, AdminChartCard } from "./components/AdminChart";
 
 export default function DriversList() {
   const [drivers, setDrivers] = useState([]);
@@ -18,6 +19,11 @@ export default function DriversList() {
     load();
   };
 
+  const driverChartData = [
+    { label: "Aktif", value: drivers.filter((d) => d.isActive).length, color: "#16a34a" },
+    { label: "Pasif", value: drivers.filter((d) => !d.isActive).length, color: "#9ca3af" },
+  ];
+
   return (
     <>
       <h1 className="admin-page-title">Şoförler</h1>
@@ -27,6 +33,13 @@ export default function DriversList() {
         <input placeholder="E-posta" value={email} onChange={(e) => setEmail(e.target.value)} />
         <button type="submit" className="admin-btn admin-btn--gold">Ekle</button>
       </form>
+
+      <div className="admin-page-charts">
+        <AdminChartCard title="Sürücü Durumu" subtitle="Aktif ve pasif sürücü sayıları">
+          <AdminBarChart data={driverChartData} />
+        </AdminChartCard>
+      </div>
+
       <div className="admin-card">
         <table className="admin-table">
           <thead><tr><th>Ad</th><th>Telefon</th><th>E-posta</th><th>Durum</th></tr></thead>

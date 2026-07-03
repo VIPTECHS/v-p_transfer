@@ -3,6 +3,7 @@ import prisma from "../lib/prisma.js";
 import { generateReference } from "../lib/reference.js";
 import { notifyNewBooking, notifyStatusChange } from "../lib/notifications.js";
 import { matchBookingToCity } from "../lib/cityMatcher.js";
+import { syncBookingToReservation } from "../lib/syncBookingToReservation.js";
 import { requireAdmin } from "../middleware/auth.js";
 import { bookingCreateSchema, parseBody } from "../lib/validation.js";
 
@@ -128,6 +129,11 @@ router.post("/", async (req, res) => {
     }
 
     await logStatus(booking.id, null, "pending", "Booking created");
+    try {
+      await syncBookingToReservation(booking.id);
+    } catch (syncError) {
+      console.error("Booking sync error:", syncError);
+    }
     await notifyNewBooking(booking);
 
     return res.status(201).json({

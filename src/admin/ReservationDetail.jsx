@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
-import { Plane, MapPin, ArrowRight, Pencil, Trash2, Plus, Minus, Copy, Printer, Save } from "lucide-react";
+import { Plane, MapPin, ArrowRight, Trash2, Plus, Minus, Copy, Printer, Save } from "lucide-react";
 import {
   fetchReservation, updateReservation, deleteReservation,
   addTransfer, updateTransfer, deleteTransfer,
-  addPassenger, deletePassenger,
-  fetchCustomers, fetchSuppliers, fetchVehicles,
+  addPassenger, updatePassenger, deletePassenger,
+  fetchCustomers, fetchSuppliers, fetchVehicles, fetchDrivers,
 } from "../api/admin";
 import StatusBadge from "./components/StatusBadge";
 import PaymentBadge from "./components/PaymentBadge";
 import CurrencyInput from "./components/CurrencyInput";
 import SearchableSelect from "./components/SearchableSelect";
+import TransferLocationField from "./components/TransferLocationField";
+import { AdminBarChart, AdminChartCard } from "./components/AdminChart";
 
 const TRANSFER_TYPES = [
   { value: "arrival", label: "Varış Transferi" },
@@ -24,12 +26,6 @@ const PAYMENT_STATUSES = [
 ];
 
 const PAYMENT_TYPES = ["Nakit", "Banka Transferi", "Kredi Kartı", "Havale"];
-
-function formatDate(iso) {
-  if (!iso) return "";
-  const d = new Date(iso);
-  return d.toLocaleDateString("tr-TR");
-}
 
 function formatDateTime(iso) {
   if (!iso) return "";
@@ -48,26 +44,67 @@ function toDateInput(d) {
   return date.toISOString().slice(0, 10);
 }
 
+function toIsoDateInput(dateValue) {
+  return dateValue ? new Date(`${dateValue}T00:00:00`).toISOString() : null;
+}
+
+function draftFromTransfer(transfer) {
+  return {
+    flightCode: transfer.flightCode || "",
+    fromLabel: transfer.fromLabel || "",
+    toLabel: transfer.toLabel || "",
+    fromLng: transfer.fromLng ?? null,
+    fromLat: transfer.fromLat ?? null,
+    toLng: transfer.toLng ?? null,
+    toLat: transfer.toLat ?? null,
+    transferDate: toDateInput(transfer.transferDate),
+    transferTime: transfer.transferTime || "",
+    type: transfer.type || "arrival",
+  };
+}
+
+function locationPointFromDraft(draft, side) {
+  if (!draft) return null;
+  if (side === "from") {
+    if (!draft.fromLabel) return null;
+    return {
+      label: draft.fromLabel,
+      lng: draft.fromLng ?? undefined,
+      lat: draft.fromLat ?? undefined,
+    };
+  }
+  if (!draft.toLabel) return null;
+  return {
+    label: draft.toLabel,
+    lng: draft.toLng ?? undefined,
+    lat: draft.toLat ?? undefined,
+  };
+}
+
 export default function ReservationDetail({ id, onBack }) {
   const [reservation, setReservation] = useState(null);
   const [customers, setCustomers] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [vehicles, setVehicles] = useState([]);
+  const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [transferDrafts, setTransferDrafts] = useState({});
+  const [passengerDrafts, setPassengerDrafts] = useState({});
 
   // Editable state
   const [form, setForm] = useState({});
 
   const load = () => {
     setLoading(true);
-    Promise.all([fetchReservation(id), fetchCustomers(), fetchSuppliers(), fetchVehicles()])
-      .then(([r, c, s, v]) => {
+    Promise.all([fetchReservation(id), fetchCustomers(), fetchSuppliers(), fetchVehicles(), fetchDrivers()])
+      .then(([r, c, s, v, d]) => {
         setReservation(r);
         setCustomers(c);
         setSuppliers(s);
         setVehicles(v.filter((x) => x.isActive));
+        setDrivers(d.filter((x) => x.isActive));
         setForm({
           status: r.status,
           supplierId: r.supplierId,
@@ -75,6 +112,7 @@ export default function ReservationDetail({ id, onBack }) {
           supplierCurrency: r.supplierCurrency,
           supplierPaymentStatus: r.supplierPaymentStatus,
           supplierPaymentType: r.supplierPaymentType,
+          supplierPaymentDate: toDateInput(r.supplierPaymentDate),
           supplierNote: r.supplierNote,
           customerId: r.customerId,
           salePrice: r.salePrice,
@@ -84,7 +122,22 @@ export default function ReservationDetail({ id, onBack }) {
           customerPaymentDate: toDateInput(r.customerPaymentDate),
           customerNote: r.customerNote,
           assignedVehicleId: r.assignedVehicleId,
+          assignedDriverId: r.assignedDriverId,
         });
+        const nextTransferDrafts = {};
+        r.transfers?.forEach((t) => {
+          nextTransferDrafts[t.id] = draftFromTransfer(t);
+        });
+        setTransferDrafts(nextTransferDrafts);
+        const nextPassengerDrafts = {};
+        r.passengers?.forEach((p) => {
+          nextPassengerDrafts[p.id] = {
+            firstName: p.firstName || "",
+            lastName: p.lastName || "",
+            identityNumber: p.identityNumber || "",
+          };
+        });
+        setPassengerDrafts(nextPassengerDrafts);
       })
       .catch(() => setError("Rezervasyon bulunamadı"))
       .finally(() => setLoading(false));
@@ -98,6 +151,7 @@ export default function ReservationDetail({ id, onBack }) {
     try {
       const updated = await updateReservation(id, {
         ...form,
+        supplierPaymentDate: form.supplierPaymentDate || null,
         customerPaymentDate: form.customerPaymentDate || null,
       });
       setReservation(updated);
@@ -121,12 +175,20 @@ export default function ReservationDetail({ id, onBack }) {
   const handleAddTransfer = async () => {
     try {
       const updated = await addTransfer(id, {
-        fromLabel: "",
-        toLabel: "",
+        fromLabel: "Yeni Alış Noktası",
+        toLabel: "Yeni Varış Noktası",
         transferDate: new Date().toISOString(),
+        transferTime: "12:00",
         type: "arrival",
       });
       setReservation(updated);
+      const created = updated.transfers?.[updated.transfers.length - 1];
+      if (created) {
+        setTransferDrafts((prev) => ({
+          ...prev,
+          [created.id]: draftFromTransfer(created),
+        }));
+      }
     } catch {
       setError("Transfer eklenemedi");
     }
@@ -136,24 +198,136 @@ export default function ReservationDetail({ id, onBack }) {
     try {
       const updated = await deleteTransfer(id, transferId);
       setReservation(updated);
+      setTransferDrafts((prev) => {
+        const next = { ...prev };
+        delete next[transferId];
+        return next;
+      });
     } catch {
       setError("Transfer silinemedi");
     }
   };
 
-  const handleTransferChange = async (transferId, field, value) => {
+  const handleTransferDraftChange = (transferId, field, value) => {
+    setTransferDrafts((prev) => ({
+      ...prev,
+      [transferId]: {
+        ...(prev[transferId] || {}),
+        [field]: value,
+      },
+    }));
+  };
+
+  const handleTransferPatch = async (transferId, payload) => {
     try {
-      const updated = await updateTransfer(id, transferId, { [field]: value });
+      const updated = await updateTransfer(id, transferId, payload);
       setReservation(updated);
+      const transfer = updated.transfers?.find((item) => item.id === transferId);
+      if (transfer) {
+        setTransferDrafts((prev) => ({
+          ...prev,
+          [transferId]: draftFromTransfer(transfer),
+        }));
+      }
     } catch {
       setError("Transfer güncellenemedi");
     }
   };
 
+  const handleTransferChange = async (transferId, field, value) => {
+    await handleTransferPatch(transferId, { [field]: value });
+  };
+
+  const handleTransferLocationDraftChange = (transferId, side, point) => {
+    setTransferDrafts((prev) => ({
+      ...prev,
+      [transferId]: {
+        ...(prev[transferId] || {}),
+        ...(side === "from"
+          ? { fromLabel: point.label, fromLng: point.lng ?? null, fromLat: point.lat ?? null }
+          : { toLabel: point.label, toLng: point.lng ?? null, toLat: point.lat ?? null }),
+      },
+    }));
+  };
+
+  const handleTransferLocationCommit = async (transfer, side, point) => {
+    const payload = side === "from"
+      ? {
+          fromLabel: point.label || "",
+          fromLng: point.lng ?? null,
+          fromLat: point.lat ?? null,
+        }
+      : {
+          toLabel: point.label || "",
+          toLng: point.lng ?? null,
+          toLat: point.lat ?? null,
+        };
+
+    setTransferDrafts((prev) => ({
+      ...prev,
+      [transfer.id]: {
+        ...(prev[transfer.id] || {}),
+        ...(side === "from"
+          ? { fromLabel: payload.fromLabel, fromLng: payload.fromLng, fromLat: payload.fromLat }
+          : { toLabel: payload.toLabel, toLng: payload.toLng, toLat: payload.toLat }),
+      },
+    }));
+
+    await handleTransferPatch(transfer.id, payload);
+  };
+
+  const handleTransferLocationBlur = async (transfer, side) => {
+    const draft = transferDrafts[transfer.id];
+    if (!draft) return;
+
+    const point = side === "from"
+      ? { label: draft.fromLabel, lng: draft.fromLng, lat: draft.fromLat }
+      : { label: draft.toLabel, lng: draft.toLng, lat: draft.toLat };
+
+    const unchanged = side === "from"
+      ? transfer.fromLabel === (point.label || "")
+        && transfer.fromLng === (point.lng ?? null)
+        && transfer.fromLat === (point.lat ?? null)
+      : transfer.toLabel === (point.label || "")
+        && transfer.toLng === (point.lng ?? null)
+        && transfer.toLat === (point.lat ?? null);
+
+    if (!unchanged) {
+      await handleTransferLocationCommit(transfer, side, point);
+    }
+  };
+
+  const handleTransferBlur = (transfer, field) => {
+    const draft = transferDrafts[transfer.id];
+    if (!draft) return;
+    if (field === "transferDate") {
+      const currentDate = toDateInput(transfer.transferDate);
+      if (draft.transferDate !== currentDate) {
+        handleTransferChange(transfer.id, "transferDate", toIsoDateInput(draft.transferDate));
+      }
+      return;
+    }
+    const currentValue = transfer[field] || "";
+    if (draft[field] !== currentValue) {
+      handleTransferChange(transfer.id, field, draft[field] || null);
+    }
+  };
+
   const handleAddPassenger = async () => {
     try {
-      const updated = await addPassenger(id, { firstName: "", lastName: "" });
+      const updated = await addPassenger(id, { firstName: "Yolcu", lastName: "" });
       setReservation(updated);
+      const created = updated.passengers?.[updated.passengers.length - 1];
+      if (created) {
+        setPassengerDrafts((prev) => ({
+          ...prev,
+          [created.id]: {
+            firstName: created.firstName || "",
+            lastName: created.lastName || "",
+            identityNumber: created.identityNumber || "",
+          },
+        }));
+      }
     } catch {
       setError("Yolcu eklenemedi");
     }
@@ -163,8 +337,53 @@ export default function ReservationDetail({ id, onBack }) {
     try {
       const updated = await deletePassenger(id, passengerId);
       setReservation(updated);
+      setPassengerDrafts((prev) => {
+        const next = { ...prev };
+        delete next[passengerId];
+        return next;
+      });
     } catch {
       setError("Yolcu silinemedi");
+    }
+  };
+
+  const handlePassengerDraftChange = (passengerId, field, value) => {
+    setPassengerDrafts((prev) => ({
+      ...prev,
+      [passengerId]: {
+        ...(prev[passengerId] || {}),
+        [field]: value,
+      },
+    }));
+  };
+
+  const handlePassengerBlur = async (passenger, field) => {
+    const draft = passengerDrafts[passenger.id];
+    if (!draft) return;
+    const currentValue = passenger[field] || "";
+    const nextValue = draft[field] || "";
+    if (currentValue === nextValue) return;
+    try {
+      const payload = {
+        firstName: draft.firstName?.trim() || "Yolcu",
+        lastName: draft.lastName?.trim() || null,
+        identityNumber: draft.identityNumber?.trim() || null,
+      };
+      const updated = await updatePassenger(id, passenger.id, payload);
+      setReservation(updated);
+      const updatedPassenger = updated.passengers?.find((p) => p.id === passenger.id);
+      if (updatedPassenger) {
+        setPassengerDrafts((prev) => ({
+          ...prev,
+          [passenger.id]: {
+            firstName: updatedPassenger.firstName || "",
+            lastName: updatedPassenger.lastName || "",
+            identityNumber: updatedPassenger.identityNumber || "",
+          },
+        }));
+      }
+    } catch {
+      setError("Yolcu güncellenemedi");
     }
   };
 
@@ -174,6 +393,12 @@ export default function ReservationDetail({ id, onBack }) {
   const profit = (form.salePrice || 0) - (form.supplierPrice || 0);
   const margin = form.salePrice > 0 ? Math.round((profit / form.salePrice) * 100) : 0;
   const firstTransfer = reservation.transfers?.[0];
+  const currency = form.saleCurrency === "EUR" ? "€" : (form.saleCurrency || "€");
+  const priceChartData = [
+    { label: "Tedarikçi", value: form.supplierPrice || 0, color: "#ef4444" },
+    { label: "Satış", value: form.salePrice || 0, color: "#3b82f6" },
+    { label: "Kâr", value: Math.max(profit, 0), color: "#16a34a" },
+  ];
   const customerDisplay = customers.find((c) => c.id === form.customerId);
   const supplierDisplay = suppliers.find((s) => s.id === form.supplierId);
 
@@ -267,6 +492,15 @@ export default function ReservationDetail({ id, onBack }) {
         </div>
       </div>
 
+      <div className="admin-page-charts">
+        <AdminChartCard title="Fiyat Özeti" subtitle="Bu rezervasyonun tedarikçi, satış ve kâr tutarları">
+          <AdminBarChart
+            data={priceChartData}
+            valueFormatter={(v) => `${currency} ${v.toFixed(0).replace(".", ",")}`}
+          />
+        </AdminChartCard>
+      </div>
+
       {/* Transfers */}
       <div className="reservation-transfers">
         <div className="reservation-transfers-header">
@@ -279,6 +513,7 @@ export default function ReservationDetail({ id, onBack }) {
           </button>
         </div>
 
+        <div className="reservation-transfers-main">
         <table className="transfers-table">
           <thead>
             <tr>
@@ -300,40 +535,62 @@ export default function ReservationDetail({ id, onBack }) {
                   <span className={`transfer-num transfer-num--${i < 3 ? i + 1 : "default"}`}>{i + 1}</span>
                 </td>
                 <td>
-                  <span className="transfer-flight-code">
-                    {t.flightCode || "–"}
-                    <button
-                      type="button"
-                      className="transfer-flight-edit"
-                      onClick={() => {
-                        const code = window.prompt("Sefer kodu:", t.flightCode || "");
-                        if (code !== null) handleTransferChange(t.id, "flightCode", code || null);
-                      }}
-                    >
-                      <Pencil size={12} />
-                    </button>
-                  </span>
+                  <input
+                    type="text"
+                    className="transfer-input"
+                    value={transferDrafts[t.id]?.flightCode ?? ""}
+                    placeholder="TK2412"
+                    onChange={(e) => handleTransferDraftChange(t.id, "flightCode", e.target.value.toUpperCase())}
+                    onBlur={() => handleTransferBlur(t, "flightCode")}
+                  />
                 </td>
                 <td>
-                  <span className="transfer-location">
-                    {t.type === "arrival" ? <Plane size={14} className="transfer-location-icon" /> : <MapPin size={14} className="transfer-location-icon" />}
-                    {t.fromLabel || "—"}
-                  </span>
+                  <TransferLocationField
+                    variant="from"
+                    placeholder="İstanbul Havalimanı (IST)"
+                    value={locationPointFromDraft(transferDrafts[t.id], "from")}
+                    onChange={(point) => handleTransferLocationDraftChange(t.id, "from", point)}
+                    onBlur={() => handleTransferLocationBlur(t, "from")}
+                    onCommit={(point) => handleTransferLocationCommit(t, "from", point)}
+                  />
                 </td>
                 <td><ArrowRight size={14} className="transfer-arrow" /></td>
                 <td>
-                  <span className="transfer-location">
-                    <MapPin size={14} className="transfer-location-icon" />
-                    {t.toLabel || "—"}
-                  </span>
+                  <TransferLocationField
+                    variant="to"
+                    placeholder="Kemer, Antalya"
+                    value={locationPointFromDraft(transferDrafts[t.id], "to")}
+                    onChange={(point) => handleTransferLocationDraftChange(t.id, "to", point)}
+                    onBlur={() => handleTransferLocationBlur(t, "to")}
+                    onCommit={(point) => handleTransferLocationCommit(t, "to", point)}
+                  />
                 </td>
-                <td>{formatDate(t.transferDate)}</td>
-                <td>{t.transferTime || "—"}</td>
+                <td>
+                  <input
+                    type="date"
+                    className="transfer-input transfer-input--date"
+                    value={transferDrafts[t.id]?.transferDate ?? ""}
+                    onChange={(e) => handleTransferDraftChange(t.id, "transferDate", e.target.value)}
+                    onBlur={() => handleTransferBlur(t, "transferDate")}
+                  />
+                </td>
+                <td>
+                  <input
+                    type="time"
+                    className="transfer-input transfer-input--time"
+                    value={transferDrafts[t.id]?.transferTime ?? ""}
+                    onChange={(e) => handleTransferDraftChange(t.id, "transferTime", e.target.value)}
+                    onBlur={() => handleTransferBlur(t, "transferTime")}
+                  />
+                </td>
                 <td>
                   <select
                     className="transfer-type-select"
-                    value={t.type}
-                    onChange={(e) => handleTransferChange(t.id, "type", e.target.value)}
+                    value={transferDrafts[t.id]?.type ?? t.type}
+                    onChange={(e) => {
+                      handleTransferDraftChange(t.id, "type", e.target.value);
+                      handleTransferChange(t.id, "type", e.target.value);
+                    }}
                   >
                     {TRANSFER_TYPES.map((tt) => (
                       <option key={tt.value} value={tt.value}>{tt.label}</option>
@@ -361,6 +618,7 @@ export default function ReservationDetail({ id, onBack }) {
             <Plus size={12} /> Transfer Ekle
           </button>
         </div>
+        </div>
       </div>
 
       {/* Three Column Detail */}
@@ -386,15 +644,39 @@ export default function ReservationDetail({ id, onBack }) {
               <span className="passenger-num">{i + 1}</span>
               <div>
                 <div className="passenger-field-label">Ad</div>
-                <div className="passenger-field-value">{p.firstName || "—"}</div>
+                <input
+                  type="text"
+                  className="passenger-input"
+                  value={passengerDrafts[p.id]?.firstName ?? ""}
+                  placeholder="Ad"
+                  onChange={(e) => handlePassengerDraftChange(p.id, "firstName", e.target.value)}
+                  onBlur={() => handlePassengerBlur(p, "firstName")}
+                />
               </div>
               <div>
                 <div className="passenger-field-label">Soyad</div>
-                <div className="passenger-field-value">{p.lastName || "—"}</div>
+                <input
+                  type="text"
+                  className="passenger-input"
+                  value={passengerDrafts[p.id]?.lastName ?? ""}
+                  placeholder="Soyad"
+                  onChange={(e) => handlePassengerDraftChange(p.id, "lastName", e.target.value)}
+                  onBlur={() => handlePassengerBlur(p, "lastName")}
+                />
               </div>
               <div>
                 <div className="passenger-field-label">TCKN / Pasaport</div>
-                <div className="passenger-field-value">{maskIdentity(p.identityNumber)}</div>
+                <input
+                  type="text"
+                  className="passenger-input"
+                  value={passengerDrafts[p.id]?.identityNumber ?? ""}
+                  placeholder="12345678901"
+                  onChange={(e) => handlePassengerDraftChange(p.id, "identityNumber", e.target.value)}
+                  onBlur={() => handlePassengerBlur(p, "identityNumber")}
+                />
+                {!!passengerDrafts[p.id]?.identityNumber && (
+                  <div className="passenger-mask-hint">Maskeli: {maskIdentity(passengerDrafts[p.id].identityNumber)}</div>
+                )}
               </div>
               <button type="button" className="passenger-delete" onClick={() => handleDeletePassenger(p.id)}>
                 <Trash2 size={14} />
@@ -431,6 +713,15 @@ export default function ReservationDetail({ id, onBack }) {
             />
           </div>
           <div className="detail-field">
+            <label>Sürücü</label>
+            <SearchableSelect
+              options={drivers.map((d) => ({ id: d.id, name: `${d.name}${d.phone ? ` - ${d.phone}` : ""}` }))}
+              value={form.assignedDriverId}
+              onChange={(v) => setForm({ ...form, assignedDriverId: v })}
+              placeholder="Sürücü seçin"
+            />
+          </div>
+          <div className="detail-field">
             <label>Tedarikçi Fiyatı</label>
             <CurrencyInput
               value={form.supplierPrice}
@@ -461,6 +752,14 @@ export default function ReservationDetail({ id, onBack }) {
                 <option key={t} value={t}>{t}</option>
               ))}
             </select>
+          </div>
+          <div className="detail-field">
+            <label>Ödeme Tarihi</label>
+            <input
+              type="date"
+              value={form.supplierPaymentDate || ""}
+              onChange={(e) => setForm({ ...form, supplierPaymentDate: e.target.value })}
+            />
           </div>
           <div className="detail-field">
             <label>Not</label>

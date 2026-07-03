@@ -695,6 +695,98 @@
   margin: 0;
 }
 
+.reservation-transfers-main {
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.transfer-location-field {
+  position: relative;
+  min-width: 180px;
+}
+
+.transfer-location-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+}
+
+.transfer-location-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.transfer-location-dot--from {
+  background: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+}
+
+.transfer-location-dot--to {
+  background: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.transfer-location-field .transfer-input--location {
+  flex: 1;
+  min-width: 0;
+  padding-left: 4px;
+}
+
+.transfer-location-field.has-coords .transfer-input--location {
+  border-color: #86efac;
+}
+
+.transfer-location-results {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.transfer-location-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  background: none;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #374151;
+  text-align: left;
+  cursor: pointer;
+}
+
+.transfer-location-option:hover {
+  background: #f3f4f6;
+}
+
+.transfer-location-option svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #9ca3af;
+}
+
+.transfer-location-empty {
+  padding: 10px 12px;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
 .transfers-table {
   width: 100%;
   border-collapse: collapse;
@@ -740,6 +832,31 @@
   align-items: center;
   gap: 6px;
   font-weight: 500;
+}
+
+.transfer-input {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 12px;
+  color: #1f2937;
+}
+
+.transfer-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.transfer-input--location {
+  min-width: 180px;
+}
+
+.transfer-input--date,
+.transfer-input--time {
+  min-width: 122px;
 }
 
 .transfer-flight-edit {
@@ -880,6 +997,28 @@
 .passenger-field-value {
   font-size: 13px;
   color: #1a1a2e;
+}
+
+.passenger-input {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  border-radius: 7px;
+  padding: 6px 9px;
+  font-size: 12px;
+  color: #1f2937;
+}
+
+.passenger-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.passenger-mask-hint {
+  font-size: 10px;
+  color: #6b7280;
+  margin-top: 3px;
 }
 
 .passenger-delete {
@@ -1043,6 +1182,19 @@
   font-size: 11px;
   color: #6b7280;
   margin-top: 2px;
+}
+
+.reservation-source-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
 /* ─── Settings Tabs ─── */
@@ -1283,4 +1435,165 @@
   border-radius: 8px;
   margin-bottom: 16px;
   font-size: 13px;
+}
+
+/* ─── Charts ─── */
+.admin-page-charts {
+  margin-bottom: 20px;
+}
+
+.admin-chart-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 18px 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.admin-chart-card-header {
+  margin-bottom: 14px;
+}
+
+.admin-chart-card-header h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.admin-chart-card-header p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.admin-chart-empty {
+  padding: 28px 12px;
+  text-align: center;
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+.admin-pie-chart {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.admin-pie-total {
+  font-size: 22px;
+  font-weight: 700;
+  fill: #1a1a2e;
+}
+
+.admin-pie-total-label {
+  font-size: 10px;
+  fill: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.admin-chart-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  min-width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-chart-legend li {
+  display: grid;
+  grid-template-columns: 10px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.admin-chart-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.admin-chart-legend-label {
+  color: #374151;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-chart-legend-value {
+  color: #1a1a2e;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.admin-chart-legend-value em {
+  font-style: normal;
+  font-weight: 400;
+  color: #9ca3af;
+  margin-left: 6px;
+}
+
+.admin-bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-bar-row {
+  display: grid;
+  grid-template-columns: minmax(72px, 110px) 1fr minmax(40px, 64px);
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-bar-label {
+  font-size: 12px;
+  color: #374151;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-bar-track {
+  height: 10px;
+  background: #f3f4f6;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.admin-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  min-width: 4px;
+  transition: width 0.35s ease;
+}
+
+.admin-bar-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1a1a2e;
+  text-align: right;
+}
+
+@media (max-width: 640px) {
+  .admin-pie-chart {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-bar-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .admin-bar-value {
+    text-align: left;
+  }
 }

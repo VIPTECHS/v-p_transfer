@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Search, Pencil, X, Check } from "lucide-react";
 import { fetchCustomers, createCustomer, updateCustomer } from "../api/admin";
+import { AdminBarChart, AdminChartCard } from "./components/AdminChart";
 
 export default function CustomersList() {
   const [customers, setCustomers] = useState([]);
@@ -49,6 +50,12 @@ export default function CustomersList() {
     }
   };
 
+  const contactChartData = [
+    { label: "E-posta var", value: customers.filter((c) => c.email).length, color: "#3b82f6" },
+    { label: "Telefon var", value: customers.filter((c) => c.phone).length, color: "#16a34a" },
+    { label: "Her ikisi", value: customers.filter((c) => c.email && c.phone).length, color: "#8b5cf6" },
+  ];
+
   return (
     <>
       <div className="admin-page-header">
@@ -64,6 +71,14 @@ export default function CustomersList() {
           <input type="text" placeholder="Ad, soyad, email ara..." value={search} onChange={(e) => setSearch(e.target.value)} />
         </form>
       </div>
+
+      {!loading && (
+        <div className="admin-page-charts">
+          <AdminChartCard title="İletişim Bilgileri" subtitle="Müşteri kayıtlarındaki iletişim alanları">
+            <AdminBarChart data={contactChartData} />
+          </AdminChartCard>
+        </div>
+      )}
 
       {showForm && (
         <div className="admin-card" style={{ marginBottom: 16 }}>

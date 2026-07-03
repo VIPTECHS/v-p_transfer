@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { BarChart3, TrendingUp } from "lucide-react";
 import { fetchRevenueReport, fetchSuppliersReport } from "../api/admin";
+import { AdminBarChart, AdminChartCard } from "./components/AdminChart";
 
 export default function ReportsView() {
   const [revenue, setRevenue] = useState([]);
@@ -18,6 +19,15 @@ export default function ReportsView() {
 
   if (loading) return <div className="admin-loading">Yükleniyor...</div>;
 
+  const profitChartData = [...revenue]
+    .slice(0, 8)
+    .reverse()
+    .map((row, index) => ({
+      label: row.month,
+      value: Math.round(row.profit || 0),
+      color: index === revenue.length - 1 ? "#16a34a" : "#3b82f6",
+    }));
+
   return (
     <>
       <div className="admin-page-header">
@@ -31,6 +41,28 @@ export default function ReportsView() {
         <button type="button" className={`settings-tab ${tab === "suppliers" ? "active" : ""}`} onClick={() => setTab("suppliers")}>
           <TrendingUp size={14} /> Tedarikçi Performansı
         </button>
+      </div>
+
+      <div className="admin-page-charts">
+        <AdminChartCard
+          title={tab === "revenue" ? "Aylık Kâr" : "Tedarikçi Rezervasyonları"}
+          subtitle={tab === "revenue" ? "Son ayların kâr tutarları (€)" : "Tedarikçi başına rezervasyon sayısı"}
+        >
+          {tab === "revenue" ? (
+            <AdminBarChart
+              data={profitChartData}
+              valueFormatter={(v) => `€ ${v.toLocaleString("tr-TR")}`}
+            />
+          ) : (
+            <AdminBarChart
+              data={suppliersReport.slice(0, 8).map((s, index) => ({
+                label: s.name,
+                value: s.reservationCount || 0,
+                color: ["#3b82f6", "#16a34a", "#f59e0b", "#ef4444", "#8b5cf6", "#6b7280", "#06b6d4", "#ec4899"][index % 8],
+              }))}
+            />
+          )}
+        </AdminChartCard>
       </div>
 
       {tab === "revenue" && (

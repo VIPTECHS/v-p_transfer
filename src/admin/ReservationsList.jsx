@@ -2,6 +2,15 @@ import { useEffect, useState } from "react";
 import { Plus, Search } from "lucide-react";
 import { fetchReservations, createReservation } from "../api/admin";
 import StatusBadge from "./components/StatusBadge";
+import { AdminChartCard, AdminPieChart, countBy } from "./components/AdminChart";
+
+const STATUS_LABELS = {
+  pending: "Bekliyor",
+  confirmed: "Onaylandı",
+  in_progress: "Devam Ediyor",
+  completed: "Tamamlandı",
+  cancelled: "İptal",
+};
 
 function formatDate(iso) {
   if (!iso) return "";
@@ -77,6 +86,14 @@ export default function ReservationsList({ navigate }) {
         </select>
       </div>
 
+      {!loading && (
+        <div className="admin-page-charts">
+          <AdminChartCard title="Durum Dağılımı" subtitle="Listedeki rezervasyonların durumu">
+            <AdminPieChart data={countBy(reservations, (r) => r.status, STATUS_LABELS)} />
+          </AdminChartCard>
+        </div>
+      )}
+
       {loading ? (
         <div className="admin-loading">Yükleniyor...</div>
       ) : (
@@ -96,7 +113,10 @@ export default function ReservationsList({ navigate }) {
             <tbody>
               {reservations.map((r) => (
                 <tr key={r.id} onClick={() => navigate("reservation-detail", r.id)} style={{ cursor: "pointer" }}>
-                  <td><strong>#{r.reference}</strong></td>
+                  <td>
+                    <strong>#{r.reference}</strong>
+                    {r.bookingId && <span className="reservation-source-badge">Web</span>}
+                  </td>
                   <td>{r.customer ? `${r.customer.firstName} ${r.customer.lastName || ""}`.trim() : "—"}</td>
                   <td>{r.supplier?.name || "—"}</td>
                   <td>{r._count?.transfers ?? r.transfers?.length ?? 0}</td>
