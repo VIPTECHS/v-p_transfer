@@ -16,6 +16,11 @@ import countriesRouter from "./routes/countries.js";
 import citiesRouter from "./routes/cities.js";
 import agenciesRouter from "./routes/agencies.js";
 import agencyPanelRouter from "./routes/agency-panel.js";
+import reservationsRouter from "./routes/reservations.js";
+import customersRouter from "./routes/customers.js";
+import suppliersRouter from "./routes/suppliers.js";
+import paymentsRouter from "./routes/payments.js";
+import reportsRouter from "./routes/reports.js";
 import { rematchBookingsWithoutCity } from "./lib/cityMatcher.js";
 import { ensureMigrations } from "./lib/ensureMigrations.js";
 import { rateLimit } from "./middleware/rateLimit.js";
@@ -124,6 +129,11 @@ mountRoutes("/countries", countriesRouter, requireAdmin);
 mountRoutes("/cities", citiesRouter, requireAdmin);
 mountRoutes("/agencies", agenciesRouter, requireAdmin);
 mountRoutes("/agency", agencyPanelRouter, requireAuth, requireRole("agency"));
+mountRoutes("/reservations", reservationsRouter);
+mountRoutes("/customers", customersRouter);
+mountRoutes("/suppliers", suppliersRouter);
+mountRoutes("/payments", paymentsRouter, requireAdmin);
+mountRoutes("/reports", reportsRouter, requireAdmin);
 
 function resolvePrerenderedHtml(distPath, urlPath) {
   const normalized = urlPath.replace(/\/$/, "") || "/";
@@ -151,6 +161,9 @@ if (serveFrontend && existsSync(distPath)) {
 
   app.get("/{*splat}", (req, res, next) => {
     const urlPath = req.path;
+
+    // Skip API routes — they are handled by mounted routers above
+    if (urlPath.startsWith("/api")) return next();
 
     // Client-only admin SPA (not prerendered)
     if (urlPath.startsWith("/admin")) {

@@ -4,8 +4,15 @@
     {
       "name": "vite-dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": ["run", "dev:web"],
       "port": 5173,
+      "autoPort": false
+    },
+    {
+      "name": "api-server",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "server"],
+      "port": 3001,
       "autoPort": false
     }
   ]

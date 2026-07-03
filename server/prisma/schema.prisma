@@ -89,8 +89,9 @@ model Driver {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  bookings    Booking[]
-  assignments BookingAssignment[]
+  bookings     Booking[]
+  assignments  BookingAssignment[]
+  reservations Reservation[]
 }
 
 model Vehicle {
@@ -102,8 +103,9 @@ model Vehicle {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  bookings    Booking[]
-  assignments BookingAssignment[]
+  bookings     Booking[]
+  assignments  BookingAssignment[]
+  reservations Reservation[]
 }
 
 model BookingAssignment {
@@ -141,6 +143,7 @@ model City {
   country   Country  @relation(fields: [countryId], references: [id])
   agencies  Agency[]
   bookings  Booking[]
+  suppliers Supplier[]
 
   @@unique([name, countryId])
   @@index([countryId])
@@ -178,4 +181,134 @@ model BookingStatusLog {
   booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
   @@index([bookingId])
+}
+
+// ─── New Reservation System ───
+
+model Customer {
+  id           String   @id @default(cuid())
+  firstName    String
+  lastName     String?
+  email        String?
+  phone        String?
+  identityNo   String?
+  notes        String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  reservations Reservation[]
+
+  @@index([email])
+  @@index([phone])
+}
+
+model Supplier {
+  id          String   @id @default(cuid())
+  name        String
+  phone       String?
+  email       String?
+  contactName String?
+  address     String?
+  cityId      String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  city         City?         @relation(fields: [cityId], references: [id])
+  reservations Reservation[]
+
+  @@index([cityId])
+}
+
+model Reservation {
+  id                    String    @id @default(cuid())
+  reference             String    @unique
+  status                String    @default("pending")
+
+  supplierId            String?
+  supplierPrice         Float?
+  supplierCurrency      String    @default("EUR")
+  supplierPaymentStatus String    @default("unpaid")
+  supplierPaymentType   String?
+  supplierPaymentDate   DateTime?
+  supplierNote          String?
+
+  customerId            String?
+  salePrice             Float?
+  saleCurrency          String    @default("EUR")
+  customerPaymentStatus String    @default("unpaid")
+  customerPaymentType   String?
+  customerPaymentDate   DateTime?
+  customerNote          String?
+
+  assignedVehicleId     String?
+  assignedDriverId      String?
+
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  supplier        Supplier?              @relation(fields: [supplierId], references: [id])
+  customer        Customer?              @relation(fields: [customerId], references: [id])
+  assignedVehicle Vehicle?               @relation(fields: [assignedVehicleId], references: [id])
+  assignedDriver  Driver?                @relation(fields: [assignedDriverId], references: [id])
+  transfers       Transfer[]
+  passengers      Passenger[]
+  statusLogs      ReservationStatusLog[]
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([supplierId])
+  @@index([customerId])
+}
+
+model Transfer {
+  id            String   @id @default(cuid())
+  reservationId String
+  flightCode    String?
+  fromLabel     String
+  toLabel       String
+  fromLng       Float?
+  fromLat       Float?
+  toLng         Float?
+  toLat         Float?
+  transferDate  DateTime
+  transferTime  String?
+  type          String   @default("arrival")
+  sortOrder     Int      @default(0)
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  reservation Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+
+  @@index([reservationId])
+  @@index([transferDate])
+}
+
+model Passenger {
+  id             String   @id @default(cuid())
+  reservationId  String
+  firstName      String
+  lastName       String?
+  identityNumber String?
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+
+  reservation Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+
+  @@index([reservationId])
+}
+
+model ReservationStatusLog {
+  id            String   @id @default(cuid())
+  reservationId String
+  fromStatus    String?
+  toStatus      String
+  note          String?
+  createdAt     DateTime @default(now())
+
+  reservation Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+
+  @@index([reservationId])
 }

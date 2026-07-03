@@ -1,45 +1,49 @@
 import { useCallback, useEffect, useState } from "react";
+import {
+  LayoutDashboard, CalendarCheck, ArrowLeftRight,
+  Users, Building2, Car, UserCog,
+  CreditCard, BarChart3, Settings, ChevronUp,
+} from "lucide-react";
 import Dashboard from "./Dashboard";
-import CalendarView from "./CalendarView";
-import BookingsList from "./BookingsList";
-import BookingDetail from "./BookingDetail";
-import EnquiriesList from "./EnquiriesList";
-import OperationsView from "./OperationsView";
+import ReservationsList from "./ReservationsList";
+import ReservationDetail from "./ReservationDetail";
+import TransfersList from "./TransfersList";
+import CustomersList from "./CustomersList";
+import SuppliersList from "./SuppliersList";
 import DriversList from "./DriversList";
 import VehiclesList from "./VehiclesList";
-import CountriesList from "./CountriesList";
-import CitiesList from "./CitiesList";
-import AgenciesList from "./AgenciesList";
+import PaymentsView from "./PaymentsView";
+import ReportsView from "./ReportsView";
+import SettingsView from "./SettingsView";
 import AdminLogin from "./AdminLogin";
-import AgencyApp from "./AgencyApp";
 import { clearAdminPassword, hasAdminPassword, getSessionRole } from "../api/admin";
 import { LANG_PREFIX_RE } from "../i18n/locale";
 import "./admin.css";
 
 const VIEWS = {
   dashboard: Dashboard,
-  calendar: CalendarView,
-  bookings: BookingsList,
-  enquiries: EnquiriesList,
-  operations: OperationsView,
-  drivers: DriversList,
+  reservations: ReservationsList,
+  transfers: TransfersList,
+  customers: CustomersList,
+  suppliers: SuppliersList,
   vehicles: VehiclesList,
-  countries: CountriesList,
-  cities: CitiesList,
-  agencies: AgenciesList,
+  drivers: DriversList,
+  payments: PaymentsView,
+  reports: ReportsView,
+  settings: SettingsView,
 };
 
 const NAV = [
-  { id: "dashboard", label: "Panel" },
-  { id: "operations", label: "Operasyon" },
-  { id: "calendar", label: "Takvim" },
-  { id: "bookings", label: "Randevular" },
-  { id: "drivers", label: "Şoförler" },
-  { id: "vehicles", label: "Araçlar" },
-  { id: "enquiries", label: "Talepler" },
-  { id: "countries", label: "Ülkeler" },
-  { id: "cities", label: "Şehirler" },
-  { id: "agencies", label: "Acenteler" },
+  { id: "dashboard", label: "Panel", icon: LayoutDashboard },
+  { id: "reservations", label: "Rezervasyonlar", icon: CalendarCheck },
+  { id: "transfers", label: "Transferler", icon: ArrowLeftRight },
+  { id: "customers", label: "Müşteriler", icon: Users },
+  { id: "suppliers", label: "Tedarikçiler", icon: Building2 },
+  { id: "vehicles", label: "Araçlar", icon: Car },
+  { id: "drivers", label: "Sürücüler", icon: UserCog },
+  { id: "payments", label: "Ödemeler", icon: CreditCard },
+  { id: "reports", label: "Raporlar", icon: BarChart3 },
+  { id: "settings", label: "Ayarlar", icon: Settings },
 ];
 
 function parseAdminRoute(pathname) {
@@ -48,7 +52,7 @@ function parseAdminRoute(pathname) {
   if (!match) return { view: "dashboard" };
   const view = match[1] || "dashboard";
   const id = match[2] || null;
-  if (view === "booking" && id) return { view: "booking-detail", id };
+  if (view === "reservation" && id) return { view: "reservation-detail", id };
   if (VIEWS[view]) return { view, id };
   return { view: "dashboard" };
 }
@@ -86,19 +90,15 @@ export default function AdminApp() {
     );
   }
 
-  if (role === "agency") {
-    return <AgencyApp onLogout={() => { clearAdminPassword(); setAuthenticated(false); setRole(null); }} />;
-  }
-
   const goTo = (view, id) => {
-    if (view === "booking-detail" && id) {
-      navigate(`/admin/booking/${id}`);
+    if (view === "reservation-detail" && id) {
+      navigate(`/admin/reservation/${id}`);
     } else {
       navigate(`/admin/${view === "dashboard" ? "" : view}`);
     }
   };
 
-  const activeView = route.view === "booking-detail" ? "bookings" : route.view;
+  const activeView = route.view === "reservation-detail" ? "reservations" : route.view;
   const ViewComponent = VIEWS[route.view];
 
   return (
@@ -106,40 +106,45 @@ export default function AdminApp() {
       <div className="admin-layout">
         <aside className="admin-sidebar">
           <div className="admin-brand">
-            <h1>VIP Transfer</h1>
-            <span>Yönetim Paneli</span>
+            <h1><span className="brand-vip">VIP</span>TRANSFER.COM</h1>
           </div>
           <nav className="admin-nav" aria-label="Admin navigation">
-            {NAV.map(({ id, label }) => (
+            {NAV.map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
                 type="button"
                 className={activeView === id ? "active" : ""}
                 onClick={() => goTo(id)}
               >
+                <Icon size={18} className="admin-nav-icon" />
                 {label}
               </button>
             ))}
           </nav>
-          <div className="admin-sidebar-footer">
-            <a href="/">← Siteye dön</a>
+          <div className="admin-avatar">
+            <div className="admin-avatar-circle">A</div>
+            <div className="admin-avatar-info">
+              <div className="admin-avatar-name">Admin</div>
+              <div className="admin-avatar-email">admin@viptransfer.com</div>
+            </div>
             <button
               type="button"
-              className="admin-logout"
+              style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", padding: 4 }}
               onClick={() => {
                 clearAdminPassword();
                 setAuthenticated(false);
                 setRole(null);
               }}
+              title="Çıkış yap"
             >
-              Çıkış yap
+              <ChevronUp size={16} />
             </button>
           </div>
         </aside>
 
         <main className="admin-main">
-          {route.view === "booking-detail" ? (
-            <BookingDetail id={route.id} onBack={() => goTo("bookings")} navigate={goTo} />
+          {route.view === "reservation-detail" ? (
+            <ReservationDetail id={route.id} onBack={() => goTo("reservations")} navigate={goTo} />
           ) : ViewComponent ? (
             <ViewComponent navigate={goTo} />
           ) : (

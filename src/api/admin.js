@@ -236,3 +236,65 @@ export function createVehicle(data) {
 export function updateVehicle(id, data) {
   return request(`/vehicles/${id}`, { method: "PATCH", body: JSON.stringify(data) });
 }
+
+// --- Reservation API ---
+export function fetchReservations(params = {}) {
+  const query = new URLSearchParams();
+  if (params.status) query.set("status", params.status);
+  if (params.from) query.set("from", params.from);
+  if (params.to) query.set("to", params.to);
+  if (params.q) query.set("q", params.q);
+  const qs = query.toString();
+  return request(`/reservations${qs ? `?${qs}` : ""}`);
+}
+export function fetchReservation(id) { return request(`/reservations/${id}`); }
+export function createReservation(data) { return request("/reservations", { method: "POST", body: JSON.stringify(data) }); }
+export function updateReservation(id, data) { return request(`/reservations/${id}`, { method: "PATCH", body: JSON.stringify(data) }); }
+export function deleteReservation(id) { return request(`/reservations/${id}`, { method: "DELETE" }); }
+
+// --- Transfer sub-resource ---
+export function addTransfer(reservationId, data) { return request(`/reservations/${reservationId}/transfers`, { method: "POST", body: JSON.stringify(data) }); }
+export function updateTransfer(reservationId, transferId, data) { return request(`/reservations/${reservationId}/transfers/${transferId}`, { method: "PATCH", body: JSON.stringify(data) }); }
+export function deleteTransfer(reservationId, transferId) { return request(`/reservations/${reservationId}/transfers/${transferId}`, { method: "DELETE" }); }
+
+// --- Passenger sub-resource ---
+export function addPassenger(reservationId, data) { return request(`/reservations/${reservationId}/passengers`, { method: "POST", body: JSON.stringify(data) }); }
+export function updatePassenger(reservationId, passengerId, data) { return request(`/reservations/${reservationId}/passengers/${passengerId}`, { method: "PATCH", body: JSON.stringify(data) }); }
+export function deletePassenger(reservationId, passengerId) { return request(`/reservations/${reservationId}/passengers/${passengerId}`, { method: "DELETE" }); }
+
+// --- Customer API ---
+export function fetchCustomers(params = {}) {
+  const query = new URLSearchParams();
+  if (params.q) query.set("q", params.q);
+  const qs = query.toString();
+  return request(`/customers${qs ? `?${qs}` : ""}`);
+}
+export function fetchCustomer(id) { return request(`/customers/${id}`); }
+export function createCustomer(data) { return request("/customers", { method: "POST", body: JSON.stringify(data) }); }
+export function updateCustomer(id, data) { return request(`/customers/${id}`, { method: "PATCH", body: JSON.stringify(data) }); }
+
+// --- Supplier API ---
+export function fetchSuppliers(params = {}) {
+  const query = new URLSearchParams();
+  if (params.q) query.set("q", params.q);
+  if (params.cityId) query.set("cityId", params.cityId);
+  const qs = query.toString();
+  return request(`/suppliers${qs ? `?${qs}` : ""}`);
+}
+export function fetchSupplier(id) { return request(`/suppliers/${id}`); }
+export function createSupplier(data) { return request("/suppliers", { method: "POST", body: JSON.stringify(data) }); }
+export function updateSupplier(id, data) { return request(`/suppliers/${id}`, { method: "PATCH", body: JSON.stringify(data) }); }
+
+// --- Payments API ---
+export function fetchPayments(params = {}) {
+  const query = new URLSearchParams();
+  if (params.type) query.set("type", params.type);
+  if (params.status) query.set("status", params.status);
+  const qs = query.toString();
+  return request(`/payments${qs ? `?${qs}` : ""}`);
+}
+export function fetchPaymentSummary() { return request("/payments/summary"); }
+
+// --- Reports API ---
+export function fetchRevenueReport() { return request("/reports/revenue"); }
+export function fetchSuppliersReport() { return request("/reports/suppliers"); }
