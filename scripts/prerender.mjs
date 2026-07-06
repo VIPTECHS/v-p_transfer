@@ -74,6 +74,7 @@ const TARGETS = [
   { route: "/tr/", lang: "tr", out: "tr/index.html" },
   { route: "/en/", lang: "en", out: "en/index.html" },
   { route: "/de/", lang: "de", out: "de/index.html" },
+  { route: "/deneyim", lang: "tr", out: "deneyim/index.html" },
   // Blog yazıları — her dil için ayrı statik sayfa
   ...blogPosts.flatMap((post) => [
     { route: `/blog/${post.slug}`, lang: "tr", out: `blog/${post.slug}/index.html` },
@@ -200,7 +201,7 @@ async function run() {
         timeout: 20000,
       });
       // Ana içeriğin render olmasını bekle
-      await page.waitForSelector("section#home, .blogpost, .landing-page", { timeout: 15000 }).catch(() => {});
+      await page.waitForSelector("section#home, .blogpost, .landing-page, .sv-page", { timeout: 15000 }).catch(() => {});
       await new Promise((r) => setTimeout(r, 800));
 
       const html = await page.evaluate(() => "<!doctype html>\n" + document.documentElement.outerHTML);

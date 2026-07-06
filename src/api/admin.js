@@ -295,6 +295,14 @@ export function fetchPayments(params = {}) {
 }
 export function fetchPaymentSummary() { return request("/payments/summary"); }
 
+// --- Flight tracking API ---
+export function fetchFlightStatus(code, date) {
+  const query = new URLSearchParams();
+  if (date) query.set("date", date);
+  const qs = query.toString();
+  return request(`/flights/${encodeURIComponent(code)}${qs ? `?${qs}` : ""}`);
+}
+
 // --- Reports API ---
 export function fetchRevenueReport() { return request("/reports/revenue"); }
 export function fetchSuppliersReport() { return request("/reports/suppliers"); }

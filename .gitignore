@@ -24,4 +24,10 @@ dist-ssr
 scripts/airports.csv
 server/prisma/dev.db
 server/prisma/dev.db-journal
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
 server/.env
+server/prisma/.env

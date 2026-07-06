@@ -11,9 +11,29 @@ import {
   useMap,
 } from "@/components/ui/mapcn-map-arc";
 import { useI18n } from "@/i18n/I18nContext";
-import { reverseGeocode, searchPlaces } from "@/utils/geocode";
+import { loadAirportGeoJSON, reverseGeocode, searchPlaces } from "@/utils/geocode";
 
 const ISTANBUL = { lng: 28.9784, lat: 41.0082, zoom: 11 };
+
+// Cleaner, more modern basemap than the flat dark tiles.
+const MAP_STYLE = "https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json";
+
+function MapPin({ tone = "red" }: { tone?: "red" | "gold" }) {
+  const fill = tone === "gold" ? "#d4af37" : "#e11d2a";
+  return (
+    <div className="map-pin">
+      <svg viewBox="0 0 24 32" width="30" height="40" aria-hidden="true">
+        <path
+          d="M12 .75C5.79.75.75 5.79.75 12 .75 20.4 12 31.25 12 31.25S23.25 20.4 23.25 12C23.25 5.79 18.21.75 12 .75Z"
+          fill={fill}
+          stroke="#fff"
+          strokeWidth="1.6"
+        />
+        <circle cx="12" cy="12" r="4" fill="#fff" />
+      </svg>
+    </div>
+  );
+}
 
 export type LocationPoint = {
   label: string;
@@ -25,7 +45,6 @@ type MapClickPickerProps = {
   draft: LocationPoint | null;
   onPick: (point: LocationPoint) => void;
   other: LocationPoint | null;
-  variant: "from" | "to";
 };
 
 function MapFlyTo({ point }: { point: LocationPoint | null }) {
@@ -43,7 +62,110 @@ function MapFlyTo({ point }: { point: LocationPoint | null }) {
   return null;
 }
 
-function MapClickPicker({ draft, onPick, other, variant }: MapClickPickerProps) {
+const AIRPORT_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30"><circle cx="15" cy="15" r="12" fill="#e11d2a" stroke="#ffffff" stroke-width="2.5"/><g transform="translate(7 7) scale(0.66)" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 4.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></g></svg>`;
+
+// Highlights every airport worldwide as a single MapLibre symbol layer.
+// Collision handling thins them out when zoomed out and reveals more on zoom-in.
+function AirportLayer() {
+  const { map, isLoaded } = useMap();
+
+  useEffect(() => {
+    if (!map || !isLoaded) return undefined;
+
+    let cancelled = false;
+    const sourceId = "vt-airports";
+    const layerId = "vt-airports-symbol";
+    const iconId = "vt-airport-icon";
+
+    // Reuse a font the current style already loads, so labels never 404.
+    const styleFont = (() => {
+      const layers = (map.getStyle()?.layers ?? []) as Array<{
+        type?: string;
+        layout?: Record<string, unknown>;
+      }>;
+      for (const layer of layers) {
+        const font = layer.layout?.["text-font"];
+        if (layer.type === "symbol" && Array.isArray(font) && font.length) {
+          return font as string[];
+        }
+      }
+      return ["Open Sans Regular"];
+    })();
+
+    const addLayers = (data: GeoJSON.FeatureCollection) => {
+      if (cancelled || !map.getStyle()) return;
+      if (!map.getSource(sourceId)) {
+        map.addSource(sourceId, { type: "geojson", data });
+      }
+      if (!map.getLayer(layerId)) {
+        map.addLayer({
+          id: layerId,
+          type: "symbol",
+          source: sourceId,
+          layout: {
+            "icon-image": iconId,
+            "icon-size": [
+              "interpolate",
+              ["linear"],
+              ["zoom"],
+              2, 0.4,
+              6, 0.62,
+              12, 0.85,
+            ],
+            "icon-allow-overlap": false,
+            "text-field": ["get", "iata"],
+            "text-font": styleFont,
+            "text-size": 11,
+            "text-offset": [0, 1.2],
+            "text-anchor": "top",
+            "text-optional": true,
+          },
+          paint: {
+            "text-color": "#b3121f",
+            "text-halo-color": "#ffffff",
+            "text-halo-width": 1.4,
+          },
+        });
+      }
+    };
+
+    loadAirportGeoJSON().then((data) => {
+      if (cancelled) return;
+      if (map.hasImage(iconId)) {
+        addLayers(data);
+        return;
+      }
+      const img = new Image(30, 30);
+      img.onload = () => {
+        if (cancelled) return;
+        if (!map.hasImage(iconId)) {
+          try {
+            map.addImage(iconId, img, { pixelRatio: 2 });
+          } catch {
+            /* image may have been added concurrently */
+          }
+        }
+        addLayers(data);
+      };
+      img.src =
+        "data:image/svg+xml;charset=utf-8," + encodeURIComponent(AIRPORT_ICON_SVG);
+    });
+
+    return () => {
+      cancelled = true;
+      try {
+        if (map.getLayer(layerId)) map.removeLayer(layerId);
+        if (map.getSource(sourceId)) map.removeSource(sourceId);
+      } catch {
+        /* style may already be torn down */
+      }
+    };
+  }, [map, isLoaded]);
+
+  return null;
+}
+
+function MapClickPicker({ draft, onPick, other }: MapClickPickerProps) {
   const { map, isLoaded } = useMap();
   const { lang } = useI18n();
 
@@ -73,16 +195,16 @@ function MapClickPicker({ draft, onPick, other, variant }: MapClickPickerProps) 
             [other.lng, other.lat],
             [draft.lng, draft.lat],
           ]}
-          color={variant === "from" ? "#d4af37" : "#f7f5f0"}
-          width={3}
-          opacity={0.85}
+          color="#e11d2a"
+          width={4}
+          opacity={0.9}
           interactive={false}
         />
       )}
       {other && (
-        <MapMarker longitude={other.lng} latitude={other.lat}>
+        <MapMarker longitude={other.lng} latitude={other.lat} anchor="bottom">
           <MarkerContent>
-            <div className="size-3 rounded-full border-2 border-white bg-emerald-500 shadow-md" />
+            <MapPin tone="red" />
             <MarkerLabel position="top" className="rounded bg-background/90 px-1.5 py-0.5 text-[10px] backdrop-blur">
               {other.label}
             </MarkerLabel>
@@ -90,13 +212,9 @@ function MapClickPicker({ draft, onPick, other, variant }: MapClickPickerProps) 
         </MapMarker>
       )}
       {marker && (
-        <MapMarker longitude={marker.lng} latitude={marker.lat}>
+        <MapMarker longitude={marker.lng} latitude={marker.lat} anchor="bottom">
           <MarkerContent>
-            <div
-              className={`size-3.5 rounded-full border-2 border-white shadow-md ${
-                variant === "from" ? "bg-[#d4af37]" : "bg-neutral-900"
-              }`}
-            />
+            <MapPin tone="red" />
           </MarkerContent>
         </MapMarker>
       )}
@@ -250,8 +368,14 @@ export default function LocationMapPopover({
       <LocationSearch value={draft} onSelect={setDraft} />
       <p className="location-map-hint">{t("map.clickHint")}</p>
       <div className="location-map-canvas">
-        <Map center={center} zoom={ISTANBUL.zoom} theme="dark" className="h-full w-full">
-          <MapClickPicker draft={draft} onPick={setDraft} other={other} variant={variant} />
+        <Map
+          center={center}
+          zoom={ISTANBUL.zoom}
+          styles={{ light: MAP_STYLE, dark: MAP_STYLE }}
+          className="h-full w-full"
+        >
+          <AirportLayer />
+          <MapClickPicker draft={draft} onPick={setDraft} other={other} />
           <MapControls position="bottom-right" showZoom showLocate />
         </Map>
       </div>

@@ -16,6 +16,30 @@ function loadAirportDb() {
   return airportDbPromise;
 }
 
+/** @type {Promise<GeoJSON.FeatureCollection> | null} */
+let airportGeoJsonPromise = null;
+
+/**
+ * Loads the worldwide airport database as a GeoJSON FeatureCollection,
+ * suitable for a MapLibre symbol layer. Cached after first load.
+ * @returns {Promise<GeoJSON.FeatureCollection>}
+ */
+export function loadAirportGeoJSON() {
+  if (!airportGeoJsonPromise) {
+    airportGeoJsonPromise = loadAirportDb().then((db) => ({
+      type: "FeatureCollection",
+      features: Object.values(db)
+        .filter((a) => Number.isFinite(a.lng) && Number.isFinite(a.lat))
+        .map((a) => ({
+          type: "Feature",
+          geometry: { type: "Point", coordinates: [a.lng, a.lat] },
+          properties: { iata: a.iata || "", label: a.label || "" },
+        })),
+    }));
+  }
+  return airportGeoJsonPromise;
+}
+
 /** @param {string} query */
 function extractAirportCodes(query) {
   const trimmed = query.trim();

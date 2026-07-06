@@ -7,12 +7,14 @@ export const serviceItems = [
 ];
 
 export const fleetItems = [
-  { key: "vClassStandard", image: "/images/cars/van_standart.png", hoverImage: "/images/cars/van_standart inside.png", popular: true, taglineKey: "vClassStandard" },
-  { key: "vClassLux", image: "/images/cars/van_lüx.png", hoverImage: "/images/cars/van_lüx_inside.png", popular: false, taglineKey: "vClassLux" },
-  { key: "sprinterUltraLux", image: "/images/cars/sprinter_brabus.png", hoverImage: "/images/cars/sprinter_brabus_inside.png", popular: false, taglineKey: "sprinterUltraLux" },
-  { key: "gls", image: "/images/cars/gls.png", hoverImage: "/images/cars/gls_inside.png", popular: false, taglineKey: "gls" },
-  { key: "eClass", image: "/images/cars/eclass_brabus.png", hoverImage: "/images/cars/eclass_inside.png", popular: false, taglineKey: "eClass" },
-  { key: "maybach", image: "/images/cars/maybach.jpg", hoverImage: "/images/cars/maybach_inisde.jpg", popular: false, taglineKey: "maybach" },
+  { key: "vClassStandard", image: "/images/fleet/v-class-standard.jpg", popular: true, taglineKey: "vClassStandard" },
+  { key: "vClassLux", image: "/images/fleet/v-class-lux.jpg", popular: false, taglineKey: "vClassLux" },
+  { key: "vClassUltraLux", image: "/images/fleet/v-class-ultra-lux.jpg", popular: false, taglineKey: "vClassUltraLux" },
+  { key: "sprinterStandard", image: "/images/fleet/sprinter-standard.jpg", popular: false, taglineKey: "sprinterStandard" },
+  { key: "sprinterUltraLux", image: "/images/fleet/sprinter-ultra-lux.jpg", popular: false, taglineKey: "sprinterUltraLux" },
+  { key: "eClass", image: "/images/fleet/e-class.jpg", popular: false, taglineKey: "eClass" },
+  { key: "sClass", image: "/images/fleet/s-class.jpg", popular: false, taglineKey: "sClass" },
+  { key: "maybach", image: "/images/fleet/maybach.jpg", popular: false, taglineKey: "maybach" },
 ];
 
 export const processSteps = ["s1", "s2", "s3", "s4"];

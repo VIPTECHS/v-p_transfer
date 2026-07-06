@@ -1,6 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import Header from "./components/Header";
-import Hero from "./components/Hero";
+import Hero from "./components/Hero.jsx?scroll-sequence-v=4";
+import BookingSection from "./components/BookingSection";
 import TrustStrip from "./components/TrustStrip";
 import AirportTransfer from "./components/AirportTransfer";
 import Services from "./components/Services";
@@ -17,6 +18,7 @@ import LandingPage from "./components/LandingPage";
 import SitePage from "./components/SitePage";
 import Testimonials from "./components/Testimonials";
 import Gallery from "./components/Gallery";
+import ExperiencePage from "./components/ExperiencePage";
 import { getLandingPage } from "./data/landingPages";
 import { getSitePage } from "./data/sitePages";
 import { LANG_PREFIX_RE } from "./i18n/locale";
@@ -45,6 +47,8 @@ function parseRoute(pathname) {
   if (blogMatch) return { type: "post", slug: decodeURIComponent(blogMatch[1]) };
 
   const slug = clean.replace(/^\//, "").replace(/\/$/, "");
+
+  if (clean === "/deneyim") return { type: "experience" };
 
   const landing = getLandingPage(slug);
   if (landing) return { type: "landing", page: landing };
@@ -121,6 +125,14 @@ export default function App() {
     );
   }
 
+  if (route.type === "experience") {
+    return (
+      <div id="top">
+        <ExperiencePage onBook={startBooking} />
+      </div>
+    );
+  }
+
   if (bookingData) {
     return (
       <div id="top">
@@ -139,7 +151,8 @@ export default function App() {
       <HomeSeo />
       <Header isHome navigate={navigate} onBook={startBooking} />
       <main>
-        <Hero onSearch={setBookingData} />
+        <Hero />
+        <BookingSection onSearch={setBookingData} />
         <TrustStrip />
         <AirportTransfer />
         <Services />

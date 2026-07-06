@@ -21,6 +21,7 @@ import customersRouter from "./routes/customers.js";
 import suppliersRouter from "./routes/suppliers.js";
 import paymentsRouter from "./routes/payments.js";
 import reportsRouter from "./routes/reports.js";
+import flightsRouter from "./routes/flights.js";
 import { rematchBookingsWithoutCity } from "./lib/cityMatcher.js";
 import { ensureMigrations } from "./lib/ensureMigrations.js";
 import { rateLimit } from "./middleware/rateLimit.js";
@@ -134,6 +135,7 @@ mountRoutes("/customers", customersRouter);
 mountRoutes("/suppliers", suppliersRouter);
 mountRoutes("/payments", paymentsRouter, requireAdmin);
 mountRoutes("/reports", reportsRouter, requireAdmin);
+mountRoutes("/flights", flightsRouter);
 
 function resolvePrerenderedHtml(distPath, urlPath) {
   const normalized = urlPath.replace(/\/$/, "") || "/";
