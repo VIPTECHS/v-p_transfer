@@ -4,29 +4,14 @@ services:
     container_name: vip-transfer-app
     restart: unless-stopped
     ports:
-      - "3001:3001"
+      - "127.0.0.1:3001:3001"
     volumes:
       - app-data:/app/data
+    env_file:
+      - .env
     environment:
       - NODE_ENV=production
       - PORT=3001
-      - DATABASE_URL=file:./data/prod.db
-      - ADMIN_PASSWORD=manager123
-    networks:
-      - tunnel-net
-
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    container_name: vip-transfer-tunnel
-    restart: unless-stopped
-    command: tunnel --url http://app:3001 --no-autoupdate
-    depends_on:
-      - app
-    networks:
-      - tunnel-net
 
 volumes:
   app-data:
-
-networks:
-  tunnel-net:
