@@ -4,7 +4,7 @@ const FRAME_COUNT = 181;
 // Sampled from the source frames (center-top ≈ #030b0d). The page background is
 // locked to this value so the letterboxed canvas edges are invisible.
 const FRAME_BG = "#030a0b";
-const frameSrc = (index) => `/frames/ezgif-frame-${String(index + 1).padStart(3, "0")}.jpg`;
+const frameSrc = (index) => `/frames/ezgif-frame-${String(index + 1).padStart(3, "0")}.webp`;
 const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 
 export default function ExperiencePage({ onBook }) {

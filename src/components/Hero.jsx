@@ -5,7 +5,7 @@ const HERO_FRAME_COUNT = 300;
 const HERO_PRELOAD_STEP = 8;
 
 const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
-const getHeroFrameSrc = (index) => `/frames/ezgif-frame-${String(index + 1).padStart(3, "0")}.jpg`;
+const getHeroFrameSrc = (index) => `/frames/ezgif-frame-${String(index + 1).padStart(3, "0")}.webp`;
 
 const INTRO_START_DELAY_MS = 1500; // wait after load before the opening video plays
 const INTRO_HOLD_MS = 2000; // how long the opening video plays before scroll unlocks
