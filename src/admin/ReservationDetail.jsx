@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Plane, MapPin, ArrowRight, Trash2, Plus, Minus, Copy, Printer, Save } from "lucide-react";
+import { Plane, MapPin, ArrowRight, Trash2, Plus, Minus, Copy, Printer, Save, Send } from "lucide-react";
 import {
   fetchReservation, updateReservation, deleteReservation,
   addTransfer, updateTransfer, deleteTransfer,
@@ -12,6 +12,7 @@ import CurrencyInput from "./components/CurrencyInput";
 import SearchableSelect from "./components/SearchableSelect";
 import TransferLocationField from "./components/TransferLocationField";
 import { AdminBarChart, AdminChartCard } from "./components/AdminChart";
+import ReservationVoucherModal from "./components/ReservationVoucherModal";
 
 const TRANSFER_TYPES = [
   { value: "arrival", label: "Varış Transferi" },
@@ -92,6 +93,8 @@ export default function ReservationDetail({ id, onBack }) {
   const [error, setError] = useState("");
   const [transferDrafts, setTransferDrafts] = useState({});
   const [passengerDrafts, setPassengerDrafts] = useState({});
+  const [voucherOpen, setVoucherOpen] = useState(false);
+  const [finishing, setFinishing] = useState(false);
 
   // Editable state
   const [form, setForm] = useState({});
@@ -159,6 +162,24 @@ export default function ReservationDetail({ id, onBack }) {
       setError("Kaydetme başarısız");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleFinishAndNotify = async () => {
+    setFinishing(true);
+    setError("");
+    try {
+      const updated = await updateReservation(id, {
+        ...form,
+        supplierPaymentDate: form.supplierPaymentDate || null,
+        customerPaymentDate: form.customerPaymentDate || null,
+      });
+      setReservation(updated);
+      setVoucherOpen(true);
+    } catch {
+      setError("Kaydetme başarısız");
+    } finally {
+      setFinishing(false);
     }
   };
 
@@ -440,7 +461,7 @@ export default function ReservationDetail({ id, onBack }) {
             <select
               value={form.status}
               onChange={(e) => setForm({ ...form, status: e.target.value })}
-              style={{ background: "#f9fafb", border: "1px solid #d1d5db", borderRadius: 6, padding: "4px 8px", fontSize: 12 }}
+              style={{ background: "#f9fafb", color: "#1a1a2e", border: "1px solid #d1d5db", borderRadius: 6, padding: "4px 8px", fontSize: 12, colorScheme: "light" }}
             >
               <option value="pending">Bekliyor</option>
               <option value="confirmed">Onaylandı</option>
@@ -875,6 +896,16 @@ export default function ReservationDetail({ id, onBack }) {
           </div>
         </div>
       </div>
+
+      <div className="reservation-finish-bar">
+        <button type="button" className="admin-btn admin-btn--primary" onClick={handleFinishAndNotify} disabled={finishing}>
+          <Send size={14} /> {finishing ? "Kaydediliyor..." : "Düzenlemeyi Bitir, Yolcuyu Bilgilendir"}
+        </button>
+      </div>
+
+      {voucherOpen && (
+        <ReservationVoucherModal reservation={reservation} onClose={() => setVoucherOpen(false)} />
+      )}
     </>
   );
 }

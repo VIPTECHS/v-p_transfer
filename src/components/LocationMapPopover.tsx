@@ -223,21 +223,23 @@ function MapClickPicker({ draft, onPick, other }: MapClickPickerProps) {
 }
 
 type LocationSearchProps = {
-  value: LocationPoint | null;
+  query: string;
+  onQueryChange: (query: string) => void;
   onSelect: (point: LocationPoint) => void;
+  autoFocus?: boolean;
 };
 
-function LocationSearch({ value, onSelect }: LocationSearchProps) {
+function LocationSearch({ query, onQueryChange: setQuery, onSelect, autoFocus }: LocationSearchProps) {
   const { t, lang } = useI18n();
-  const [query, setQuery] = useState(value?.label ?? "");
   const [results, setResults] = useState<(LocationPoint & { kind?: string })[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [open, setOpen] = useState(false);
   const requestId = useRef(0);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setQuery(value?.label ?? "");
-  }, [value]);
+    if (autoFocus) inputRef.current?.focus();
+  }, [autoFocus]);
 
   useEffect(() => {
     const trimmed = query.trim();
@@ -283,6 +285,7 @@ function LocationSearch({ value, onSelect }: LocationSearchProps) {
       <div className="location-map-search-inner">
         <Search className="location-map-search-icon" size={16} aria-hidden />
         <input
+          ref={inputRef}
           type="search"
           className="location-map-search-input"
           value={query}
@@ -328,6 +331,8 @@ type LocationMapPopoverProps = {
   variant: "from" | "to";
   value: LocationPoint | null;
   other: LocationPoint | null;
+  query: string;
+  onQueryChange: (query: string) => void;
   onConfirm: (point: LocationPoint) => void;
   onClose: () => void;
 };
@@ -336,6 +341,8 @@ export default function LocationMapPopover({
   variant,
   value,
   other,
+  query,
+  onQueryChange,
   onConfirm,
   onClose,
 }: LocationMapPopoverProps) {
@@ -365,7 +372,7 @@ export default function LocationMapPopover({
           ×
         </button>
       </div>
-      <LocationSearch value={draft} onSelect={setDraft} />
+      <LocationSearch query={query} onQueryChange={onQueryChange} onSelect={setDraft} autoFocus />
       <p className="location-map-hint">{t("map.clickHint")}</p>
       <div className="location-map-canvas">
         <Map

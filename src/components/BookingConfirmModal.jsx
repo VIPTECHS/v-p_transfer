@@ -270,7 +270,7 @@ export default function BookingConfirmModal({ booking, onClose }) {
         </button>
 
         <div className="bc-check">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#1a1200" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#1a1200" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>
         </div>
 
         <h2 className="bc-title">{c.title}</h2>

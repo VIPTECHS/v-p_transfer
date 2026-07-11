@@ -848,6 +848,13 @@ input, select, textarea { color-scheme: var(--scheme); }
   font-size: 16px !important;
   font-weight: 500 !important;
   padding: 0 !important;
+  min-width: 0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+.booking-band .location-field-trigger {
+  padding-right: 30px !important;
 }
 .booking-band .field-input-wrapper input::placeholder {
   color: #777 !important;
@@ -891,8 +898,12 @@ input, select, textarea { color-scheme: var(--scheme); }
 }
 /* Location map opens as an overlay to the right of the panel (desktop). */
 @media (min-width: 901px) {
+  .booking-band .location-field,
+  .booking-band .pickup-datetime,
   .booking-band .field-group--location,
-  .booking-band .location-field { position: static; }
+  .booking-band .field-group--datetime {
+    position: static;
+  }
   .booking-band .location-map-popover {
     left: calc(100% + 24px);
     right: auto;
@@ -902,12 +913,28 @@ input, select, textarea { color-scheme: var(--scheme); }
     width: min(460px, 38vw);
     z-index: 60;
   }
+  .booking-band .pickup-datetime-popover {
+    left: calc(100% + 24px);
+    right: auto;
+    top: 0;
+    bottom: auto;
+    transform: none;
+    z-index: 60;
+  }
 }
 @media (max-width: 900px) {
   .booking-band-inner { grid-template-columns: 1fr; gap: 34px; }
   .booking-band-card { order: 1; }
   .booking-band-intro { order: 0; padding-left: 0; }
   .booking-band .booking-form { max-width: 520px; }
+  .booking-band .pickup-datetime-popover {
+    position: fixed;
+    left: 50%;
+    right: auto;
+    top: 50%;
+    bottom: auto;
+    transform: translate(-50%, -50%);
+  }
 }
 
 h1,h2 { font-family: var(--font-display); font-weight: 600; margin: 0; }
@@ -1339,9 +1366,9 @@ footer { background: var(--bg); padding: 70px 7vw 25px; }
   .hero .booking-form .form-fields { grid-template-columns: 1fr !important; gap: 10px !important; }
   .hero .booking-form .field-group:first-child { grid-column: auto; }
   .hero .booking-form .field-group { min-height: 84px; }
-  .location-map-popover { left: 50%; transform: translateX(-50%); width: min(420px, calc(100vw - 28px)); }
+  .location-map-popover { position: fixed; left: 50%; top: 50%; bottom: auto; transform: translate(-50%, -50%); width: min(420px, calc(100vw - 28px)); max-height: 86vh; overflow-y: auto; }
   .location-map-canvas { height: 240px; }
-  .pickup-datetime-popover { left: 50%; transform: translateX(-50%); width: min(390px, calc(100vw - 28px)); }
+  .pickup-datetime-popover { position: fixed; left: 50%; top: 50%; bottom: auto; transform: translate(-50%, -50%); width: min(390px, calc(100vw - 28px)); max-height: 86vh; overflow-y: auto; }
   .calendar-card { width: 100%; }
   .booking-tabs { grid-column: auto; padding: 0 0 5px; }
   .booking-form label { padding: 4px 2px 15px; border-left: 0; border-bottom: 1px solid var(--line); }
@@ -1484,7 +1511,9 @@ footer { background: var(--bg); padding: 70px 7vw 25px; }
 
 /* Layout: sidebar + main */
 .bw-layout { display: grid; grid-template-columns: 380px 1fr; gap: 32px; align-items: start; }
-.bw-layout--checkout { grid-template-columns: 380px 1fr; }
+.bw-layout--checkout { grid-template-columns: 1fr 380px; }
+.bw-layout--checkout .bw-checkout-right { order: 1; }
+.bw-layout--checkout .bw-checkout-left { order: 2; }
 
 /* Sidebar */
 .bw-sidebar { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 0; overflow: hidden; position: sticky; top: 110px; }

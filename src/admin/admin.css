@@ -6,6 +6,18 @@
   font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
 }
 
+/* Admin panel always renders in light UI — force readable native dropdowns
+   regardless of the site-wide dark/light theme variable the select would
+   otherwise inherit. */
+.admin-root select {
+  color: #1a1a2e;
+  color-scheme: light;
+}
+.admin-root select option {
+  color: #1a1a2e;
+  background: #fff;
+}
+
 .admin-layout {
   display: grid;
   grid-template-columns: 240px 1fr;
@@ -1168,6 +1180,16 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
+.reservation-finish-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 24px;
+}
+.reservation-finish-bar .admin-btn {
+  padding: 12px 20px;
+  font-size: 13px;
+}
+
 .reservation-summary h3 {
   font-size: 16px;
   font-weight: 600;
@@ -1809,6 +1831,80 @@
   margin-bottom: 16px;
   font-size: 13px;
 }
+
+/* ─── Reservation voucher modal ─── */
+.rv-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.rv-modal {
+  position: relative;
+  width: min(420px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #171717;
+  color: #f5f5f5;
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: 16px;
+  padding: 28px 24px 24px;
+  text-align: center;
+}
+.rv-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: transparent;
+  border: 0;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 4px;
+}
+.rv-close:hover { color: #fff; }
+.rv-title { font-size: 19px; font-weight: 700; margin: 8px 0 6px; }
+.rv-subtitle { font-size: 12px; color: #a3a3a3; line-height: 1.5; margin: 0 0 18px; }
+.rv-ref {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 14px;
+}
+.rv-ref span { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #9a8a5a; }
+.rv-ref strong { font-family: "Courier New", monospace; font-size: 18px; color: #d4af37; letter-spacing: 0.04em; }
+.rv-qr { display: flex; justify-content: center; margin-bottom: 16px; }
+.rv-qr img { border-radius: 10px; background: #fff; padding: 8px; }
+.rv-qr-loading { width: 180px; height: 180px; border-radius: 10px; background: rgba(255,255,255,0.06); }
+.rv-rows { text-align: left; border-top: 1px solid rgba(255,255,255,0.08); margin-bottom: 18px; }
+.rv-row { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 13px; }
+.rv-row span { color: #9a9a9a; }
+.rv-row strong { color: #fff; font-weight: 600; text-align: right; }
+.rv-contact { font-size: 11px; color: #9a9a9a; margin: 0 0 18px; }
+.rv-actions { display: grid; gap: 10px; }
+.rv-lang-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+.rv-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  border: 1px solid transparent;
+}
+.rv-action--download { background: #d4af37; color: #1a1200; }
+.rv-action--whatsapp { background: #25d366; color: #06210f; }
+.rv-action--email { background: transparent; color: #d4af37; border-color: rgba(212,175,55,.55); }
+.rv-action:hover { filter: brightness(1.08); }
+.rv-action:disabled, .rv-action--disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+.rv-hint { margin: 12px 0 0; font-size: 11px; color: #d97706; }
 
 /* ─── Charts ─── */
 .admin-page-charts {

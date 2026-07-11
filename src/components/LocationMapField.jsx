@@ -19,7 +19,12 @@ export default function LocationMapField({
 }) {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState(value?.label ?? "");
   const rootRef = useRef(null);
+
+  useEffect(() => {
+    setQuery(value?.label ?? "");
+  }, [value]);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -47,16 +52,21 @@ export default function LocationMapField({
       <label htmlFor={id} className="field-label">{label}</label>
       <div className="field-input-wrapper">
         {icon}
-        <button
+        <input
           id={id}
-          type="button"
+          type="text"
           className="location-field-trigger"
-          onClick={() => setOpen((current) => !current)}
+          placeholder={placeholder}
+          value={query}
+          onChange={(event) => {
+            setQuery(event.target.value);
+            setOpen(true);
+          }}
+          onFocus={() => setOpen(true)}
+          autoComplete="off"
           aria-expanded={open}
           aria-haspopup="dialog"
-        >
-          {value?.label || placeholder}
-        </button>
+        />
         {showSwap && (
           <button type="button" className="swap-btn" onClick={onSwap} aria-label={t("booking.swap")}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1e293b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="swap-icon">
@@ -72,7 +82,12 @@ export default function LocationMapField({
             variant={variant}
             value={value}
             other={other}
-            onConfirm={onChange}
+            query={query}
+            onQueryChange={setQuery}
+            onConfirm={(point) => {
+              setQuery(point.label);
+              onChange(point);
+            }}
             onClose={() => setOpen(false)}
           />
         </Suspense>

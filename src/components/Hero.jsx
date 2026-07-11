@@ -170,7 +170,9 @@ export default function Hero() {
             }}
           >
             {t("hero.vipPre")}
+            <br />
             <span className="hero-gold">{t("hero.vipWord")}</span>
+            <br />
             {t("hero.vipPost")}
           </p>
         </div>

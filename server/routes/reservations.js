@@ -107,7 +107,7 @@ router.post("/", requireAdmin, async (req, res) => {
 
     const data = {
       ...rest,
-      reference: generateReservationReference(),
+      reference: await generateReservationReference(),
       status: rest.status || "pending",
       supplierPaymentDate: rest.supplierPaymentDate ? new Date(rest.supplierPaymentDate) : null,
       customerPaymentDate: rest.customerPaymentDate ? new Date(rest.customerPaymentDate) : null,

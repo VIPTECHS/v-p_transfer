@@ -19,7 +19,7 @@ export default function Checkout({ state, dispatch, onEdit, onSubmit, status, me
 
   return (
     <div className="bw-layout bw-layout--checkout">
-      {/* Left: Confirmation */}
+      {/* Right: Confirmation */}
       <div className="bw-checkout-left">
         <h2 className="bw-page-title">{t("wizard.reviewBooking")}</h2>
         <p className="bw-confirm-note">{t("wizard.reservationOnlyNote")}</p>

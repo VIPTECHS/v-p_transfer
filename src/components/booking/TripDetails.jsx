@@ -19,6 +19,7 @@ export default function TripDetails({ state, dispatch, onContinue }) {
   const [toPoint, setToPoint] = useState(pointFrom(tripData?.to, tripData?.toCoords));
   const [durationHours, setDurationHours] = useState(String(tripData?.durationHours || "4"));
   const [activeField, setActiveField] = useState(null);
+  const [activeQuery, setActiveQuery] = useState("");
   const [message, setMessage] = useState("");
 
   const minPickup = toPickupISO(new Date());
@@ -105,7 +106,11 @@ export default function TripDetails({ state, dispatch, onContinue }) {
             <button
               type="button"
               className={`bw-trip-trigger${activeField === "from" ? " is-active" : ""}${fromPoint ? " has-value" : ""}`}
-              onClick={() => setActiveField(activeField === "from" ? null : "from")}
+              onClick={() => {
+                const next = activeField === "from" ? null : "from";
+                setActiveField(next);
+                setActiveQuery(next ? fromPoint?.label || "" : "");
+              }}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d4af37" strokeWidth="3"><circle cx="12" cy="12" r="4" /></svg>
               <span>{fromPoint?.label || t("booking.fromPlaceholder")}</span>
@@ -118,7 +123,11 @@ export default function TripDetails({ state, dispatch, onContinue }) {
               <button
                 type="button"
                 className={`bw-trip-trigger${activeField === "to" ? " is-active" : ""}${toPoint ? " has-value" : ""}`}
-                onClick={() => setActiveField(activeField === "to" ? null : "to")}
+                onClick={() => {
+                  const next = activeField === "to" ? null : "to";
+                  setActiveField(next);
+                  setActiveQuery(next ? toPoint?.label || "" : "");
+                }}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" strokeWidth="3"><circle cx="12" cy="12" r="4" /></svg>
                 <span>{toPoint?.label || t("booking.toPlaceholder")}</span>
@@ -156,6 +165,8 @@ export default function TripDetails({ state, dispatch, onContinue }) {
                 variant={activeField}
                 value={activePoint}
                 other={otherPoint}
+                query={activeQuery}
+                onQueryChange={setActiveQuery}
                 onConfirm={handleConfirm}
                 onClose={() => setActiveField(null)}
               />

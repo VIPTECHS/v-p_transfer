@@ -1,6 +1,6 @@
 import { Router } from "express";
 import prisma from "../lib/prisma.js";
-import { generateReference } from "../lib/reference.js";
+import { generateBookingReference } from "../lib/reference.js";
 import { notifyNewBooking, notifyStatusChange } from "../lib/notifications.js";
 import { matchBookingToCity } from "../lib/cityMatcher.js";
 import { syncBookingToReservation } from "../lib/syncBookingToReservation.js";
@@ -113,7 +113,7 @@ router.post("/", async (req, res) => {
     const booking = await prisma.booking.create({
       data: {
         ...payload,
-        reference: generateReference(),
+        reference: await generateBookingReference(),
         status: "pending",
         notificationStatus: "none",
       },

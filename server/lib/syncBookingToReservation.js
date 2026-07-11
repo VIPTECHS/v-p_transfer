@@ -1,5 +1,4 @@
 import prisma from "./prisma.js";
-import { generateReservationReference } from "./reference.js";
 
 function buildTransferType(bookingType) {
   return bookingType === "hourly" ? "internal" : "arrival";
@@ -50,7 +49,7 @@ export async function syncBookingToReservation(bookingId) {
 
   const reservation = await prisma.reservation.create({
     data: {
-      reference: generateReservationReference(),
+      reference: booking.reference,
       status: booking.status === "cancelled" ? "cancelled" : "pending",
       bookingId: booking.id,
       customerId: customer.id,

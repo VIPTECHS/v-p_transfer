@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { MapPin } from "lucide-react";
 
 const LocationMapPopover = lazy(() => import("../../components/LocationMapPopover"));
@@ -16,6 +16,15 @@ function pointFromDraft(draft, side) {
 }
 
 export default function TransferRouteMap({ mapContext, transferDrafts, onConfirm, onClose }) {
+  const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    if (!mapContext) return;
+    const draft = transferDrafts[mapContext.transferId];
+    const point = pointFromDraft(draft, mapContext.field);
+    setQuery(point?.label ?? "");
+  }, [mapContext, transferDrafts]);
+
   if (!mapContext) {
     return (
       <div className="transfer-route-map transfer-route-map--empty">
@@ -38,6 +47,8 @@ export default function TransferRouteMap({ mapContext, transferDrafts, onConfirm
           variant={mapContext.field}
           value={activePoint}
           other={otherPoint}
+          query={query}
+          onQueryChange={setQuery}
           onConfirm={onConfirm}
           onClose={onClose}
         />
