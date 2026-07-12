@@ -135,7 +135,15 @@ export default function BookingDetail({ id, onBack }) {
               {statusLabelTr(booking.status)}
             </span>
             <span className="admin-badge admin-badge--pending">
-              {booking.type === "hourly" ? "Saatlik" : "Transfer"}
+              {booking.type === "hourly"
+                ? "Saatlik"
+                : booking.type === "chauffeur"
+                  ? "Şoförlü"
+                  : booking.type === "group"
+                    ? "Grup"
+                    : booking.type === "events"
+                      ? "Events"
+                      : "Transfer"}
             </span>
             {booking.returnTransfer && (
               <span className="admin-badge admin-badge--confirmed">Dönüş</span>

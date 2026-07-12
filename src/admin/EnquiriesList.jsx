@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useState } from "react";
 import { fetchEnquiries, updateEnquiry } from "../api/admin";
 import { enquiryStatusLabel, formatDateTime } from "./utils";
+import AdminToolbar from "./components/AdminToolbar";
 
 const STATUSES = [
   { value: "", label: "Tümü" },
@@ -40,16 +41,15 @@ export default function EnquiriesList() {
 
   return (
     <>
-      <h1 className="admin-page-title">İletişim Talepleri</h1>
       {error && <div className="admin-error">{error}</div>}
 
-      <div className="admin-filters">
-        <select value={status} onChange={(e) => setStatus(e.target.value)}>
+      <AdminToolbar>
+        <select value={status} onChange={(e) => setStatus(e.target.value)} aria-label="Durum filtresi">
           {STATUSES.map((s) => (
             <option key={s.value} value={s.value}>{s.label}</option>
           ))}
         </select>
-      </div>
+      </AdminToolbar>
 
       <div className="admin-card">
         {loading ? (

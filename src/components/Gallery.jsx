@@ -108,18 +108,20 @@ function BookmarkIcon() {
   );
 }
 
-export default function Gallery() {
+export default function Gallery({ showHeading = true }) {
   const { t, lang } = useI18n();
   const handle = t("gallery.handle");
 
   return (
     <section className="social-feed" id="gallery">
       <div className="container">
-        <SectionHeading
-          eyebrow={t("gallery.eyebrow")}
-          title={t("gallery.title")}
-          text={t("gallery.text")}
-        />
+        {showHeading && (
+          <SectionHeading
+            eyebrow={t("gallery.eyebrow")}
+            title={t("gallery.title")}
+            text={t("gallery.text")}
+          />
+        )}
         <div className="social-grid">
           {posts.map((post) => (
             <article className="ig-post" key={post.image}>

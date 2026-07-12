@@ -11,6 +11,10 @@ function validateBooking(payload) {
   return null;
 }
 
+export function isPointToPointType(type) {
+  return type !== "hourly";
+}
+
 export async function submitBooking(payload) {
   const invalid = validateBooking(payload);
   if (invalid) {

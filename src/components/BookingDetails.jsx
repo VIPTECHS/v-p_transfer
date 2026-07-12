@@ -4,6 +4,7 @@ import { fleetItems, WHATSAPP_URL } from "../data/content";
 import { submitBooking } from "../api/booking";
 import { formatPickupDisplay } from "../utils/datetime";
 import { tripInvolvesAirport } from "../utils/airport";
+import { requiresDestination } from "../utils/bookingTypes";
 import BookingConfirmModal from "./BookingConfirmModal";
 
 const COUNTRIES = [
@@ -123,7 +124,7 @@ function TripSummaryCard({ bookingData, lang, t }) {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d4af37" strokeWidth="3"><circle cx="12" cy="12" r="4"/></svg>
           <span>{from || "—"}</span>
         </div>
-        {type === "transfer" ? (
+        {requiresDestination(type) ? (
           <div className="bd-trip-row">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="3"><circle cx="12" cy="12" r="4"/></svg>
             <span>{to || "—"}</span>

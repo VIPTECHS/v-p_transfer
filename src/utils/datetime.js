@@ -40,6 +40,18 @@ export function formatPickupDisplay(date, locale = "en") {
   }).format(date);
 }
 
+export function formatPickupDateDisplay(date, locale = "en") {
+  return new Intl.DateTimeFormat(resolveIntlLocale(locale), {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+}
+
+export function formatPickupTimeDisplay(date) {
+  return dateToTimeValue(date);
+}
+
 export function hoursBetween(startTime, endTime) {
   const [sh, sm] = startTime.split(":").map(Number);
   const [eh, em] = endTime.split(":").map(Number);

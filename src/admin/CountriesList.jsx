@@ -19,29 +19,46 @@ export default function CountriesList() {
 
   return (
     <>
-      <h1 className="admin-page-title">Ülkeler</h1>
-      <form className="admin-filters" onSubmit={handleAdd}>
-        <input placeholder="Ülke adı" value={name} onChange={(e) => setName(e.target.value)} required />
-        <input placeholder="Kod (TR, GR...)" value={code} onChange={(e) => setCode(e.target.value)} required style={{ width: 100 }} />
-        <button type="submit" className="admin-btn admin-btn--gold">Ekle</button>
-      </form>
-      <div className="admin-card">
+      <div className="admin-card admin-form-panel">
+        <h3>Yeni Ülke</h3>
+        <form className="admin-form-grid" onSubmit={handleAdd}>
+          <div className="detail-field">
+            <label>Ülke adı</label>
+            <input placeholder="Ülke adı" value={name} onChange={(e) => setName(e.target.value)} required />
+          </div>
+          <div className="detail-field">
+            <label>Kod</label>
+            <input placeholder="TR, GR..." value={code} onChange={(e) => setCode(e.target.value)} required />
+          </div>
+          <div className="admin-form-actions">
+            <button type="submit" className="admin-btn admin-btn--primary">Ekle</button>
+          </div>
+        </form>
+      </div>
+
+      <div className="admin-card admin-table-wrap">
         <table className="admin-table">
           <thead><tr><th>Ülke</th><th>Kod</th><th>Şehir</th><th>Durum</th><th></th></tr></thead>
           <tbody>
             {countries.map((c) => (
               <tr key={c.id}>
-                <td><img src={flagUrl(c.code)} alt="" width={20} height={15} style={{ verticalAlign: "middle", marginRight: 8, borderRadius: 2 }} /> {c.name}</td>
-                <td>{c.code}</td>
+                <td>
+                  <img src={flagUrl(c.code)} alt="" width={20} height={15} style={{ verticalAlign: "middle", marginRight: 8, borderRadius: 2 }} />
+                  {c.name}
+                </td>
+                <td><code className="admin-ref">{c.code}</code></td>
                 <td>{c._count?.cities ?? 0}</td>
                 <td>
-                  <button type="button" className="admin-btn admin-btn--ghost" onClick={() => updateCountry(c.id, { isActive: !c.isActive }).then(load)}>
+                  <span className={`admin-pill ${c.isActive ? "admin-pill--green" : "admin-pill--muted"}`}>
                     {c.isActive ? "Aktif" : "Pasif"}
+                  </span>
+                  <button type="button" className="admin-btn admin-btn--ghost admin-btn--sm" style={{ marginLeft: 8 }} onClick={() => updateCountry(c.id, { isActive: !c.isActive }).then(load)}>
+                    Değiştir
                   </button>
                 </td>
                 <td>
                   {(c._count?.cities ?? 0) === 0 && (
-                    <button type="button" className="admin-btn admin-btn--danger" onClick={() => { if (confirm("Ülkeyi sil?")) deleteCountry(c.id).then(load); }}>Sil</button>
+                    <button type="button" className="admin-btn admin-btn--danger admin-btn--sm" onClick={() => { if (confirm("Ülkeyi sil?")) deleteCountry(c.id).then(load); }}>Sil</button>
                   )}
                 </td>
               </tr>

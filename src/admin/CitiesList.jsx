@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchCountries, fetchCities, createCity, updateCity, deleteCity } from "../api/admin";
 import { flagUrl } from "../utils/flags";
+import AdminToolbar from "./components/AdminToolbar";
 
 export default function CitiesList() {
   const [cities, setCities] = useState([]);
@@ -34,14 +35,12 @@ export default function CitiesList() {
 
   return (
     <>
-      <h1 className="admin-page-title">Şehirler</h1>
-
-      {/* Country selector */}
-      <div className="admin-filters" style={{ flexWrap: "wrap", gap: 8 }}>
+      <AdminToolbar>
         <select
           value={selectedCountry}
           onChange={(e) => { setSelectedCountry(e.target.value); setSearch(""); }}
-          style={{ minWidth: 250 }}
+          aria-label="Ülke"
+          style={{ minWidth: 220 }}
         >
           <option value="">Ülke seçin...</option>
           {countries.map((c) => (
@@ -55,36 +54,40 @@ export default function CitiesList() {
             placeholder="Şehir ara..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={{ minWidth: 180 }}
           />
         )}
-      </div>
+      </AdminToolbar>
 
       {!selectedCountry && (
-        <div className="admin-card" style={{ textAlign: "center", padding: 48, color: "rgba(255,255,255,.4)" }}>
-          <p style={{ fontSize: 32, marginBottom: 8 }}>🌍</p>
+        <div className="admin-card admin-empty-state">
+          <p className="admin-empty-state__icon">🌍</p>
           <p>Şehirleri görüntülemek için bir ülke seçin</p>
-          <p style={{ fontSize: 12, marginTop: 8 }}>{countries.length} ülke mevcut</p>
+          <p className="admin-empty-state__hint">{countries.length} ülke mevcut</p>
         </div>
       )}
 
       {selectedCountry && (
         <>
-          {/* Country header */}
-          <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "16px 0 12px" }}>
+          <div className="admin-inline-heading">
             <img src={flagUrl(selectedCountryData?.code)} alt="" width={28} height={21} style={{ borderRadius: 3 }} />
-            <span style={{ fontSize: 18, fontWeight: 600 }}>{selectedCountryData?.name}</span>
-            <span style={{ color: "rgba(255,255,255,.4)", fontSize: 13 }}>{cities.length} şehir</span>
+            <span>{selectedCountryData?.name}</span>
+            <span className="admin-inline-heading__meta">{cities.length} şehir</span>
           </div>
 
-          {/* Add city form */}
-          <form className="admin-filters" onSubmit={handleAdd} style={{ marginBottom: 12 }}>
-            <input placeholder="Yeni şehir adı" value={name} onChange={(e) => setName(e.target.value)} required />
-            <button type="submit" className="admin-btn admin-btn--gold">Ekle</button>
-          </form>
+          <div className="admin-card admin-form-panel">
+            <h3>Yeni Şehir</h3>
+            <form className="admin-form-grid" onSubmit={handleAdd}>
+              <div className="detail-field detail-field--full">
+                <label>Şehir adı</label>
+                <input placeholder="Yeni şehir adı" value={name} onChange={(e) => setName(e.target.value)} required />
+              </div>
+              <div className="admin-form-actions">
+                <button type="submit" className="admin-btn admin-btn--primary">Ekle</button>
+              </div>
+            </form>
+          </div>
 
-          {/* Cities table */}
-          <div className="admin-card">
+          <div className="admin-card admin-table-wrap">
             <table className="admin-table">
               <thead>
                 <tr><th>Şehir</th><th>Acente</th><th>Durum</th><th></th></tr>
@@ -117,7 +120,7 @@ export default function CitiesList() {
                   </tr>
                 ))}
                 {filtered.length === 0 && (
-                  <tr><td colSpan={4} style={{ textAlign: "center", padding: 24, color: "rgba(255,255,255,.3)" }}>
+                  <tr><td colSpan={4} className="admin-empty">
                     {search ? "Sonuç bulunamadı" : "Bu ülkede şehir yok"}
                   </td></tr>
                 )}

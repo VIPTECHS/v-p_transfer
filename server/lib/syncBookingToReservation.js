@@ -50,7 +50,8 @@ export async function syncBookingToReservation(bookingId) {
   const reservation = await prisma.reservation.create({
     data: {
       reference: booking.reference,
-      status: booking.status === "cancelled" ? "cancelled" : "pending",
+      status: booking.status === "cancelled" ? "cancelled" : "confirmed",
+      source: "web",
       bookingId: booking.id,
       customerId: customer.id,
       salePrice: booking.quotedPrice,
@@ -108,6 +109,9 @@ export async function syncBookingToReservation(bookingId) {
       note: `Booking ${booking.reference} kaydından otomatik oluşturuldu`,
     },
   });
+
+  const { syncReservationLedger } = await import("./ledger.js");
+  await syncReservationLedger(reservation.id);
 
   return reservation;
 }

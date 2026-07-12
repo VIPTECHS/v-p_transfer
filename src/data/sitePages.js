@@ -1,7 +1,10 @@
 // Footer bağlantı sayfaları — tek kaynak. SitePage.jsx buradan beslenir.
 // Her sayfa dile göre içerik taşır: intro + başlıklı bölümler.
 
-export const sitePages = [
+import { enrichedSitePages } from "./sitePagesEnrich";
+import { extraSitePages } from "./sitePagesExtra";
+
+const baseSitePages = [
   // ---------------- CORPORATE ----------------
   {
     slug: "about-us",
@@ -513,7 +516,7 @@ export const sitePages = [
   // ---------------- LEGAL ----------------
   {
     slug: "privacy-policy",
-    column: "legal",
+    column: "support",
     content: {
       en: {
         title: "Privacy Policy",
@@ -612,7 +615,7 @@ export const sitePages = [
   },
   {
     slug: "terms-conditions",
-    column: "legal",
+    column: "support",
     content: {
       en: {
         title: "Terms & Conditions",
@@ -711,7 +714,7 @@ export const sitePages = [
   },
   {
     slug: "cookie-policy",
-    column: "legal",
+    column: "support",
     content: {
       en: {
         title: "Cookie Policy",
@@ -790,6 +793,17 @@ export const sitePages = [
       },
     },
   },
+];
+
+const overrides = new Map(
+  [...enrichedSitePages, ...extraSitePages].map((page) => [page.slug, page])
+);
+
+export const sitePages = [
+  ...baseSitePages.map((page) => overrides.get(page.slug) || page),
+  ...[...enrichedSitePages, ...extraSitePages].filter(
+    (page) => !baseSitePages.some((base) => base.slug === page.slug)
+  ),
 ];
 
 export function getSitePage(slug) {

@@ -10,7 +10,6 @@ import {
 import BookingForm from "./BookingForm";
 import Fleet from "./Fleet";
 import FAQ from "./FAQ";
-import TrustStrip from "./TrustStrip";
 
 export default function LandingPage({ page, onSearch }) {
   const { lang, t } = useI18n();
@@ -53,7 +52,6 @@ export default function LandingPage({ page, onSearch }) {
         <BookingForm visible onSearch={onSearch} />
       </section>
 
-      <TrustStrip />
       <Fleet onSearch={onSearch} />
       <FAQ />
       <section className="landing-cta">

@@ -14,6 +14,8 @@ import operationsRouter from "./routes/operations.js";
 import authRouter from "./routes/auth.js";
 import countriesRouter from "./routes/countries.js";
 import citiesRouter from "./routes/cities.js";
+import districtsRouter from "./routes/districts.js";
+import locationsRouter from "./routes/locations.js";
 import agenciesRouter from "./routes/agencies.js";
 import agencyPanelRouter from "./routes/agency-panel.js";
 import reservationsRouter from "./routes/reservations.js";
@@ -22,6 +24,8 @@ import suppliersRouter from "./routes/suppliers.js";
 import paymentsRouter from "./routes/payments.js";
 import reportsRouter from "./routes/reports.js";
 import flightsRouter from "./routes/flights.js";
+import ledgerRouter from "./routes/ledger.js";
+import documentsRouter from "./routes/documents.js";
 import { rematchBookingsWithoutCity } from "./lib/cityMatcher.js";
 import { ensureMigrations } from "./lib/ensureMigrations.js";
 import { rateLimit } from "./middleware/rateLimit.js";
@@ -112,6 +116,9 @@ app.use(
 app.use(express.json({ limit: "1mb" }));
 app.use(rateLimit);
 
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/api/uploads", express.static(path.join(__dirname, "uploads")));
+
 app.get("/health", (_req, res) => {
   res.json({ ok: true, env: process.env.NODE_ENV || "development" });
 });
@@ -133,12 +140,16 @@ mountRoutes("/vehicles", vehiclesRouter);
 mountRoutes("/operations", operationsRouter);
 mountRoutes("/countries", countriesRouter, requireAdmin);
 mountRoutes("/cities", citiesRouter, requireAdmin);
+mountRoutes("/districts", districtsRouter, requireAdmin);
+mountRoutes("/locations", locationsRouter, requireAdmin);
 mountRoutes("/agencies", agenciesRouter, requireAdmin);
 mountRoutes("/agency", agencyPanelRouter, requireAuth, requireRole("agency"));
 mountRoutes("/reservations", reservationsRouter);
 mountRoutes("/customers", customersRouter);
 mountRoutes("/suppliers", suppliersRouter);
 mountRoutes("/payments", paymentsRouter, requireAdmin);
+mountRoutes("/ledger", ledgerRouter);
+mountRoutes("/documents", documentsRouter);
 mountRoutes("/reports", reportsRouter, requireAdmin);
 mountRoutes("/flights", flightsRouter);
 

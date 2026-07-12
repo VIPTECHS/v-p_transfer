@@ -1,6 +1,7 @@
 import { lazy, Suspense, useState } from "react";
 import { useI18n } from "../../i18n/I18nContext";
 import { defaultPickupDate, toPickupISO } from "../../utils/datetime";
+import { BOOKING_TYPES, requiresDestination, requiresDuration } from "../../utils/bookingTypes";
 
 const LocationMapPopover = lazy(() => import("../LocationMapPopover"));
 
@@ -31,16 +32,18 @@ export default function TripDetails({ state, dispatch, onContinue }) {
 
     const from = (fromPoint?.label || "").trim();
     const to = (toPoint?.label || "").trim();
+    const needsTo = requiresDestination(bookingType);
+    const needsDuration = requiresDuration(bookingType);
 
     if (!pickupAt || !from) {
-      setMessage(bookingType === "hourly" ? t("booking.hourlyValidation") : t("booking.validation"));
+      setMessage(needsDuration ? t("booking.hourlyValidation") : t("booking.validation"));
       return;
     }
-    if (bookingType === "transfer" && !to) {
+    if (needsTo && !to) {
       setMessage(t("booking.validation"));
       return;
     }
-    if (bookingType === "hourly" && (!durationHours || Number(durationHours) < 1)) {
+    if (needsDuration && (!durationHours || Number(durationHours) < 1)) {
       setMessage(t("booking.hourlyValidation"));
       return;
     }
@@ -51,10 +54,10 @@ export default function TripDetails({ state, dispatch, onContinue }) {
         type: bookingType,
         pickupAt,
         from,
-        to: bookingType === "hourly" ? undefined : to,
-        durationHours: bookingType === "hourly" ? Number(durationHours) : undefined,
+        to: needsTo ? to : undefined,
+        durationHours: needsDuration ? Number(durationHours) : undefined,
         fromCoords: hasCoords(fromPoint) ? { lng: fromPoint.lng, lat: fromPoint.lat } : undefined,
-        toCoords: hasCoords(toPoint) ? { lng: toPoint.lng, lat: toPoint.lat } : undefined,
+        toCoords: hasCoords(toPoint) && needsTo ? { lng: toPoint.lng, lat: toPoint.lat } : undefined,
       },
     });
     onContinue();
@@ -75,20 +78,16 @@ export default function TripDetails({ state, dispatch, onContinue }) {
       <div className="bw-trip-layout">
         <form className="bw-trip-form" onSubmit={handleContinue}>
           <div className="bw-trip-tabs" role="group" aria-label="Booking type">
-            <button
-              type="button"
-              className={bookingType === "transfer" ? "active" : ""}
-              onClick={() => setBookingType("transfer")}
-            >
-              {t("booking.transfer")}
-            </button>
-            <button
-              type="button"
-              className={bookingType === "hourly" ? "active" : ""}
-              onClick={() => setBookingType("hourly")}
-            >
-              {t("booking.hourly")}
-            </button>
+            {BOOKING_TYPES.map((type) => (
+              <button
+                key={type}
+                type="button"
+                className={bookingType === type ? "active" : ""}
+                onClick={() => setBookingType(type)}
+              >
+                {t(`booking.types.${type}`)}
+              </button>
+            ))}
           </div>
 
           <label className="vehicle-book-field">
@@ -117,7 +116,7 @@ export default function TripDetails({ state, dispatch, onContinue }) {
             </button>
           </div>
 
-          {bookingType === "transfer" ? (
+          {requiresDestination(bookingType) ? (
             <div className="vehicle-book-field">
               <span>{t("booking.toLabel")}</span>
               <button
@@ -135,7 +134,7 @@ export default function TripDetails({ state, dispatch, onContinue }) {
             </div>
           ) : (
             <label className="vehicle-book-field">
-              <span>{t("booking.hourly")}</span>
+              <span>{t("booking.durationLabel")}</span>
               <input
                 type="number"
                 min="1"
@@ -158,10 +157,10 @@ export default function TripDetails({ state, dispatch, onContinue }) {
         </form>
 
         <div className="bw-map-panel">
-          {activeField ? (
-            <Suspense fallback={<div className="bw-map-placeholder">{t("map.loading")}</div>}>
+          {activeField && (
+            <Suspense fallback={<div className="bw-map-loading">{t("map.loading")}</div>}>
               <LocationMapPopover
-                key={activeField}
+                open
                 variant={activeField}
                 value={activePoint}
                 other={otherPoint}
@@ -171,11 +170,6 @@ export default function TripDetails({ state, dispatch, onContinue }) {
                 onClose={() => setActiveField(null)}
               />
             </Suspense>
-          ) : (
-            <div className="bw-map-placeholder">
-              <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
-              <p>{t("map.clickHint")}</p>
-            </div>
           )}
         </div>
       </div>

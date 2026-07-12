@@ -1,71 +1,80 @@
 import { useEffect, useState } from "react";
-import { fetchOperations, updateBooking } from "../api/admin";
-import { customerName, formatTime, statusLabel, toDateInput } from "./utils";
+import { fetchOperations } from "../api/admin";
+import { toDateInput } from "./utils";
+import StatusBadge from "./components/StatusBadge";
 import { WHATSAPP_URL } from "../data/content";
+import AdminToolbar from "./components/AdminToolbar";
+
+function formatTime(iso, time) {
+  if (time) return time;
+  if (!iso) return "";
+  return new Date(iso).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
+}
+
+function customerName(item) {
+  if (item.customer) return `${item.customer.firstName} ${item.customer.lastName || ""}`.trim();
+  if (item.passenger) return `${item.passenger.firstName} ${item.passenger.lastName || ""}`.trim();
+  return "—";
+}
 
 export default function OperationsView({ navigate }) {
   const [date, setDate] = useState(toDateInput(new Date()));
-  const [bookings, setBookings] = useState([]);
+  const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const load = () => {
     setLoading(true);
     fetchOperations(date)
-      .then(setBookings)
+      .then(setItems)
       .finally(() => setLoading(false));
   };
 
   useEffect(() => { load(); }, [date]);
 
-  const whatsappLink = (b, msg) =>
-    `${WHATSAPP_URL}?text=${encodeURIComponent(msg || `Merhaba ${customerName(b)}, ${b.reference} transferiniz hakkında.`)}`;
+  const whatsappLink = (phone, ref) => {
+    const p = phone || "";
+    return `${WHATSAPP_URL}?text=${encodeURIComponent(`Merhaba, ${ref} transferiniz hakkında.`)}`;
+  };
 
   return (
     <>
-      <h1 className="admin-page-title">Operasyon</h1>
-      <div className="admin-filters">
-        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+      <AdminToolbar>
+        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} aria-label="Tarih" />
         <button type="button" className="admin-btn admin-btn--ghost" onClick={load}>Yenile</button>
-      </div>
+      </AdminToolbar>
 
       {loading ? (
         <div className="admin-loading">Yükleniyor...</div>
-      ) : bookings.length === 0 ? (
+      ) : items.length === 0 ? (
         <div className="admin-empty">Bu gün için transfer yok</div>
       ) : (
-        bookings.map((b) => (
-          <div key={b.id} className="admin-booking-card">
+        items.map((item) => (
+          <div key={item.id} className="admin-booking-card">
             <div className="admin-booking-card-header">
-              <strong>{formatTime(b.pickupAt)} — {customerName(b)}</strong>
-              <span className={`admin-badge admin-badge--${b.status}`}>{statusLabel(b.status)}</span>
+              <strong>{formatTime(item.transferDate, item.transferTime)} — {customerName(item)}</strong>
+              <StatusBadge status={item.status} />
             </div>
             <div className="admin-booking-card-route">
-              {b.fromLabel} → {b.toLabel || `${b.durationHours}sa`}
+              {item.fromLabel} → {item.toLabel}
             </div>
             <div className="admin-booking-card-meta">
-              {b.flightNumber && `Uçuş: ${b.flightNumber} · `}
-              {b.phone} · {b.vehicle || "Araç atanmadı"}
-              {b.assignedDriver && ` · Şoför: ${b.assignedDriver.name}`}
+              #{item.reference}
+              {item.flightCode && ` · Uçuş: ${item.flightCode}`}
+              {item.supplier && ` · Tedarikçi: ${item.supplier.name}`}
+              {item.assignedDriver && ` · Sürücü: ${item.assignedDriver.name}`}
             </div>
             <div className="admin-detail-actions" style={{ marginTop: 12 }}>
-              <button type="button" className="admin-btn admin-btn--ghost" onClick={() => navigate("booking-detail", b.id)}>
+              <button type="button" className="admin-btn admin-btn--ghost" onClick={() => navigate("reservation-detail", item.reservationId)}>
                 Detay
               </button>
-              <a className="admin-btn admin-btn--gold" href={whatsappLink(b)} target="_blank" rel="noopener noreferrer">
+              <a
+                className="admin-btn admin-btn--gold"
+                href={whatsappLink(item.customer?.phone || item.customer?.whatsapp, item.reference)}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 WhatsApp
               </a>
-              {b.status === "pending" && (
-                <button
-                  type="button"
-                  className="status-action-btn status-action-btn--primary status-action-btn--inline"
-                  onClick={() => updateBooking(b.id, { status: "confirmed" }).then(load)}
-                >
-                  <span className="status-action-btn-icon">✓</span>
-                  <span className="status-action-btn-text">
-                    <strong>Onayla</strong>
-                  </span>
-                </button>
-              )}
             </div>
           </div>
         ))

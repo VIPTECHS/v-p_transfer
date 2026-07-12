@@ -8,53 +8,53 @@ datasource db {
 }
 
 model Booking {
-  id                 String   @id @default(cuid())
-  reference          String   @unique
-  type               String
-  status             String   @default("pending")
-  pickupAt           DateTime
-  fromLabel          String
-  toLabel            String?
-  durationHours      Int?
-  fromLng            Float?
-  fromLat            Float?
-  toLng              Float?
-  toLat              Float?
-  firstName          String
-  lastName           String?
-  email              String
-  phone              String
-  passengers         Int      @default(1)
-  luggage            Int      @default(0)
-  childSeat          Int      @default(0)
-  vehicle            String?
-  notes              String?
-  flightNumber       String?
-  meetAndGreetName   String?
-  returnTransfer     Boolean  @default(false)
-  paymentStatus      String   @default("unpaid")
-  quotedPrice        Float?
-  currency           String   @default("EUR")
-  priceNotes         String?
-  lastNotifiedAt     DateTime?
-  notificationStatus String   @default("none")
-  assignedDriverId   String?
-  assignedVehicleId  String?
-  cityId             String?
-  agencyId           String?
-  routedAgencyId     String?
-  routedAt           DateTime?
+  id                   String    @id @default(cuid())
+  reference            String    @unique
+  type                 String
+  status               String    @default("pending")
+  pickupAt             DateTime
+  fromLabel            String
+  toLabel              String?
+  durationHours        Int?
+  fromLng              Float?
+  fromLat              Float?
+  toLng                Float?
+  toLat                Float?
+  firstName            String
+  lastName             String?
+  email                String
+  phone                String
+  passengers           Int       @default(1)
+  luggage              Int       @default(0)
+  childSeat            Int       @default(0)
+  vehicle              String?
+  notes                String?
+  flightNumber         String?
+  meetAndGreetName     String?
+  returnTransfer       Boolean   @default(false)
+  paymentStatus        String    @default("unpaid")
+  quotedPrice          Float?
+  currency             String    @default("EUR")
+  priceNotes           String?
+  lastNotifiedAt       DateTime?
+  notificationStatus   String    @default("none")
+  assignedDriverId     String?
+  assignedVehicleId    String?
+  cityId               String?
+  agencyId             String?
+  routedAgencyId       String?
+  routedAt             DateTime?
   agencyResponseStatus String?
-  agencyRespondedAt  DateTime?
-  agencyDeclineNote  String?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  agencyRespondedAt    DateTime?
+  agencyDeclineNote    String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 
-  assignedDriver  Driver?  @relation(fields: [assignedDriverId], references: [id])
-  assignedVehicle Vehicle? @relation(fields: [assignedVehicleId], references: [id])
-  city            City?    @relation(fields: [cityId], references: [id])
-  agency          Agency?  @relation("BookingAcceptedBy", fields: [agencyId], references: [id])
-  routedAgency    Agency?  @relation("BookingRoutedTo", fields: [routedAgencyId], references: [id])
+  assignedDriver  Driver?             @relation(fields: [assignedDriverId], references: [id])
+  assignedVehicle Vehicle?            @relation(fields: [assignedVehicleId], references: [id])
+  city            City?               @relation(fields: [cityId], references: [id])
+  agency          Agency?             @relation("BookingAcceptedBy", fields: [agencyId], references: [id])
+  routedAgency    Agency?             @relation("BookingRoutedTo", fields: [routedAgencyId], references: [id])
   statusLogs      BookingStatusLog[]
   assignments     BookingAssignment[]
   reservation     Reservation?
@@ -82,17 +82,24 @@ model Enquiry {
 }
 
 model Driver {
-  id        String   @id @default(cuid())
-  name      String
-  phone     String
-  email     String?
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(cuid())
+  name       String
+  phone      String
+  email      String?
+  supplierId String?
+  agencyId   String?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
+  supplier     Supplier?           @relation(fields: [supplierId], references: [id])
+  agency       Agency?             @relation(fields: [agencyId], references: [id])
   bookings     Booking[]
   assignments  BookingAssignment[]
   reservations Reservation[]
+
+  @@index([supplierId])
+  @@index([agencyId])
 }
 
 model Vehicle {
@@ -125,50 +132,111 @@ model BookingAssignment {
 }
 
 model Country {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  code      String   @unique
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String     @id @default(cuid())
+  name      String     @unique
+  code      String     @unique
+  isActive  Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
   cities    City[]
+  suppliers Supplier[]
+  agencies  Agency[]
 }
 
 model City {
-  id        String   @id @default(cuid())
+  id        String     @id @default(cuid())
   name      String
   countryId String
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  country   Country  @relation(fields: [countryId], references: [id])
+  isActive  Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  country   Country    @relation(fields: [countryId], references: [id])
+  districts District[]
   agencies  Agency[]
   bookings  Booking[]
   suppliers Supplier[]
+  locations Location[]
 
   @@unique([name, countryId])
   @@index([countryId])
 }
 
-model Agency {
-  id           String   @id @default(cuid())
-  name         String
-  cityId       String
-  phone        String?
-  email        String?
-  contactName  String?
-  address      String?
-  username     String   @unique
-  passwordHash String
-  isActive     Boolean  @default(true)
-  webhookUrl   String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  city         City     @relation(fields: [cityId], references: [id])
-  acceptedBookings Booking[] @relation("BookingAcceptedBy")
-  routedBookings   Booking[] @relation("BookingRoutedTo")
+model District {
+  id        String     @id @default(cuid())
+  name      String
+  cityId    String
+  isActive  Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  city      City       @relation(fields: [cityId], references: [id])
+  suppliers Supplier[]
+  agencies  Agency[]
+  locations Location[]
+
+  @@unique([name, cityId])
+  @@index([cityId])
+}
+
+model Location {
+  id         String    @id @default(cuid())
+  name       String
+  type       String
+  districtId String?
+  cityId     String?
+  lat        Float?
+  lng        Float?
+  isActive   Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  district   District? @relation(fields: [districtId], references: [id])
+  city       City?     @relation(fields: [cityId], references: [id])
 
   @@index([cityId])
+  @@index([districtId])
+  @@index([type])
+}
+
+model Agency {
+  id                 String   @id @default(cuid())
+  name               String
+  cityId             String
+  countryId          String?
+  districtId         String?
+  phone              String?
+  whatsapp           String?
+  email              String?
+  website            String?
+  contactName        String?
+  contactPhone       String?
+  contactWhatsapp    String?
+  contactEmail       String?
+  address            String?
+  invoiceTitle       String?
+  taxOffice          String?
+  taxNumber          String?
+  invoiceAddress     String?
+  invoiceEmail       String?
+  commissionRate     Float?
+  commissionType     String?  @default("percentage")
+  commissionCurrency String?  @default("EUR")
+  username           String   @unique
+  passwordHash       String
+  isActive           Boolean  @default(true)
+  webhookUrl         String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  city             City          @relation(fields: [cityId], references: [id])
+  country          Country?      @relation(fields: [countryId], references: [id])
+  district         District?     @relation(fields: [districtId], references: [id])
+  acceptedBookings Booking[]     @relation("BookingAcceptedBy")
+  routedBookings   Booking[]     @relation("BookingRoutedTo")
+  drivers          Driver[]
+  reservations     Reservation[]
+
+  @@index([cityId])
+  @@index([countryId])
+  @@index([districtId])
 }
 
 model BookingStatusLog {
@@ -184,19 +252,18 @@ model BookingStatusLog {
   @@index([bookingId])
 }
 
-// ─── New Reservation System ───
-
 model Customer {
-  id           String   @id @default(cuid())
-  firstName    String
-  lastName     String?
-  email        String?
-  phone        String?
-  identityNo   String?
-  notes        String?
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id         String   @id @default(cuid())
+  firstName  String
+  lastName   String?
+  email      String?
+  phone      String?
+  whatsapp   String?
+  identityNo String?
+  notes      String?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   reservations Reservation[]
 
@@ -205,28 +272,48 @@ model Customer {
 }
 
 model Supplier {
-  id          String   @id @default(cuid())
-  name        String
-  phone       String?
-  email       String?
-  contactName String?
-  address     String?
-  cityId      String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String   @id @default(cuid())
+  name            String
+  countryId       String?
+  cityId          String?
+  districtId      String?
+  address         String?
+  phone           String?
+  whatsapp        String?
+  email           String?
+  website         String?
+  contactName     String?
+  contactPhone    String?
+  contactWhatsapp String?
+  contactEmail    String?
+  invoiceTitle    String?
+  taxOffice       String?
+  taxNumber       String?
+  invoiceAddress  String?
+  invoiceEmail    String?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
+  country      Country?      @relation(fields: [countryId], references: [id])
   city         City?         @relation(fields: [cityId], references: [id])
+  district     District?     @relation(fields: [districtId], references: [id])
+  drivers      Driver[]
   reservations Reservation[]
 
   @@index([cityId])
+  @@index([countryId])
+  @@index([districtId])
 }
 
 model Reservation {
   id                    String    @id @default(cuid())
   reference             String    @unique
-  status                String    @default("pending")
+  status                String    @default("confirmed")
+  source                String    @default("manual")
+  sourceLabel           String?
   bookingId             String?   @unique
+  agencyId              String?
 
   supplierId            String?
   supplierPrice         Float?
@@ -252,17 +339,21 @@ model Reservation {
 
   supplier        Supplier?              @relation(fields: [supplierId], references: [id])
   customer        Customer?              @relation(fields: [customerId], references: [id])
+  agency          Agency?                @relation(fields: [agencyId], references: [id])
   assignedVehicle Vehicle?               @relation(fields: [assignedVehicleId], references: [id])
   assignedDriver  Driver?                @relation(fields: [assignedDriverId], references: [id])
   booking         Booking?               @relation(fields: [bookingId], references: [id])
   transfers       Transfer[]
   passengers      Passenger[]
   statusLogs      ReservationStatusLog[]
+  ledgerEntries   LedgerEntry[]
 
   @@index([status])
+  @@index([source])
   @@index([createdAt])
   @@index([supplierId])
   @@index([customerId])
+  @@index([agencyId])
   @@index([bookingId])
 }
 
@@ -315,4 +406,59 @@ model ReservationStatusLog {
   reservation Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
 
   @@index([reservationId])
+}
+
+model BankAccount {
+  id              String   @id @default(cuid())
+  entityType      String
+  entityId        String
+  accountHolder   String
+  bankName        String
+  branch          String?
+  iban            String
+  swift           String?
+  currency        String   @default("EUR")
+  paymentTermDays Int?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([entityType, entityId])
+}
+
+model EntityDocument {
+  id         String    @id @default(cuid())
+  entityType String
+  entityId   String
+  docType    String
+  docNumber  String?
+  issuedAt   DateTime?
+  expiresAt  DateTime?
+  filePath   String
+  fileName   String
+  mimeType   String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([entityType, entityId])
+  @@index([expiresAt])
+}
+
+model LedgerEntry {
+  id            String   @id @default(cuid())
+  entityType    String
+  entityId      String
+  reservationId String?
+  type          String
+  direction     String
+  amount        Float
+  currency      String   @default("EUR")
+  description   String?
+  entryDate     DateTime
+  createdAt     DateTime @default(now())
+
+  reservation Reservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId])
+  @@index([reservationId])
+  @@index([entryDate])
 }

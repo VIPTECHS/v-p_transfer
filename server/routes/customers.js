@@ -68,6 +68,7 @@ router.patch("/:id", requireAdmin, async (req, res) => {
     if (req.body.lastName !== undefined) data.lastName = req.body.lastName;
     if (req.body.email !== undefined) data.email = req.body.email;
     if (req.body.phone !== undefined) data.phone = req.body.phone;
+    if (req.body.whatsapp !== undefined) data.whatsapp = req.body.whatsapp;
     if (req.body.identityNo !== undefined) data.identityNo = req.body.identityNo;
     if (req.body.notes !== undefined) data.notes = req.body.notes;
     if (req.body.isActive !== undefined) data.isActive = Boolean(req.body.isActive);

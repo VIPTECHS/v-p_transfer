@@ -30,11 +30,7 @@ export default function ReportsView() {
 
   return (
     <>
-      <div className="admin-page-header">
-        <h1>Raporlar</h1>
-      </div>
-
-      <div className="settings-tabs" style={{ marginBottom: 16 }}>
+      <div className="settings-tabs">
         <button type="button" className={`settings-tab ${tab === "revenue" ? "active" : ""}`} onClick={() => setTab("revenue")}>
           <BarChart3 size={14} /> Gelir Raporu
         </button>

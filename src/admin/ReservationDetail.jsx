@@ -4,7 +4,7 @@ import {
   fetchReservation, updateReservation, deleteReservation,
   addTransfer, updateTransfer, deleteTransfer,
   addPassenger, updatePassenger, deletePassenger,
-  fetchCustomers, fetchSuppliers, fetchVehicles, fetchDrivers,
+  fetchCustomers, fetchSuppliers, fetchVehicles, fetchDrivers, fetchAgencies,
 } from "../api/admin";
 import StatusBadge from "./components/StatusBadge";
 import PaymentBadge from "./components/PaymentBadge";
@@ -88,6 +88,7 @@ export default function ReservationDetail({ id, onBack }) {
   const [suppliers, setSuppliers] = useState([]);
   const [vehicles, setVehicles] = useState([]);
   const [drivers, setDrivers] = useState([]);
+  const [agencies, setAgencies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -101,15 +102,19 @@ export default function ReservationDetail({ id, onBack }) {
 
   const load = () => {
     setLoading(true);
-    Promise.all([fetchReservation(id), fetchCustomers(), fetchSuppliers(), fetchVehicles(), fetchDrivers()])
-      .then(([r, c, s, v, d]) => {
+    Promise.all([fetchReservation(id), fetchCustomers(), fetchSuppliers(), fetchVehicles(), fetchDrivers(), fetchAgencies()])
+      .then(([r, c, s, v, d, a]) => {
         setReservation(r);
         setCustomers(c);
         setSuppliers(s);
         setVehicles(v.filter((x) => x.isActive));
         setDrivers(d.filter((x) => x.isActive));
+        setAgencies(a);
         setForm({
-          status: r.status,
+          status: r.status === "pending" ? "confirmed" : r.status,
+          source: r.source || "manual",
+          sourceLabel: r.sourceLabel || "",
+          agencyId: r.agencyId || "",
           supplierId: r.supplierId,
           supplierPrice: r.supplierPrice,
           supplierCurrency: r.supplierCurrency,
@@ -463,12 +468,41 @@ export default function ReservationDetail({ id, onBack }) {
               onChange={(e) => setForm({ ...form, status: e.target.value })}
               style={{ background: "#f9fafb", color: "#1a1a2e", border: "1px solid #d1d5db", borderRadius: 6, padding: "4px 8px", fontSize: 12, colorScheme: "light" }}
             >
-              <option value="pending">Bekliyor</option>
               <option value="confirmed">Onaylandı</option>
               <option value="in_progress">Devam Ediyor</option>
               <option value="completed">Tamamlandı</option>
               <option value="cancelled">İptal</option>
             </select>
+          </div>
+          <div style={{ marginBottom: 8, display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <select
+              value={form.source || "manual"}
+              onChange={(e) => setForm({ ...form, source: e.target.value, agencyId: e.target.value === "agency" ? form.agencyId : "" })}
+              style={{ background: "#f9fafb", color: "#1a1a2e", border: "1px solid #d1d5db", borderRadius: 6, padding: "4px 8px", fontSize: 12 }}
+            >
+              <option value="manual">Manuel</option>
+              <option value="web">WEB</option>
+              <option value="agency">Acente</option>
+              <option value="api">API</option>
+            </select>
+            {form.source === "agency" && (
+              <select
+                value={form.agencyId || ""}
+                onChange={(e) => setForm({ ...form, agencyId: e.target.value })}
+                style={{ background: "#f9fafb", border: "1px solid #d1d5db", borderRadius: 6, padding: "4px 8px", fontSize: 12 }}
+              >
+                <option value="">Acente seç</option>
+                {agencies.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
+              </select>
+            )}
+            {form.source === "api" && (
+              <input
+                placeholder="API kaynak adı"
+                value={form.sourceLabel || ""}
+                onChange={(e) => setForm({ ...form, sourceLabel: e.target.value })}
+                style={{ border: "1px solid #d1d5db", borderRadius: 6, padding: "4px 8px", fontSize: 12 }}
+              />
+            )}
           </div>
           <p className="reservation-info-dates">
             Oluşturma Tarihi<br />{formatDateTime(reservation.createdAt)}<br />

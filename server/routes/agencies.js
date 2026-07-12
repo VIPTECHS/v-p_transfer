@@ -1,6 +1,19 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
 import prisma from "../lib/prisma.js";
+import { documentUpload } from "../lib/upload.js";
+import {
+  pickPatchFields,
+  AGENCY_PATCH_FIELDS,
+  agencyInclude,
+  listBankAccounts,
+  listDocuments,
+  createBankAccount,
+  updateBankAccount,
+  deleteBankAccount,
+  createDocument,
+  deleteDocument,
+} from "../lib/entityResources.js";
 
 const router = Router();
 
@@ -11,7 +24,7 @@ router.get("/", async (req, res) => {
     const agencies = await prisma.agency.findMany({
       where,
       orderBy: { name: "asc" },
-      include: { city: { include: { country: true } } },
+      include: agencyInclude,
     });
     const safe = agencies.map(({ passwordHash, ...rest }) => rest);
     return res.json(safe);
@@ -25,13 +38,45 @@ router.get("/:id", async (req, res) => {
   try {
     const agency = await prisma.agency.findUnique({
       where: { id: req.params.id },
-      include: { city: { include: { country: true } } },
+      include: agencyInclude,
     });
     if (!agency) return res.status(404).json({ error: "NOT_FOUND" });
     const { passwordHash, ...safe } = agency;
-    return res.json(safe);
+    const [bankAccounts, documents] = await Promise.all([
+      listBankAccounts("agency", req.params.id),
+      listDocuments("agency", req.params.id),
+    ]);
+    return res.json({ ...safe, bankAccounts, documents });
   } catch (error) {
     console.error("GET /agencies/:id", error);
+    return res.status(500).json({ error: "SERVER_ERROR" });
+  }
+});
+
+router.get("/:id/reservations", async (req, res) => {
+  try {
+    const reservations = await prisma.reservation.findMany({
+      where: { agencyId: req.params.id },
+      include: {
+        customer: true,
+        supplier: true,
+        transfers: { orderBy: { sortOrder: "asc" }, take: 1 },
+        _count: { select: { transfers: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    return res.json(
+      reservations.map((r) => ({
+        ...r,
+        supplierPaymentDate: r.supplierPaymentDate?.toISOString() ?? null,
+        customerPaymentDate: r.customerPaymentDate?.toISOString() ?? null,
+        createdAt: r.createdAt.toISOString(),
+        updatedAt: r.updatedAt.toISOString(),
+        firstTransferDate: r.transfers[0]?.transferDate?.toISOString() ?? null,
+      })),
+    );
+  } catch (error) {
+    console.error("GET /agencies/:id/reservations", error);
     return res.status(500).json({ error: "SERVER_ERROR" });
   }
 });
@@ -54,7 +99,7 @@ router.post("/", async (req, res) => {
         contactName: contactName?.trim() || null,
         address: address?.trim() || null,
       },
-      include: { city: { include: { country: true } } },
+      include: agencyInclude,
     });
     const { passwordHash: _, ...safe } = agency;
     return res.status(201).json(safe);
@@ -67,20 +112,11 @@ router.post("/", async (req, res) => {
 
 router.patch("/:id", async (req, res) => {
   try {
-    const data = {};
-    if (req.body.name) data.name = req.body.name.trim();
-    if (req.body.cityId) data.cityId = req.body.cityId;
-    if (req.body.phone !== undefined) data.phone = req.body.phone?.trim() || null;
-    if (req.body.email !== undefined) data.email = req.body.email?.trim() || null;
-    if (req.body.contactName !== undefined) data.contactName = req.body.contactName?.trim() || null;
-    if (req.body.address !== undefined) data.address = req.body.address?.trim() || null;
-    if (req.body.isActive !== undefined) data.isActive = Boolean(req.body.isActive);
-    if (req.body.webhookUrl !== undefined) data.webhookUrl = req.body.webhookUrl?.trim() || null;
-
+    const data = pickPatchFields(req.body, AGENCY_PATCH_FIELDS);
     const agency = await prisma.agency.update({
       where: { id: req.params.id },
       data,
-      include: { city: { include: { country: true } } },
+      include: agencyInclude,
     });
     const { passwordHash, ...safe } = agency;
     return res.json(safe);
@@ -99,6 +135,79 @@ router.post("/:id/reset-password", async (req, res) => {
     return res.json({ success: true });
   } catch (error) {
     console.error("POST /agencies/:id/reset-password", error);
+    return res.status(500).json({ error: "SERVER_ERROR" });
+  }
+});
+
+router.get("/:id/bank-accounts", async (req, res) => {
+  try {
+    return res.json(await listBankAccounts("agency", req.params.id));
+  } catch (error) {
+    console.error("GET /agencies/:id/bank-accounts", error);
+    return res.status(500).json({ error: "SERVER_ERROR" });
+  }
+});
+
+router.post("/:id/bank-accounts", async (req, res) => {
+  try {
+    const account = await createBankAccount("agency", req.params.id, req.body);
+    return res.status(201).json(account);
+  } catch (error) {
+    if (error.message === "VALIDATION") return res.status(400).json({ error: "VALIDATION" });
+    console.error("POST /agencies/:id/bank-accounts", error);
+    return res.status(500).json({ error: "SERVER_ERROR" });
+  }
+});
+
+router.patch("/:id/bank-accounts/:accountId", async (req, res) => {
+  try {
+    const account = await updateBankAccount(req.params.accountId, "agency", req.params.id, req.body);
+    if (!account) return res.status(404).json({ error: "NOT_FOUND" });
+    return res.json(account);
+  } catch (error) {
+    console.error("PATCH agency bank-account", error);
+    return res.status(500).json({ error: "SERVER_ERROR" });
+  }
+});
+
+router.delete("/:id/bank-accounts/:accountId", async (req, res) => {
+  try {
+    const ok = await deleteBankAccount(req.params.accountId, "agency", req.params.id);
+    if (!ok) return res.status(404).json({ error: "NOT_FOUND" });
+    return res.json({ success: true });
+  } catch (error) {
+    console.error("DELETE agency bank-account", error);
+    return res.status(500).json({ error: "SERVER_ERROR" });
+  }
+});
+
+router.get("/:id/documents", async (req, res) => {
+  try {
+    return res.json(await listDocuments("agency", req.params.id));
+  } catch (error) {
+    console.error("GET /agencies/:id/documents", error);
+    return res.status(500).json({ error: "SERVER_ERROR" });
+  }
+});
+
+router.post("/:id/documents", documentUpload.single("file"), async (req, res) => {
+  try {
+    const doc = await createDocument("agency", req.params.id, req.file, req.body);
+    return res.status(201).json(doc);
+  } catch (error) {
+    if (error.message === "VALIDATION") return res.status(400).json({ error: "VALIDATION" });
+    console.error("POST /agencies/:id/documents", error);
+    return res.status(500).json({ error: "SERVER_ERROR" });
+  }
+});
+
+router.delete("/:id/documents/:docId", async (req, res) => {
+  try {
+    const ok = await deleteDocument(req.params.docId, "agency", req.params.id);
+    if (!ok) return res.status(404).json({ error: "NOT_FOUND" });
+    return res.json({ success: true });
+  } catch (error) {
+    console.error("DELETE agency document", error);
     return res.status(500).json({ error: "SERVER_ERROR" });
   }
 });

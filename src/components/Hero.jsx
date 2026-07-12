@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useI18n } from "../i18n/I18nContext";
+import BookingForm from "./BookingForm";
 
 const HERO_FRAME_COUNT = 300;
 const HERO_PRELOAD_STEP = 8;
@@ -11,7 +12,7 @@ const INTRO_START_DELAY_MS = 1500; // wait after load before the opening video p
 const INTRO_HOLD_MS = 2000; // how long the opening video plays before scroll unlocks
 const INTRO_FADE_MS = 600;
 
-export default function Hero() {
+export default function Hero({ onSearch }) {
   const { t } = useI18n();
   const [frameIndex, setFrameIndex] = useState(0);
   const [sequenceReady, setSequenceReady] = useState(false);
@@ -200,6 +201,8 @@ export default function Hero() {
             />
           </svg>
         </div>
+
+        <BookingForm visible={!introActive} onSearch={onSearch} />
       </div>
     </section>
   );

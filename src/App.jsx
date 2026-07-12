@@ -1,14 +1,10 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import Header from "./components/Header";
 import Hero from "./components/Hero.jsx?scroll-sequence-v=4";
-import BookingSection from "./components/BookingSection";
-import TrustStrip from "./components/TrustStrip";
 import AirportTransfer from "./components/AirportTransfer";
 import Services from "./components/Services";
 import Fleet from "./components/Fleet";
-import Process from "./components/Process";
 import About from "./components/About";
-import FAQ from "./components/FAQ";
 import Blog from "./components/Blog";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
@@ -17,7 +13,8 @@ import BlogPost from "./components/BlogPost";
 import LandingPage from "./components/LandingPage";
 import SitePage from "./components/SitePage";
 import Testimonials from "./components/Testimonials";
-import Gallery from "./components/Gallery";
+import MediaPage from "./components/MediaPage";
+import FAQPage from "./components/FAQPage";
 import ExperiencePage from "./components/ExperiencePage";
 import { getLandingPage } from "./data/landingPages";
 import { getSitePage } from "./data/sitePages";
@@ -49,6 +46,10 @@ function parseRoute(pathname) {
   const slug = clean.replace(/^\//, "").replace(/\/$/, "");
 
   if (clean === "/deneyim") return { type: "experience" };
+
+  if (clean === "/medyada-biz") return { type: "media" };
+
+  if (clean === "/yardim") return { type: "faq" };
 
   const landing = getLandingPage(slug);
   if (landing) return { type: "landing", page: landing };
@@ -125,6 +126,28 @@ export default function App() {
     );
   }
 
+  if (route.type === "faq") {
+    return (
+      <div id="top">
+        <Header isHome={false} navigate={navigate} onBook={startBooking} />
+        <FAQPage navigate={navigate} />
+        <Footer navigate={navigate} />
+        <WhatsAppCTA />
+      </div>
+    );
+  }
+
+  if (route.type === "media") {
+    return (
+      <div id="top">
+        <Header isHome={false} navigate={navigate} onBook={startBooking} />
+        <MediaPage navigate={navigate} />
+        <Footer navigate={navigate} />
+        <WhatsAppCTA />
+      </div>
+    );
+  }
+
   if (route.type === "experience") {
     return (
       <div id="top">
@@ -151,17 +174,12 @@ export default function App() {
       <HomeSeo />
       <Header isHome navigate={navigate} onBook={startBooking} />
       <main>
-        <Hero />
-        <BookingSection onSearch={setBookingData} />
-        <TrustStrip />
+        <Hero onSearch={setBookingData} />
         <AirportTransfer />
-        <Services />
         <Fleet onSearch={setBookingData} />
-        <Process />
+        <Services />
         <About />
         <Testimonials />
-        <Gallery />
-        <FAQ />
         <Blog navigate={navigate} />
         <Contact />
       </main>

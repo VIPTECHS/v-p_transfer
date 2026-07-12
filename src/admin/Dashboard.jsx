@@ -16,14 +16,13 @@ import {
   Car,
   UserCog,
 } from "lucide-react";
-import { fetchReservations, fetchCustomers, fetchSuppliers, fetchPaymentSummary } from "../api/admin";
+import { fetchReservations, fetchCustomers, fetchSuppliers, fetchPaymentSummary, fetchExpiringDocuments } from "../api/admin";
 import { getMonthMatrix, isSameDay, startOfDay } from "../utils/datetime";
 import StatusBadge from "./components/StatusBadge";
 import FlightStatus from "./components/FlightStatus";
 import { AdminChartCard, AdminPieChart, countBy } from "./components/AdminChart";
 
 const STATUS_LABELS = {
-  pending: "Bekliyor",
   confirmed: "Onaylandı",
   in_progress: "Devam Ediyor",
   completed: "Tamamlandı",
@@ -124,6 +123,7 @@ export default function Dashboard({ navigate }) {
   const [customerCount, setCustomerCount] = useState(0);
   const [supplierCount, setSupplierCount] = useState(0);
   const [summary, setSummary] = useState(null);
+  const [expiringDocs, setExpiringDocs] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [viewDate, setViewDate] = useState(() => new Date());
@@ -135,12 +135,14 @@ export default function Dashboard({ navigate }) {
       fetchCustomers(),
       fetchSuppliers(),
       fetchPaymentSummary().catch(() => null),
+      fetchExpiringDocuments(30).catch(() => []),
     ])
-      .then(([r, c, s, ps]) => {
+      .then(([r, c, s, ps, docs]) => {
         setReservations(r);
         setCustomerCount(c.length);
         setSupplierCount(s.length);
         setSummary(ps);
+        setExpiringDocs(docs);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -182,7 +184,7 @@ export default function Dashboard({ navigate }) {
 
   if (loading) return <div className="admin-loading">Yükleniyor...</div>;
 
-  const pending = reservations.filter((r) => r.status === "pending").length;
+  const inProgress = reservations.filter((r) => r.status === "in_progress").length;
   const cells = getMonthMatrix(viewDate);
   const today = startOfDay(new Date());
   const todayCount = (transfersByDay.get(today.getTime()) || []).length;
@@ -198,10 +200,6 @@ export default function Dashboard({ navigate }) {
 
   return (
     <>
-      <div className="admin-page-header">
-        <h1>Panel</h1>
-      </div>
-
       <div className="admin-stats-row admin-dash-stats">
         <StatCard
           icon={<CalendarCheck size={20} />}
@@ -212,8 +210,8 @@ export default function Dashboard({ navigate }) {
         <StatCard
           tone="yellow"
           icon={<CalendarCheck size={20} />}
-          value={pending}
-          label="Bekleyen"
+          value={inProgress}
+          label="Devam Ediyor"
           onClick={() => navigate("reservations")}
         />
         <StatCard
@@ -234,12 +232,34 @@ export default function Dashboard({ navigate }) {
           <StatCard
             tone="green"
             icon={<TrendingUp size={20} />}
-            value={`€ ${(summary.totalProfit || 0).toFixed(2).replace(".", ",")}`}
-            label="Toplam Kâr"
-            onClick={() => navigate("reports")}
+            value={`€ ${((summary.customers?.totalReceivable || 0) - (summary.suppliers?.totalPayable || 0)).toFixed(2).replace(".", ",")}`}
+            label="Net Pozisyon"
+            onClick={() => navigate("payments")}
           />
         )}
       </div>
+
+      {expiringDocs.length > 0 && (
+        <div className="admin-card" style={{ marginBottom: 16, borderColor: "#f59e0b" }}>
+          <div className="admin-card-header">
+            <h2>Süresi Dolacak Belgeler</h2>
+            <span className="doc-expiry doc-expiry--warning">{expiringDocs.length} belge</span>
+          </div>
+          <table className="admin-table">
+            <thead><tr><th>Firma</th><th>Belge</th><th>Geçerlilik</th><th>Kalan</th></tr></thead>
+            <tbody>
+              {expiringDocs.slice(0, 5).map((d) => (
+                <tr key={d.id}>
+                  <td>{d.entityName}</td>
+                  <td>{d.docType}</td>
+                  <td>{d.expiresAt ? new Date(d.expiresAt).toLocaleDateString("tr-TR") : "—"}</td>
+                  <td><span className={d.daysLeft <= 7 ? "doc-expiry doc-expiry--expired" : "doc-expiry doc-expiry--warning"}>{d.daysLeft} gün</span></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* Calendar + today's transfers */}
       <div className="admin-card dash-planner">

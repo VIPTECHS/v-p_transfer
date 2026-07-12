@@ -40,6 +40,13 @@ export default function Header({ isHome = true, navigate, onBook }) {
     goHome(href.replace(/^#/, ""));
   };
 
+  const handlePageLink = (event, href) => {
+    event.preventDefault();
+    setOpen(false);
+    const prefix = (typeof window !== "undefined" && window.location.pathname.match(LANG_PREFIX_RE)?.[0]) || "";
+    navigate?.(`${prefix}${href}`);
+  };
+
   return (
     <header className={`header ${scrolled ? "scrolled" : ""}`}>
       <a
@@ -59,15 +66,21 @@ export default function Header({ isHome = true, navigate, onBook }) {
         <span /><span /><span />
       </button>
       <nav className={open ? "nav open" : "nav"} aria-label="Main navigation">
-        {navItems.map(({ key, href }) => (
-          <a
-            href={isHome ? href : `${homeHref}${href}`}
-            onClick={(e) => handleAnchor(e, href)}
-            key={key}
-          >
-            {t(`nav.${key}`)}
-          </a>
-        ))}
+        {navItems.map(({ key, href }) =>
+          href.startsWith("#") ? (
+            <a
+              href={isHome ? href : `${homeHref}${href}`}
+              onClick={(e) => handleAnchor(e, href)}
+              key={key}
+            >
+              {t(`nav.${key}`)}
+            </a>
+          ) : (
+            <a href={href} onClick={(e) => handlePageLink(e, href)} key={key}>
+              {t(`nav.${key}`)}
+            </a>
+          ),
+        )}
       </nav>
       <div className="header-actions">
         <button

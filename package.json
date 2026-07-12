@@ -35,12 +35,13 @@
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^1.21.0",
     "maplibre-gl": "^5.24.0",
+    "multer": "^2.2.0",
+    "prisma": "^6.19.0",
     "qrcode": "^1.5.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwind-merge": "^3.6.0",
-    "zod": "^4.4.3",
-    "prisma": "^6.19.0"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/geojson": "^7946.0.16",

@@ -335,6 +335,7 @@ type LocationMapPopoverProps = {
   onQueryChange: (query: string) => void;
   onConfirm: (point: LocationPoint) => void;
   onClose: () => void;
+  className?: string;
 };
 
 export default function LocationMapPopover({
@@ -345,6 +346,7 @@ export default function LocationMapPopover({
   onQueryChange,
   onConfirm,
   onClose,
+  className = "",
 }: LocationMapPopoverProps) {
   const { t } = useI18n();
   const [draft, setDraft] = useState<LocationPoint | null>(value);
@@ -365,7 +367,7 @@ export default function LocationMapPopover({
   }, [draft, onConfirm, onClose]);
 
   return (
-    <div className="location-map-popover tailwind-root">
+    <div className={`location-map-popover tailwind-root ${className}`.trim()}>
       <div className="location-map-popover-header">
         <strong>{variant === "from" ? t("booking.fromLabel") : t("booking.toLabel")}</strong>
         <button type="button" className="location-map-close" onClick={onClose} aria-label={t("map.close")}>

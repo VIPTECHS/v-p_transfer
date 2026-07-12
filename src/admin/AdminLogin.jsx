@@ -29,7 +29,7 @@ export default function AdminLogin({ onSuccess }) {
   return (
     <div className="admin-login">
       <form className="admin-login-card" onSubmit={handleSubmit}>
-        <h1>VIP Transfer</h1>
+        <h1>Transfer</h1>
         <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
           <button type="button" className={`admin-btn ${mode === "admin" ? "admin-btn--gold" : "admin-btn--ghost"}`} onClick={() => setMode("admin")} style={{ flex: 1 }}>
             Admin

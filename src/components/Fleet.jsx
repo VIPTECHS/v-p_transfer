@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { fleetItems } from "../data/content";
+import { useMemo, useState } from "react";
+import { fleetItems, fleetPreviewKeys } from "../data/content";
 import { useI18n } from "../i18n/I18nContext";
 import Icon from "./Icon";
 import SectionHeading from "./SectionHeading";
@@ -135,6 +135,21 @@ function VehicleCard({ item, onSearch }) {
 
 export default function Fleet({ onSearch }) {
   const { t } = useI18n();
+  const [showAll, setShowAll] = useState(false);
+
+  const previewItems = useMemo(() => {
+    const byKey = new Map(fleetItems.map((item) => [item.key, item]));
+    return fleetPreviewKeys.map((key) => byKey.get(key)).filter(Boolean);
+  }, []);
+
+  const visibleItems = useMemo(() => {
+    if (!showAll) return previewItems;
+    const previewSet = new Set(fleetPreviewKeys);
+    const rest = fleetItems.filter((item) => !previewSet.has(item.key));
+    return [...previewItems, ...rest];
+  }, [previewItems, showAll]);
+
+  const canToggle = fleetItems.length > previewItems.length;
 
   return (
     <section className="section fleet" id="fleet">
@@ -145,11 +160,34 @@ export default function Fleet({ onSearch }) {
         text={t("fleet.text")}
       />
       <p className="fleet-intro">{t("fleet.intro")}</p>
-      <div className="fleet-grid">
-        {fleetItems.map((item) => (
+      <div className={`fleet-grid${showAll ? " fleet-grid--all" : " fleet-grid--preview"}`}>
+        {visibleItems.map((item) => (
           <VehicleCard key={item.key} item={item} onSearch={onSearch} />
         ))}
       </div>
+      {canToggle && (
+        <div className="fleet-more">
+          <button
+            type="button"
+            className="fleet-more-btn"
+            aria-expanded={showAll}
+            onClick={() => {
+              setShowAll((prev) => {
+                const next = !prev;
+                if (!next) {
+                  requestAnimationFrame(() => {
+                    document.getElementById("fleet")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  });
+                }
+                return next;
+              });
+            }}
+          >
+            {showAll ? t("fleet.showLess") : t("fleet.viewAll")}
+            <Icon name="arrow" size={16} />
+          </button>
+        </div>
+      )}
     </section>
   );
 }

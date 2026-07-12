@@ -3,18 +3,23 @@ import prisma from "../lib/prisma.js";
 import { generateReservationReference } from "../lib/reference.js";
 import { requireAdmin } from "../middleware/auth.js";
 import { reservationCreateSchema, transferSchema, passengerSchema, parseBody } from "../lib/validation.js";
+import { syncReservationLedger } from "../lib/ledger.js";
 
 const router = Router();
 
-const VALID_STATUSES = ["pending", "confirmed", "in_progress", "completed", "cancelled"];
+const VALID_STATUSES = ["confirmed", "in_progress", "completed", "cancelled"];
+const VALID_SOURCES = ["web", "agency", "manual", "api"];
 
 function serializeReservation(r) {
+  const firstTransfer = r.transfers?.[0];
   return {
     ...r,
     supplierPaymentDate: r.supplierPaymentDate?.toISOString() ?? null,
     customerPaymentDate: r.customerPaymentDate?.toISOString() ?? null,
     createdAt: r.createdAt.toISOString(),
     updatedAt: r.updatedAt.toISOString(),
+    firstTransferDate: firstTransfer?.transferDate?.toISOString?.() ?? firstTransfer?.transferDate ?? null,
+    transferCount: r._count?.transfers ?? r.transfers?.length ?? 0,
     transfers: r.transfers?.map((t) => ({
       ...t,
       transferDate: t.transferDate.toISOString(),
@@ -35,6 +40,7 @@ function serializeReservation(r) {
 const reservationInclude = {
   supplier: true,
   customer: true,
+  agency: true,
   assignedVehicle: true,
   assignedDriver: true,
   transfers: { orderBy: { sortOrder: "asc" } },
@@ -51,10 +57,11 @@ async function logStatus(reservationId, fromStatus, toStatus, note) {
 // GET /reservations
 router.get("/", requireAdmin, async (req, res) => {
   try {
-    const { status, from, to, q } = req.query;
+    const { status, from, to, q, source } = req.query;
     const where = {};
 
     if (status && VALID_STATUSES.includes(status)) where.status = status;
+    if (source && VALID_SOURCES.includes(source)) where.source = source;
 
     if (q?.trim()) {
       const term = q.trim();
@@ -66,14 +73,27 @@ router.get("/", requireAdmin, async (req, res) => {
       ];
     }
 
-    const reservations = await prisma.reservation.findMany({
+    let reservations = await prisma.reservation.findMany({
       where,
       include: {
         ...reservationInclude,
         statusLogs: false,
+        _count: { select: { transfers: true } },
       },
       orderBy: { createdAt: "desc" },
     });
+
+    if (from || to) {
+      const fromDate = from ? new Date(from) : null;
+      const toDate = to ? new Date(to) : null;
+      reservations = reservations.filter((r) => {
+        const d = r.transfers[0]?.transferDate;
+        if (!d) return false;
+        if (fromDate && d < fromDate) return false;
+        if (toDate && d > toDate) return false;
+        return true;
+      });
+    }
 
     return res.json(reservations.map(serializeReservation));
   } catch (error) {
@@ -108,7 +128,10 @@ router.post("/", requireAdmin, async (req, res) => {
     const data = {
       ...rest,
       reference: await generateReservationReference(),
-      status: rest.status || "pending",
+      status: rest.status || "confirmed",
+      source: rest.source || "manual",
+      sourceLabel: rest.sourceLabel || null,
+      agencyId: rest.agencyId || null,
       supplierPaymentDate: rest.supplierPaymentDate ? new Date(rest.supplierPaymentDate) : null,
       customerPaymentDate: rest.customerPaymentDate ? new Date(rest.customerPaymentDate) : null,
     };
@@ -138,6 +161,7 @@ router.post("/", requireAdmin, async (req, res) => {
     });
 
     await logStatus(reservation.id, null, reservation.status, "Rezervasyon oluşturuldu");
+    await syncReservationLedger(reservation.id);
     return res.status(201).json(serializeReservation(reservation));
   } catch (error) {
     console.error("POST /reservations", error);
@@ -153,6 +177,9 @@ router.patch("/:id", requireAdmin, async (req, res) => {
 
     const data = {};
     if (req.body.status && VALID_STATUSES.includes(req.body.status)) data.status = req.body.status;
+    if (req.body.source && VALID_SOURCES.includes(req.body.source)) data.source = req.body.source;
+    if (req.body.sourceLabel !== undefined) data.sourceLabel = req.body.sourceLabel || null;
+    if (req.body.agencyId !== undefined) data.agencyId = req.body.agencyId || null;
     if (req.body.supplierId !== undefined) data.supplierId = req.body.supplierId || null;
     if (req.body.supplierPrice !== undefined) data.supplierPrice = req.body.supplierPrice;
     if (req.body.supplierCurrency) data.supplierCurrency = req.body.supplierCurrency;
@@ -180,6 +207,7 @@ router.patch("/:id", requireAdmin, async (req, res) => {
       await logStatus(reservation.id, existing.status, data.status, req.body.statusNote || null);
     }
 
+    await syncReservationLedger(reservation.id);
     return res.json(serializeReservation(reservation));
   } catch (error) {
     console.error("PATCH /reservations/:id", error);

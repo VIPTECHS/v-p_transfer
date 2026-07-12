@@ -15,13 +15,15 @@ function PlusIcon({ open }) {
   );
 }
 
-export default function FAQ() {
+export default function FAQ({ showHeading = true }) {
   const { t } = useI18n();
   const [activeFaq, setActiveFaq] = useState(0);
 
   return (
     <section className="section faq" id="help">
-      <SectionHeading center eyebrow={t("faq.eyebrow")} title={t("faq.title")} />
+      {showHeading && (
+        <SectionHeading center eyebrow={t("faq.eyebrow")} title={t("faq.title")} />
+      )}
       <div className="faq-list">
         {faqKeys.map((key, index) => {
           const open = activeFaq === index;

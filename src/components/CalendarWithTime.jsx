@@ -250,8 +250,11 @@ export default function CalendarWithTime({
   value,
   onChange,
   showEndTime = false,
+  mode = "full",
   minDate = startOfDay(new Date()),
 }) {
+  const dateOnly = mode === "date";
+  const timeOnly = mode === "time";
   const { t, lang } = useI18n();
   const [viewDate, setViewDate] = useState(() => new Date(value.getFullYear(), value.getMonth(), 1));
   const [startTime, setStartTime] = useState(() => dateToTimeValue(value));
@@ -332,6 +335,27 @@ export default function CalendarWithTime({
     }
   };
 
+  if (timeOnly) {
+    return (
+      <div className="calendar-card calendar-card--time-only">
+        <div className="calendar-card-body">
+          <div className="calendar-header">
+            <span style={{ width: 38 }} />
+            <strong>{t("calendar.startTime")}</strong>
+            <span style={{ width: 38 }} />
+          </div>
+          <TimePicker
+            value={startTime}
+            onChange={(timeStr) => {
+              setStartTime(timeStr);
+              emitChange(value, timeStr, endTime);
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="calendar-card">
       {clockTarget ? (
@@ -402,27 +426,29 @@ export default function CalendarWithTime({
             )}
           </div>
 
-          <div className="calendar-card-footer">
-            <div className="calendar-time-fields">
-              <div className="calendar-time-field">
-                <span>{t("calendar.startTime")}</span>
-                <button type="button" className="calendar-time-input" onClick={() => handleTimeClick("start")}>
-                  <span className="calendar-time-value">{startTime}</span>
-                  <ClockIcon />
-                </button>
-              </div>
-
-              {showEndTime && (
+          {!dateOnly && (
+            <div className="calendar-card-footer">
+              <div className="calendar-time-fields">
                 <div className="calendar-time-field">
-                  <span>{t("calendar.endTime")}</span>
-                  <button type="button" className="calendar-time-input" onClick={() => handleTimeClick("end")}>
-                    <span className="calendar-time-value">{endTime}</span>
+                  <span>{t("calendar.startTime")}</span>
+                  <button type="button" className="calendar-time-input" onClick={() => handleTimeClick("start")}>
+                    <span className="calendar-time-value">{startTime}</span>
                     <ClockIcon />
                   </button>
                 </div>
-              )}
+
+                {showEndTime && (
+                  <div className="calendar-time-field">
+                    <span>{t("calendar.endTime")}</span>
+                    <button type="button" className="calendar-time-input" onClick={() => handleTimeClick("end")}>
+                      <span className="calendar-time-value">{endTime}</span>
+                      <ClockIcon />
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </>
       )}
     </div>

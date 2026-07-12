@@ -123,6 +123,26 @@ export function createCity(data) { return request("/cities", { method: "POST", b
 export function updateCity(id, data) { return request(`/cities/${id}`, { method: "PATCH", body: JSON.stringify(data) }); }
 export function deleteCity(id) { return request(`/cities/${id}`, { method: "DELETE" }); }
 
+export function fetchDistricts(params = {}) {
+  const query = new URLSearchParams();
+  if (params.cityId) query.set("cityId", params.cityId);
+  if (params.active) query.set("active", "true");
+  const qs = query.toString();
+  return request(`/districts${qs ? `?${qs}` : ""}`);
+}
+export function createDistrict(data) { return request("/districts", { method: "POST", body: JSON.stringify(data) }); }
+export function updateDistrict(id, data) { return request(`/districts/${id}`, { method: "PATCH", body: JSON.stringify(data) }); }
+export function deleteDistrict(id) { return request(`/districts/${id}`, { method: "DELETE" }); }
+
+export function fetchLocations(params = {}) {
+  const query = new URLSearchParams();
+  if (params.cityId) query.set("cityId", params.cityId);
+  if (params.districtId) query.set("districtId", params.districtId);
+  if (params.type) query.set("type", params.type);
+  const qs = query.toString();
+  return request(`/locations${qs ? `?${qs}` : ""}`);
+}
+
 export function fetchAgencies(params = {}) {
   const query = new URLSearchParams();
   if (params.cityId) query.set("cityId", params.cityId);
@@ -132,6 +152,50 @@ export function fetchAgencies(params = {}) {
 export function createAgency(data) { return request("/agencies", { method: "POST", body: JSON.stringify(data) }); }
 export function updateAgency(id, data) { return request(`/agencies/${id}`, { method: "PATCH", body: JSON.stringify(data) }); }
 export function resetAgencyPassword(id, password) { return request(`/agencies/${id}/reset-password`, { method: "POST", body: JSON.stringify({ password }) }); }
+export function fetchAgency(id) { return request(`/agencies/${id}`); }
+export function fetchAgencyReservations(id) { return request(`/agencies/${id}/reservations`); }
+
+async function uploadRequest(path, formData) {
+  const response = await fetch(`${API_URL.replace(/\/$/, "")}${path}`, {
+    method: "POST",
+    headers: { ...adminHeaders() },
+    body: formData,
+  });
+  if (!response.ok) throw new Error("API_ERROR");
+  return response.json();
+}
+
+export function uploadSupplierDocument(supplierId, formData) {
+  return uploadRequest(`/suppliers/${supplierId}/documents`, formData);
+}
+export function deleteSupplierDocument(supplierId, docId) {
+  return request(`/suppliers/${supplierId}/documents/${docId}`, { method: "DELETE" });
+}
+export function createSupplierBankAccount(supplierId, data) {
+  return request(`/suppliers/${supplierId}/bank-accounts`, { method: "POST", body: JSON.stringify(data) });
+}
+export function updateSupplierBankAccount(supplierId, accountId, data) {
+  return request(`/suppliers/${supplierId}/bank-accounts/${accountId}`, { method: "PATCH", body: JSON.stringify(data) });
+}
+export function deleteSupplierBankAccount(supplierId, accountId) {
+  return request(`/suppliers/${supplierId}/bank-accounts/${accountId}`, { method: "DELETE" });
+}
+
+export function uploadAgencyDocument(agencyId, formData) {
+  return uploadRequest(`/agencies/${agencyId}/documents`, formData);
+}
+export function deleteAgencyDocument(agencyId, docId) {
+  return request(`/agencies/${agencyId}/documents/${docId}`, { method: "DELETE" });
+}
+export function createAgencyBankAccount(agencyId, data) {
+  return request(`/agencies/${agencyId}/bank-accounts`, { method: "POST", body: JSON.stringify(data) });
+}
+export function updateAgencyBankAccount(agencyId, accountId, data) {
+  return request(`/agencies/${agencyId}/bank-accounts/${accountId}`, { method: "PATCH", body: JSON.stringify(data) });
+}
+export function deleteAgencyBankAccount(agencyId, accountId) {
+  return request(`/agencies/${agencyId}/bank-accounts/${accountId}`, { method: "DELETE" });
+}
 
 // --- Agency Panel API ---
 export function fetchAgencyProfile() { return request("/agency/profile"); }
@@ -213,6 +277,14 @@ export function fetchOperations(date) {
   return request(`/operations${query}`);
 }
 
+export function fetchCalendarTransfers(params = {}) {
+  const query = new URLSearchParams();
+  if (params.from) query.set("from", params.from);
+  if (params.to) query.set("to", params.to);
+  const qs = query.toString();
+  return request(`/operations/calendar${qs ? `?${qs}` : ""}`);
+}
+
 export function fetchDrivers() {
   return request("/drivers");
 }
@@ -244,6 +316,7 @@ export function fetchReservations(params = {}) {
   if (params.from) query.set("from", params.from);
   if (params.to) query.set("to", params.to);
   if (params.q) query.set("q", params.q);
+  if (params.source) query.set("source", params.source);
   const qs = query.toString();
   return request(`/reservations${qs ? `?${qs}` : ""}`);
 }
@@ -294,6 +367,19 @@ export function fetchPayments(params = {}) {
   return request(`/payments${qs ? `?${qs}` : ""}`);
 }
 export function fetchPaymentSummary() { return request("/payments/summary"); }
+export function fetchCustomerPayments() { return request("/payments/customers"); }
+export function fetchSupplierPayments() { return request("/payments/suppliers"); }
+export function fetchAgencyPayments() { return request("/payments/agencies"); }
+
+export function fetchLedger(entityType, entityId) {
+  return request(`/ledger/${entityType}/${entityId}`);
+}
+export function createLedgerAdjustment(entityType, entityId, data) {
+  return request(`/ledger/${entityType}/${entityId}/adjustment`, { method: "POST", body: JSON.stringify(data) });
+}
+export function fetchExpiringDocuments(days = 30) {
+  return request(`/documents/expiring?days=${days}`);
+}
 
 // --- Flight tracking API ---
 export function fetchFlightStatus(code, date) {

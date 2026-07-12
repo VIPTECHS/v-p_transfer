@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Search, Pencil, X, Check } from "lucide-react";
 import { fetchCustomers, createCustomer, updateCustomer } from "../api/admin";
-import { AdminBarChart, AdminChartCard } from "./components/AdminChart";
+import AdminToolbar from "./components/AdminToolbar";
 
 export default function CustomersList() {
   const [customers, setCustomers] = useState([]);
@@ -9,7 +9,7 @@ export default function CustomersList() {
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState(null);
-  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", identityNo: "", notes: "" });
+  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", whatsapp: "", identityNo: "", notes: "" });
 
   const load = () => {
     setLoading(true);
@@ -24,13 +24,13 @@ export default function CustomersList() {
   const handleSearch = (e) => { e.preventDefault(); load(); };
 
   const resetForm = () => {
-    setForm({ firstName: "", lastName: "", email: "", phone: "", identityNo: "", notes: "" });
+    setForm({ firstName: "", lastName: "", email: "", phone: "", whatsapp: "", identityNo: "", notes: "" });
     setShowForm(false);
     setEditId(null);
   };
 
   const handleEdit = (c) => {
-    setForm({ firstName: c.firstName, lastName: c.lastName || "", email: c.email || "", phone: c.phone || "", identityNo: c.identityNo || "", notes: c.notes || "" });
+    setForm({ firstName: c.firstName, lastName: c.lastName || "", email: c.email || "", phone: c.phone || "", whatsapp: c.whatsapp || "", identityNo: c.identityNo || "", notes: c.notes || "" });
     setEditId(c.id);
     setShowForm(true);
   };
@@ -38,11 +38,8 @@ export default function CustomersList() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (editId) {
-        await updateCustomer(editId, form);
-      } else {
-        await createCustomer(form);
-      }
+      if (editId) await updateCustomer(editId, form);
+      else await createCustomer(form);
       resetForm();
       load();
     } catch {
@@ -50,39 +47,26 @@ export default function CustomersList() {
     }
   };
 
-  const contactChartData = [
-    { label: "E-posta var", value: customers.filter((c) => c.email).length, color: "#3b82f6" },
-    { label: "Telefon var", value: customers.filter((c) => c.phone).length, color: "#16a34a" },
-    { label: "Her ikisi", value: customers.filter((c) => c.email && c.phone).length, color: "#8b5cf6" },
-  ];
-
   return (
     <>
-      <div className="admin-page-header">
-        <h1>Müşteriler</h1>
-        <button type="button" className="admin-btn admin-btn--primary" onClick={() => { resetForm(); setShowForm(true); }}>
-          <Plus size={14} /> Yeni Müşteri
-        </button>
+      <div className="admin-page-header admin-page-header--actions-only">
+        <div className="admin-page-header__actions">
+          <button type="button" className="admin-btn admin-btn--primary" onClick={() => { resetForm(); setShowForm(true); }}>
+            <Plus size={14} /> Yeni Müşteri
+          </button>
+        </div>
       </div>
 
-      <div className="admin-filters">
+      <AdminToolbar>
         <form onSubmit={handleSearch} className="admin-search-form">
           <Search size={14} className="admin-search-icon" />
-          <input type="text" placeholder="Ad, soyad, email ara..." value={search} onChange={(e) => setSearch(e.target.value)} />
+          <input type="text" placeholder="Ad, soyad veya e-posta ara..." value={search} onChange={(e) => setSearch(e.target.value)} />
         </form>
-      </div>
-
-      {!loading && (
-        <div className="admin-page-charts">
-          <AdminChartCard title="İletişim Bilgileri" subtitle="Müşteri kayıtlarındaki iletişim alanları">
-            <AdminBarChart data={contactChartData} />
-          </AdminChartCard>
-        </div>
-      )}
+      </AdminToolbar>
 
       {showForm && (
-        <div className="admin-card" style={{ marginBottom: 16 }}>
-          <h3 style={{ marginBottom: 12 }}>{editId ? "Müşteri Düzenle" : "Yeni Müşteri"}</h3>
+        <div className="admin-card admin-form-panel">
+          <h3>{editId ? "Müşteri Düzenle" : "Yeni Müşteri"}</h3>
           <form onSubmit={handleSubmit} className="admin-form-grid">
             <div className="detail-field">
               <label>Ad *</label>
@@ -93,7 +77,7 @@ export default function CustomersList() {
               <input type="text" value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} />
             </div>
             <div className="detail-field">
-              <label>Email</label>
+              <label>E-posta</label>
               <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
             </div>
             <div className="detail-field">
@@ -101,12 +85,16 @@ export default function CustomersList() {
               <input type="text" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
             </div>
             <div className="detail-field">
+              <label>WhatsApp</label>
+              <input type="text" value={form.whatsapp} onChange={(e) => setForm({ ...form, whatsapp: e.target.value })} />
+            </div>
+            <div className="detail-field">
               <label>TCKN / Pasaport</label>
               <input type="text" value={form.identityNo} onChange={(e) => setForm({ ...form, identityNo: e.target.value })} />
             </div>
-            <div className="detail-field">
+            <div className="detail-field detail-field--full">
               <label>Notlar</label>
-              <textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+              <textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={3} />
             </div>
             <div className="admin-form-actions">
               <button type="submit" className="admin-btn admin-btn--primary"><Check size={14} /> Kaydet</button>
@@ -119,28 +107,28 @@ export default function CustomersList() {
       {loading ? (
         <div className="admin-loading">Yükleniyor...</div>
       ) : (
-        <div className="admin-card">
+        <div className="admin-card admin-table-wrap">
           <table className="admin-table">
             <thead>
               <tr>
-                <th>Ad</th>
-                <th>Soyad</th>
-                <th>Email</th>
+                <th>Ad Soyad</th>
+                <th>E-posta</th>
                 <th>Telefon</th>
-                <th>Rez. Sayısı</th>
+                <th>WhatsApp</th>
+                <th>Rezervasyon</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
               {customers.map((c) => (
                 <tr key={c.id}>
-                  <td>{c.firstName}</td>
-                  <td>{c.lastName || "—"}</td>
+                  <td>{c.firstName} {c.lastName || ""}</td>
                   <td>{c.email || "—"}</td>
                   <td>{c.phone || "—"}</td>
+                  <td>{c.whatsapp || "—"}</td>
                   <td>{c._count?.reservations ?? 0}</td>
                   <td>
-                    <button type="button" className="admin-btn admin-btn--ghost" onClick={() => handleEdit(c)}>
+                    <button type="button" className="admin-btn admin-btn--ghost admin-btn--sm" onClick={() => handleEdit(c)}>
                       <Pencil size={14} />
                     </button>
                   </td>

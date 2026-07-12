@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useI18n } from "../i18n/I18nContext";
 
 const LocationMapPopover = lazy(() => import("./LocationMapPopover"));
@@ -21,6 +22,7 @@ export default function LocationMapField({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState(value?.label ?? "");
   const rootRef = useRef(null);
+  const popoverRef = useRef(null);
 
   useEffect(() => {
     setQuery(value?.label ?? "");
@@ -30,9 +32,9 @@ export default function LocationMapField({
     if (!open) return undefined;
 
     const handlePointer = (event) => {
-      if (!rootRef.current?.contains(event.target)) {
-        setOpen(false);
-      }
+      const inTrigger = rootRef.current?.contains(event.target);
+      const inPopover = popoverRef.current?.contains(event.target);
+      if (!inTrigger && !inPopover) setOpen(false);
     };
 
     const handleEscape = (event) => {
@@ -46,6 +48,29 @@ export default function LocationMapField({
       document.removeEventListener("keydown", handleEscape);
     };
   }, [open]);
+
+  const popover = open && typeof document !== "undefined"
+    ? createPortal(
+        <div ref={popoverRef}>
+          <Suspense fallback={<div className="location-map-popover location-map-popover--portal location-map-loading">{t("map.loading")}</div>}>
+            <LocationMapPopover
+              variant={variant}
+              value={value}
+              other={other}
+              query={query}
+              onQueryChange={setQuery}
+              onConfirm={(point) => {
+                setQuery(point.label);
+                onChange(point);
+              }}
+              onClose={() => setOpen(false)}
+              className="location-map-popover--portal"
+            />
+          </Suspense>
+        </div>,
+        document.body,
+      )
+    : null;
 
   return (
     <div className={`location-field ${open ? "open" : ""}`} ref={rootRef}>
@@ -75,23 +100,7 @@ export default function LocationMapField({
           </button>
         )}
       </div>
-
-      {open && (
-        <Suspense fallback={<div className="location-map-popover location-map-loading">{t("map.loading")}</div>}>
-          <LocationMapPopover
-            variant={variant}
-            value={value}
-            other={other}
-            query={query}
-            onQueryChange={setQuery}
-            onConfirm={(point) => {
-              setQuery(point.label);
-              onChange(point);
-            }}
-            onClose={() => setOpen(false)}
-          />
-        </Suspense>
-      )}
+      {popover}
     </div>
   );
 }

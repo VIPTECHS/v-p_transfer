@@ -5,7 +5,7 @@ const phoneSchema = z.string().min(6).max(30);
 const labelSchema = z.string().min(2).max(500);
 
 export const bookingCreateSchema = z.object({
-  type: z.enum(["transfer", "hourly"]).default("transfer"),
+  type: z.enum(["transfer", "chauffeur", "hourly", "group", "events"]).default("transfer"),
   pickupAt: z.string().min(1),
   from: z.string().min(2).max(500).optional(),
   fromLabel: z.string().min(2).max(500).optional(),
@@ -33,7 +33,7 @@ export const bookingCreateSchema = z.object({
   if (!from) {
     ctx.addIssue({ code: "custom", message: "INVALID_FROM", path: ["from"] });
   }
-  if (data.type === "transfer") {
+  if (data.type !== "hourly") {
     const to = (data.to || data.toLabel || "").trim();
     if (!to) {
       ctx.addIssue({ code: "custom", message: "INVALID_TO", path: ["to"] });
@@ -75,7 +75,10 @@ export const passengerSchema = z.object({
 });
 
 export const reservationCreateSchema = z.object({
-  status: z.enum(["pending", "confirmed", "in_progress", "completed", "cancelled"]).optional(),
+  status: z.enum(["confirmed", "in_progress", "completed", "cancelled"]).optional(),
+  source: z.enum(["web", "agency", "manual", "api"]).optional(),
+  sourceLabel: z.string().max(200).optional().nullable(),
+  agencyId: z.string().optional().nullable(),
   supplierId: z.string().optional().nullable(),
   supplierPrice: z.number().min(0).optional().nullable(),
   supplierCurrency: z.string().max(5).optional(),
@@ -101,17 +104,30 @@ export const customerCreateSchema = z.object({
   lastName: z.string().max(100).optional().nullable(),
   email: z.string().email().max(254).optional().nullable(),
   phone: z.string().max(30).optional().nullable(),
+  whatsapp: z.string().max(30).optional().nullable(),
   identityNo: z.string().max(50).optional().nullable(),
   notes: z.string().max(2000).optional().nullable(),
 });
 
 export const supplierCreateSchema = z.object({
   name: z.string().min(1).max(200),
-  phone: z.string().max(30).optional().nullable(),
-  email: z.string().email().max(254).optional().nullable(),
-  contactName: z.string().max(100).optional().nullable(),
-  address: z.string().max(500).optional().nullable(),
+  countryId: z.string().optional().nullable(),
   cityId: z.string().optional().nullable(),
+  districtId: z.string().optional().nullable(),
+  address: z.string().max(500).optional().nullable(),
+  phone: z.string().max(30).optional().nullable(),
+  whatsapp: z.string().max(30).optional().nullable(),
+  email: z.string().email().max(254).optional().nullable(),
+  website: z.string().max(200).optional().nullable(),
+  contactName: z.string().max(100).optional().nullable(),
+  contactPhone: z.string().max(30).optional().nullable(),
+  contactWhatsapp: z.string().max(30).optional().nullable(),
+  contactEmail: z.string().email().max(254).optional().nullable(),
+  invoiceTitle: z.string().max(200).optional().nullable(),
+  taxOffice: z.string().max(100).optional().nullable(),
+  taxNumber: z.string().max(50).optional().nullable(),
+  invoiceAddress: z.string().max(500).optional().nullable(),
+  invoiceEmail: z.string().email().max(254).optional().nullable(),
 });
 
 export function parseBody(schema, body) {

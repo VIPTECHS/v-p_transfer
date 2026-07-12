@@ -103,7 +103,7 @@ router.post("/", async (req, res) => {
     if (!payload.fromLabel?.trim()) {
       return res.status(400).json({ error: "INVALID_FROM" });
     }
-    if (payload.type === "transfer" && !payload.toLabel?.trim()) {
+    if (payload.type !== "hourly" && !payload.toLabel?.trim()) {
       return res.status(400).json({ error: "INVALID_TO" });
     }
     if (!payload.firstName?.trim() || !payload.email?.trim() || !payload.phone?.trim()) {
