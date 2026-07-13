@@ -30,6 +30,12 @@ export default function WhatsAppCTA() {
       setDismissed(true);
       return;
     }
+    // On phones the auto-opening chat covers the booking form, so only
+    // auto-open on wider screens; the FAB stays tappable everywhere.
+    const isMobile =
+      typeof window !== "undefined" &&
+      window.matchMedia("(max-width: 768px)").matches;
+    if (isMobile) return undefined;
     const timer = setTimeout(() => setOpen(true), 2600);
     return () => clearTimeout(timer);
   }, []);

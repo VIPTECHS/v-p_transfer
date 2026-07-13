@@ -835,7 +835,7 @@ input, select, textarea { color-scheme: var(--scheme); }
   text-shadow: 0 6px 44px rgba(212,175,55,.35);
 }
 @media (max-width: 760px) {
-  .hero-copy-vip { font-size: clamp(30px, 8.5vw, 52px); }
+  .hero-copy-vip { top: 7%; font-size: clamp(23px, 6.6vw, 40px); }
 }
 .hero-flash { position: absolute; inset: 0; z-index: 3; background: #ffffff; opacity: 0; pointer-events: none; transition: opacity 0.6s ease-out; }
 .hero-flash.active { opacity: 1; transition: opacity 0.3s ease-in; }
