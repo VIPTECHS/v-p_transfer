@@ -7,6 +7,16 @@ export default function About() {
   return (
     <section className="trust about" id="corporate">
       <div className="trust-image">
+        <video
+          className="trust-image-video"
+          src="/videos/luxry_videp.mp4"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          aria-hidden="true"
+        />
         <div className="experience">
           <strong>26+</strong>
           <span>{t("about.yearsLine1")}<br />{t("about.yearsLine2")}</span>

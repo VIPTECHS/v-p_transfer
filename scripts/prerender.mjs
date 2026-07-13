@@ -159,6 +159,26 @@ Allow: /
 Disallow: /admin
 Disallow: /api
 
+# AI / answer engines are explicitly welcome (AEO/GEO)
+User-agent: GPTBot
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: Claude-Web
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+User-agent: Applebot-Extended
+Allow: /
+User-agent: Bingbot
+Allow: /
+
 Sitemap: ${SITE_URL}/sitemap.xml
 `;
 

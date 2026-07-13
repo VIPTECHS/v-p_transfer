@@ -45,13 +45,13 @@
       href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="preload" as="image" href="/frames/ezgif-frame-001.webp" fetchpriority="high" />
+    <link rel="preload" as="image" href="/frames/ezgif-frame-300.webp" fetchpriority="high" />
 
     <!-- Structured data: Organization / LocalBusiness -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "LocalBusiness",
+      "@type": ["LocalBusiness", "TravelAgency"],
       "@id": "https://viptransfer.com/#business",
       "name": "VIP Transfer",
       "url": "https://viptransfer.com/",
@@ -61,17 +61,43 @@
       "telephone": "+90 850 255 48 47",
       "email": "info@viptransfer.com",
       "priceRange": "$$$",
+      "currenciesAccepted": "EUR, USD, TRY",
+      "paymentAccepted": "Cash, Credit Card",
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "Marmara Kule Esentepe mah kelebek sok no 2 D 176 Kartal",
         "addressLocality": "İstanbul",
+        "addressRegion": "İstanbul",
+        "postalCode": "34873",
         "addressCountry": "TR"
       },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 40.9061,
+        "longitude": 29.1897
+      },
+      "areaServed": [
+        { "@type": "City", "name": "Istanbul" },
+        { "@type": "City", "name": "Antalya" },
+        { "@type": "City", "name": "Bursa" },
+        { "@type": "City", "name": "Sapanca" },
+        { "@type": "Country", "name": "Turkey" }
+      ],
+      "knowsLanguage": ["tr", "en", "de"],
       "openingHoursSpecification": {
         "@type": "OpeningHoursSpecification",
         "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
         "opens": "00:00",
         "closes": "23:59"
+      },
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "VIP Transfer Services",
+        "itemListElement": [
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Airport Transfer", "description": "Private VIP transfers to and from Istanbul Airport (IST) and Sabiha Gökçen (SAW) with flight tracking and meet & greet." } },
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Private Chauffeur Service", "description": "Hourly and daily chauffeur-driven luxury vehicles with professional English-speaking drivers." } },
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Intercity Transfer", "description": "Comfortable long-distance private transfers such as Istanbul to Bursa and Istanbul to Sapanca." } }
+        ]
       },
       "sameAs": [
         "https://www.instagram.com/viptransfercom/",
