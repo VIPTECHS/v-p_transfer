@@ -258,17 +258,6 @@ export default function Footer({ navigate }) {
             </a>
           </div>
 
-          <div className="footer-apps">
-            <p className="footer-apps-label">{t("footer.appsLabel")}</p>
-            <div className="footer-apps-badges">
-              <a className="footer-app-badge" href={APP_STORE_URL} target="_blank" rel="noopener noreferrer" aria-label="App Store">
-                <AppStoreBadge />
-              </a>
-              <a className="footer-app-badge" href={GOOGLE_PLAY_URL} target="_blank" rel="noopener noreferrer" aria-label="Google Play">
-                <GooglePlayBadge />
-              </a>
-            </div>
-          </div>
         </div>
 
         {(["services", "corporate", "support"]).map((column) => (
@@ -283,7 +272,6 @@ export default function Footer({ navigate }) {
                 {t(`footer.columns.${column}.links.${link.key}`)}
               </a>
             ))}
-            {column === "support" && <FooterPatent t={t} />}
           </div>
         ))}
 
@@ -317,8 +305,19 @@ export default function Footer({ navigate }) {
           <BadgeTursab />
           <BadgeKitsab />
           <BadgeSsl />
+          <div className="footer-apps">
+            <div className="footer-apps-badges">
+              <a className="footer-app-badge" href={APP_STORE_URL} target="_blank" rel="noopener noreferrer" aria-label="App Store">
+                <AppStoreBadge />
+              </a>
+              <a className="footer-app-badge" href={GOOGLE_PLAY_URL} target="_blank" rel="noopener noreferrer" aria-label="Google Play">
+                <GooglePlayBadge />
+              </a>
+            </div>
+          </div>
         </div>
         <div className="footer-payments" aria-label={t("footer.paymentsAria")}>
+          <FooterPatent t={t} />
           {PAYMENT_LOGOS.map((logo) => (
             <PayLogo key={logo.label} src={logo.src} label={logo.label} />
           ))}

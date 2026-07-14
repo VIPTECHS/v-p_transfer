@@ -38,6 +38,7 @@ export default function Contact() {
   ];
 
   return (
+    <>
     <section className="contact" id="contact">
       <div className="contact-layout">
         <div className="contact-copy">
@@ -99,6 +100,7 @@ export default function Contact() {
           ))}
         </div>
       </div>
+    </section>
 
       <div className="agency-band">
         <div className="agency-band-inner">
@@ -115,6 +117,6 @@ export default function Contact() {
           </a>
         </div>
       </div>
-    </section>
+    </>
   );
 }

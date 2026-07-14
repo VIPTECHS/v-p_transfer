@@ -2233,8 +2233,19 @@ h1,h2 { font-family: var(--font-display); font-weight: 600; margin: 0; }
 .office-card a.office-link span { color: #ccc; transition: color .2s; }
 .office-card a.office-link:hover span { color: var(--gold); }
 
-.agency-band { background: #fff; padding: 48px 7vw; margin-top: 48px; }
-.agency-band-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 32px; }
+.agency-band {
+  width: 100%;
+  background: #fff;
+  padding: 48px 7vw;
+  box-sizing: border-box;
+}
+.agency-band-inner {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+}
 .agency-band-eyebrow { display: block; font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); margin-bottom: 6px; }
 .agency-band h3 { margin: 0 0 8px; font: 700 26px/1.2 var(--font-display); color: #16181d; }
 .agency-band p { margin: 0; font-size: 15px; color: #555; max-width: 520px; }
@@ -2242,7 +2253,8 @@ h1,h2 { font-family: var(--font-display); font-weight: 600; margin: 0; }
 .agency-band-cta:hover { background: #c5a12e; }
 .agency-band-cta svg { flex-shrink: 0; }
 @media (max-width: 768px) {
-  .agency-band-inner { flex-direction: column; text-align: center; }
+  .agency-band { padding: 40px 20px; }
+  .agency-band-inner { flex-direction: column; align-items: flex-start; text-align: left; }
   .agency-band p { max-width: 100%; }
 }
 
@@ -2455,17 +2467,6 @@ footer.site-footer,
   border-color: var(--gold);
   color: var(--gold);
 }
-.footer-apps {
-  margin-top: 22px;
-}
-.footer-apps-label {
-  margin: 0 0 10px;
-  color: rgba(247, 245, 240, 0.45);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
 .footer-apps-badges {
   display: flex;
   flex-wrap: wrap;
@@ -2531,8 +2532,50 @@ footer.site-footer,
 .footer-trust-badges {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
+}
+.footer-payments .footer-patent {
+  margin-top: 0;
+  flex-direction: row;
+  align-items: center;
+  gap: 0;
+  margin-right: 4px;
+}
+.footer-payments .footer-patent img {
+  width: 120px;
+}
+.footer-payments .footer-patent-label {
+  display: none;
+}
+.footer-trust .footer-apps {
+  margin: 0;
+}
+.footer-trust .footer-badge {
+  min-height: 44px;
+  padding: 0 14px;
+  font-size: 12px;
+  gap: 9px;
+  border-radius: 9px;
+}
+.footer-trust .footer-badge svg {
+  width: 20px;
+  height: 20px;
+}
+.footer-trust .footer-badge--logo {
+  padding: 6px 10px;
+}
+.footer-trust .footer-badge--logo img {
+  height: 34px;
+}
+.footer-trust .footer-app-badge {
+  height: 48px;
+}
+.footer-trust .footer-app-badge svg {
+  height: 48px;
+}
+.footer-trust .footer-apps-badges {
+  gap: 12px;
 }
 .footer-badge {
   display: inline-flex;
