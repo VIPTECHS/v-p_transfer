@@ -839,6 +839,29 @@ input, select, textarea { color-scheme: var(--scheme); }
 }
 .hero-flash { position: absolute; inset: 0; z-index: 3; background: #ffffff; opacity: 0; pointer-events: none; transition: opacity 0.6s ease-out; }
 .hero-flash.active { opacity: 1; transition: opacity 0.3s ease-in; }
+/* ── White stats strip (between hero and global reach) ─────────── */
+.stats-strip { background: #f6f4ef; border-top: 1px solid rgba(0,0,0,.06); border-bottom: 1px solid rgba(0,0,0,.06); padding: 26px 5.5vw; }
+.stats-strip-inner { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.stats-strip-item { display: flex; align-items: center; gap: 14px; flex: 1; justify-content: center; position: relative; }
+.stats-strip-item + .stats-strip-item::before { content: ""; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 1px; height: 42px; background: rgba(0,0,0,.1); }
+.stats-strip-icon { color: var(--gold); flex-shrink: 0; }
+.stats-strip-icon svg { width: 34px; height: 34px; display: block; }
+.stats-strip-copy { display: flex; flex-direction: column; line-height: 1.15; }
+.stats-strip-copy strong { color: #1a1a1a; font: 700 26px/1.05 var(--font-display); letter-spacing: -.01em; }
+.stats-strip-copy span { color: #6b6b6b; font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; margin-top: 3px; }
+@media (max-width: 900px) {
+  .stats-strip { padding: 22px 18px; }
+  .stats-strip-inner { flex-wrap: wrap; gap: 20px 12px; }
+  .stats-strip-item { flex: 0 0 calc(33.333% - 12px); justify-content: flex-start; gap: 10px; }
+  .stats-strip-item + .stats-strip-item::before { display: none; }
+  .stats-strip-icon svg { width: 28px; height: 28px; }
+  .stats-strip-copy strong { font-size: 21px; }
+  .stats-strip-copy span { font-size: 9.5px; letter-spacing: .08em; }
+}
+@media (max-width: 520px) {
+  .stats-strip-item { flex: 0 0 calc(50% - 10px); }
+}
+
 .trust-strip { min-height: 104px; padding: 22px 5.5vw; display: flex; align-items: center; justify-content: space-between; gap: 45px; color: var(--text); background: var(--bg); border-top: 1px solid rgba(212,175,55,.18); border-bottom: 1px solid rgba(255,255,255,.08); }
 .trust-strip-copy strong { display: block; font-size: 14px; line-height: 1.4; }
 .trust-strip-copy p { margin: 4px 0 0; color: var(--text-muted); font-size: 12px; line-height: 1.5; }

@@ -2,6 +2,7 @@ import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import Header from "./components/Header";
 import Hero from "./components/Hero.jsx?scroll-sequence-v=4";
 import AirportTransfer from "./components/AirportTransfer";
+import StatsStrip from "./components/StatsStrip";
 import Services from "./components/Services";
 import Fleet from "./components/Fleet";
 import About from "./components/About";
@@ -175,6 +176,7 @@ export default function App() {
       <Header isHome navigate={navigate} onBook={startBooking} />
       <main>
         <Hero onSearch={setBookingData} />
+        <StatsStrip />
         <AirportTransfer />
         <Fleet onSearch={setBookingData} />
         <Services />

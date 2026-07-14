@@ -19,6 +19,13 @@ export const translations = {
       bookNow: "Book Now",
       toggleMenu: "Toggle menu",
     },
+    statsStrip: {
+      countries: { value: "190+", label: "Countries" },
+      airports: { value: "700+", label: "Airports" },
+      customers: { value: "50,000+", label: "Happy Customers" },
+      vehicles: { value: "25,000+", label: "Vehicles" },
+      support: { value: "24/7", label: "Support" },
+    },
     hero: {
       eyebrow: "WORLDWIDE VIP TRANSFERS",
       vipPre: "Feel like a ",
@@ -478,6 +485,13 @@ export const translations = {
       help: "Yardım",
       bookNow: "Rezervasyon",
       toggleMenu: "Menüyü aç/kapat",
+    },
+    statsStrip: {
+      countries: { value: "190+", label: "Ülke" },
+      airports: { value: "700+", label: "Havalimanı" },
+      customers: { value: "50.000+", label: "Memnun Müşteri" },
+      vehicles: { value: "25.000+", label: "Araç" },
+      support: { value: "7/24", label: "Destek" },
     },
     hero: {
       eyebrow: "DÜNYA ÇAPINDA VIP TRANSFER",

@@ -10,6 +10,13 @@ export default {
     bookNow: "Jetzt buchen",
     toggleMenu: "Menü öffnen/schließen",
   },
+  statsStrip: {
+    countries: { value: "190+", label: "Länder" },
+    airports: { value: "700+", label: "Flughäfen" },
+    customers: { value: "50.000+", label: "Zufriedene Kunden" },
+    vehicles: { value: "25.000+", label: "Fahrzeuge" },
+    support: { value: "24/7", label: "Support" },
+  },
   hero: {
     eyebrow: "VIP-TRANSFERS WELTWEIT",
     vipPre: "Fühlen Sie sich wie ein ",
