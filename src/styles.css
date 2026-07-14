@@ -2233,6 +2233,22 @@ h1,h2 { font-family: var(--font-display); font-weight: 600; margin: 0; }
 .office-card a.office-link span { color: #ccc; transition: color .2s; }
 .office-card a.office-link:hover span { color: var(--gold); }
 
+.agency-band { background: #fff; padding: 48px 7vw; margin-top: 48px; }
+.agency-band-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 32px; }
+.agency-band-eyebrow { display: block; font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); margin-bottom: 6px; }
+.agency-band h3 { margin: 0 0 8px; font: 700 26px/1.2 var(--font-display); color: #16181d; }
+.agency-band p { margin: 0; font-size: 15px; color: #555; max-width: 520px; }
+.agency-band-cta { display: inline-flex; align-items: center; gap: 8px; padding: 14px 32px; background: var(--gold); color: #fff; font-weight: 700; font-size: 15px; border-radius: var(--radius-sm); text-decoration: none; white-space: nowrap; transition: background .2s; }
+.agency-band-cta:hover { background: #c5a12e; }
+.agency-band-cta svg { flex-shrink: 0; }
+@media (max-width: 768px) {
+  .agency-band-inner { flex-direction: column; text-align: center; }
+  .agency-band p { max-width: 100%; }
+}
+
+.footer-operations-note { margin: 8px 0 0; font-size: 11px; color: rgba(247,245,240,.32); }
+.footer-operations-note strong { color: rgba(247,245,240,.5); }
+
 footer.site-footer,
 .site-footer {
   background: #070707;

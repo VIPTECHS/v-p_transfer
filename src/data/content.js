@@ -2,7 +2,6 @@ export const serviceItems = [
   { key: "chauffeur", icon: "steering", image: "/images/services/Chauffeur-driven-Car.jpg" },
   { key: "intercity", icon: "route", image: "/images/services/Intercity-Routes.jpg" },
   { key: "airport", icon: "plane", image: "/images/services/Airport-Transfer.png" },
-  { key: "taxi", icon: "taxi", image: "/images/services/Airport-Taxi.jpg" },
   { key: "shuttle", icon: "shuttle", image: "/images/services/Airport-Shuttle.jpg" },
 ];
 

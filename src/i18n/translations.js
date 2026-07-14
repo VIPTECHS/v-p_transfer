@@ -340,6 +340,12 @@ export const translations = {
         england: { name: "England Office", address: "11 Coldbath Square, London England" },
       },
       operationsNote: "Our Turkey operations are carried out by",
+      agency: {
+        eyebrow: "FOR TRAVEL AGENCIES",
+        title: "Join Our Agency Network",
+        text: "Partner with us and offer your clients premium transfers worldwide with agency rates and priority support.",
+        cta: "Become an Agency Partner",
+      },
     },
     footer: {
       tagline: "We deliver a premium transfer experience anywhere in the world.",
@@ -810,6 +816,12 @@ export const translations = {
         england: { name: "İngiltere Ofisi", address: "11 Coldbath Square, London England" },
       },
       operationsNote: "Türkiye operasyonlarımız",
+      agency: {
+        eyebrow: "SEYAHAT ACENTELERİ İÇİN",
+        title: "Acente Ağımıza Katılın",
+        text: "Bizimle çalışın; müşterilerinize acente fiyatları ve öncelikli destekle dünya çapında premium transfer sunun.",
+        cta: "Acente Partneri Olun",
+      },
     },
     footer: {
       tagline: "Dünyanın her yerinde premium transfer deneyimi sunuyoruz.",

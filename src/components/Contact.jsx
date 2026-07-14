@@ -1,5 +1,3 @@
-import { useState } from "react";
-import { submitEnquiry } from "../api/enquiry";
 import { EMAIL, PHONE, PHONE_DISPLAY, WHATSAPP_URL } from "../data/content";
 import { useI18n } from "../i18n/I18nContext";
 
@@ -32,36 +30,6 @@ function WhatsAppIcon() {
 
 export default function Contact() {
   const { t } = useI18n();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
-  const [status, setStatus] = useState("idle");
-  const [feedback, setFeedback] = useState("");
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    setStatus("loading");
-    setFeedback("");
-
-    const honeypot = event.currentTarget.elements.website?.value;
-    if (honeypot) {
-      setStatus("success");
-      setFeedback(t("contact.success"));
-      return;
-    }
-
-    try {
-      await submitEnquiry({ name, email, message });
-      setStatus("success");
-      setFeedback(t("contact.success"));
-      setName("");
-      setEmail("");
-      setMessage("");
-    } catch (error) {
-      setStatus("error");
-      setFeedback(error.message === "VALIDATION" ? t("contact.validation") : t("contact.error"));
-    }
-  };
 
   const offices = [
     { key: "istanbul", hasCompany: true },
@@ -102,31 +70,6 @@ export default function Contact() {
             </a>
           </div>
 
-          <form className="enquiry-form" onSubmit={handleSubmit}>
-            <h3>{t("contact.enquiryTitle")}</h3>
-            <label>
-              <span>{t("contact.nameLabel")}</span>
-              <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
-            </label>
-            <label>
-              <span>{t("contact.emailLabel")}</span>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            </label>
-            <label>
-              <span>{t("contact.messageLabel")}</span>
-              <textarea rows={4} value={message} onChange={(e) => setMessage(e.target.value)} required />
-            </label>
-            <label className="hp-field" aria-hidden="true">
-              <span>Website</span>
-              <input type="text" name="website" tabIndex={-1} autoComplete="off" />
-            </label>
-            <button className="btn btn-gold" type="submit" disabled={status === "loading"}>
-              {status === "loading" ? t("contact.submitting") : t("contact.submit")}
-            </button>
-            {feedback && (
-              <p className={`enquiry-feedback enquiry-feedback--${status}`} role="status">{feedback}</p>
-            )}
-          </form>
         </div>
 
         <div className="office-grid">
@@ -157,9 +100,21 @@ export default function Contact() {
         </div>
       </div>
 
-      <p className="operations-note">
-        {t("contact.operationsNote")} <strong>{t("about.tursab")}</strong>
-      </p>
+      <div className="agency-band">
+        <div className="agency-band-inner">
+          <div className="agency-band-copy">
+            <span className="agency-band-eyebrow">{t("contact.agency.eyebrow")}</span>
+            <h3>{t("contact.agency.title")}</h3>
+            <p>{t("contact.agency.text")}</p>
+          </div>
+          <a className="agency-band-cta" href="/travel-partners">
+            {t("contact.agency.cta")}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </a>
+        </div>
+      </div>
     </section>
   );
 }

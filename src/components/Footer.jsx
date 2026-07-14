@@ -283,6 +283,9 @@ export default function Footer({ navigate }) {
 
       <div className="footer-bottom">
         <span>{t("footer.rights")}</span>
+        <p className="footer-operations-note">
+          {t("contact.operationsNote")} <strong>{t("about.tursab")}</strong>
+        </p>
       </div>
     </footer>
   );

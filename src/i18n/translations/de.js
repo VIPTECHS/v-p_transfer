@@ -331,6 +331,12 @@ export default {
       england: { name: "Büro England", address: "11 Coldbath Square, London England" },
     },
     operationsNote: "Unsere Türkei-Operationen werden durchgeführt von",
+    agency: {
+      eyebrow: "FÜR REISEBÜROS",
+      title: "Werden Sie Teil unseres Agenturnetzwerks",
+      text: "Arbeiten Sie mit uns zusammen und bieten Sie Ihren Kunden weltweit Premium-Transfers mit Agenturpreisen und bevorzugtem Support.",
+      cta: "Agenturpartner werden",
+    },
   },
   footer: {
     tagline: "Wir bieten weltweit ein Premium-Transfererlebnis.",
