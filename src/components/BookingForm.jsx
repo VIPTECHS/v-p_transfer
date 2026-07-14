@@ -137,8 +137,8 @@ export default function BookingForm({ visible, onSearch }) {
       from,
       to: needsTo ? to : undefined,
       durationHours: needsDuration ? Number(durationHours) : undefined,
-      fromCoords: fromPoint ? { lng: fromPoint.lng, lat: fromPoint.lat } : undefined,
-      toCoords: toPoint && needsTo ? { lng: toPoint.lng, lat: toPoint.lat } : undefined,
+      fromCoords: fromPoint?.lng != null ? { lng: fromPoint.lng, lat: fromPoint.lat } : undefined,
+      toCoords: toPoint?.lng != null && needsTo ? { lng: toPoint.lng, lat: toPoint.lat } : undefined,
       passengers: passengerCount,
       roundTrip,
     };

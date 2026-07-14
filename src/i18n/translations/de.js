@@ -62,6 +62,7 @@ export default {
     fromPlaceholder: "Flughafen, Hotel, Adresse",
     toPlaceholder: "Flughafen, Hotel, Adresse",
     swap: "Richtung tauschen",
+    showOnMap: "Auf Karte zeigen",
     search: "Suchen",
     seePrices: "Preise anzeigen",
     searching: "Suche läuft...",

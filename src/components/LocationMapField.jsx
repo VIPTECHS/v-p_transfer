@@ -84,14 +84,26 @@ export default function LocationMapField({
           placeholder={placeholder}
           value={query}
           onChange={(event) => {
-            setQuery(event.target.value);
-            setOpen(true);
+            const text = event.target.value;
+            setQuery(text);
+            onChange(text.trim() ? { label: text } : null);
           }}
-          onFocus={() => setOpen(true)}
           autoComplete="off"
           aria-expanded={open}
           aria-haspopup="dialog"
         />
+        <button
+          type="button"
+          className="map-btn"
+          onClick={() => setOpen(true)}
+          aria-label={t("booking.showOnMap")}
+          title={t("booking.showOnMap")}
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M9 3 3 5v16l6-2 6 2 6-2V3l-6 2-6-2z" />
+            <path d="M9 3v16M15 5v16" />
+          </svg>
+        </button>
         {showSwap && (
           <button type="button" className="swap-btn" onClick={onSwap} aria-label={t("booking.swap")}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1e293b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="swap-icon">

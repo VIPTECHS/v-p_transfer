@@ -7,14 +7,14 @@ export const serviceItems = [
 ];
 
 export const fleetItems = [
-  { key: "vClassStandard", image: "/images/fleet/v-class-standard.jpg", popular: true, taglineKey: "vClassStandard" },
-  { key: "vClassLux", image: "/images/fleet/v-class-lux.jpg", popular: false, taglineKey: "vClassLux" },
-  { key: "vClassUltraLux", image: "/images/fleet/v-class-ultra-lux.jpg", popular: false, taglineKey: "vClassUltraLux" },
-  { key: "sprinterStandard", image: "/images/fleet/sprinter-standard.jpg", popular: false, taglineKey: "sprinterStandard" },
-  { key: "sprinterUltraLux", image: "/images/fleet/sprinter-ultra-lux.jpg", popular: false, taglineKey: "sprinterUltraLux" },
-  { key: "eClass", image: "/images/fleet/e-class.jpg", popular: false, taglineKey: "eClass" },
-  { key: "sClass", image: "/images/fleet/s-class.jpg", popular: false, taglineKey: "sClass" },
-  { key: "maybach", image: "/images/fleet/maybach.jpg", popular: false, taglineKey: "maybach" },
+  { key: "vClassStandard", image: "/images/fleet/v-class-standard.png", popular: true, taglineKey: "vClassStandard" },
+  { key: "vClassLux", image: "/images/fleet/v-class-lux.png", popular: false, taglineKey: "vClassLux" },
+  { key: "vClassUltraLux", image: "/images/fleet/v-class-ultra-lux.png", popular: false, taglineKey: "vClassUltraLux" },
+  { key: "sprinterStandard", image: "/images/fleet/sprinter-standard.png", popular: false, taglineKey: "sprinterStandard" },
+  { key: "sprinterUltraLux", image: "/images/fleet/sprinter-ultra-lux.png", popular: false, taglineKey: "sprinterUltraLux" },
+  { key: "eClass", image: "/images/fleet/e-class.png", popular: false, taglineKey: "eClass" },
+  { key: "sClass", image: "/images/fleet/s-class.png", popular: false, taglineKey: "sClass" },
+  { key: "maybach", image: "/images/fleet/maybach.png", popular: false, taglineKey: "maybach" },
 ];
 
 /** First-screen fleet preview under the map (5 vehicles). */
