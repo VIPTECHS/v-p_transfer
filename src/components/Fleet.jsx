@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import { fleetItems, fleetPreviewKeys } from "../data/content";
 import { useI18n } from "../i18n/I18nContext";
 import Icon from "./Icon";
-import SectionHeading from "./SectionHeading";
 import LocationAutocomplete from "./LocationAutocomplete";
 import { defaultPickupDate, toPickupISO } from "../utils/datetime";
 
@@ -48,7 +47,19 @@ function VehicleCard({ item, onSearch }) {
       className={`vehicle-card ${popular ? "vehicle-card--popular" : ""}${hoverImage ? " vehicle-card--has-flip" : ""}${flipped ? " vehicle-card--booking" : ""}`}
     >
       <div className={`vehicle-card-flip${flipped ? " is-flipped" : ""}`}>
-        <div className="vehicle-card-face vehicle-card-front">
+        <div
+          className="vehicle-card-face vehicle-card-front"
+          role="button"
+          tabIndex={0}
+          aria-label={`${name} — ${t("fleet.select")}`}
+          onClick={() => setFlipped(true)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setFlipped(true);
+            }
+          }}
+        >
           <div className={`vehicle-visual${hoverImage ? " vehicle-visual--flip" : ""}`}>
             {popular && <span className="vehicle-popular-badge">{t("booking.mostPopular")}</span>}
             {hoverImage ? (
@@ -65,17 +76,11 @@ function VehicleCard({ item, onSearch }) {
             )}
           </div>
           <div className="vehicle-info">
-            <div>
-              <small>{t("fleet.premium")}</small>
-              <h3>{name}</h3>
-            </div>
+            <h3>{name}</h3>
             <div className="vehicle-specs">
-              <span><Icon name="users" size={17} />{t(`fleet.items.${key}.passengers`)}</span>
-              <span><Icon name="bag" size={17} />{t(`fleet.items.${key}.bags`)}</span>
+              <span><Icon name="users" size={16} />{t(`fleet.items.${key}.passengers`)}</span>
+              <span><Icon name="bag" size={16} />{t(`fleet.items.${key}.bags`)}</span>
             </div>
-            <button type="button" className="vehicle-select" onClick={() => setFlipped(true)}>
-              {t("fleet.select")} <Icon name="arrow" size={16} />
-            </button>
           </div>
         </div>
 
@@ -151,43 +156,48 @@ export default function Fleet({ onSearch }) {
 
   const canToggle = fleetItems.length > previewItems.length;
 
+  const toggleShowAll = () => {
+    setShowAll((prev) => {
+      const next = !prev;
+      if (!next) {
+        requestAnimationFrame(() => {
+          document.getElementById("fleet")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      }
+      return next;
+    });
+  };
+
   return (
     <section className="section fleet" id="fleet">
-      <SectionHeading
-        center
-        eyebrow={t("fleet.eyebrow")}
-        title={t("fleet.title")}
-        text={t("fleet.text")}
-      />
-      <p className="fleet-intro">{t("fleet.intro")}</p>
+      <div className="fleet-head">
+        <div className="fleet-head-copy">
+          <p className="fleet-eyebrow">
+            <Icon name="taxi" size={16} />
+            <span>{t("fleet.eyebrow")}</span>
+          </p>
+          <h2 className="fleet-title">
+            {t("fleet.titleBefore")}
+            <span className="fleet-title-accent">{t("fleet.titleAccent")}</span>
+          </h2>
+        </div>
+        {canToggle && (
+          <button
+            type="button"
+            className="fleet-viewall"
+            aria-expanded={showAll}
+            onClick={toggleShowAll}
+          >
+            {showAll ? t("fleet.showLess") : t("fleet.viewAll")}
+            <Icon name="arrow" size={16} />
+          </button>
+        )}
+      </div>
       <div className={`fleet-grid${showAll ? " fleet-grid--all" : " fleet-grid--preview"}`}>
         {visibleItems.map((item) => (
           <VehicleCard key={item.key} item={item} onSearch={onSearch} />
         ))}
       </div>
-      {canToggle && (
-        <div className="fleet-more">
-          <button
-            type="button"
-            className="fleet-more-btn"
-            aria-expanded={showAll}
-            onClick={() => {
-              setShowAll((prev) => {
-                const next = !prev;
-                if (!next) {
-                  requestAnimationFrame(() => {
-                    document.getElementById("fleet")?.scrollIntoView({ behavior: "smooth", block: "start" });
-                  });
-                }
-                return next;
-              });
-            }}
-          >
-            {showAll ? t("fleet.showLess") : t("fleet.viewAll")}
-            <Icon name="arrow" size={16} />
-          </button>
-        </div>
-      )}
     </section>
   );
 }

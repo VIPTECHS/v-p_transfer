@@ -206,8 +206,10 @@ export default {
     },
   },
   fleet: {
-    eyebrow: "UNSERE EXKLUSIVE FAHRZEUGKOLLEKTION",
+    eyebrow: "UNSERE FLOTTE",
     title: "Entdecken Sie unsere Premium-Flotte",
+    titleBefore: "Das richtige Fahrzeug für ",
+    titleAccent: "jede Fahrt",
     text: "Entdecken Sie unsere vielfältige Fahrzeugauswahl — jedes Modell bietet außergewöhnlichen Komfort, Stil und Kapazität für jede Reise.",
     intro: "Bei VIPTransfer.com sind wir stolz auf unsere kuratierte Flotte an Premium-Fahrzeugen, die Sicherheit, Komfort und Eleganz auf jeder Fahrt gewährleisten.",
     premium: "PREMIUM-KOLLEKTION",

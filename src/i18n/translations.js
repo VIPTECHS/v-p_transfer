@@ -215,8 +215,10 @@ export const translations = {
       },
     },
     fleet: {
-      eyebrow: "OUR EXCLUSIVE VEHICLE COLLECTION",
+      eyebrow: "OUR FLEET",
       title: "Explore Our Premium Vehicle Fleet",
+      titleBefore: "The Right Vehicle for ",
+      titleAccent: "Every Journey",
       text: "Discover our diverse range of vehicles, each offering exceptional comfort, style, and capacity to suit every journey.",
       intro: "At VIPTransfer.com, we take pride in our curated fleet of premium vehicles, ensuring safety, comfort, and elegance on every journey.",
       premium: "PREMIUM COLLECTION",
@@ -682,8 +684,10 @@ export const translations = {
       },
     },
     fleet: {
-      eyebrow: "ÖZEL ARAÇ KOLEKSİYONUMUZ",
+      eyebrow: "ARAÇ FİLOMUZ",
       title: "Premium Araç Filomuzu Keşfedin",
+      titleBefore: "Her Yolculuk İçin ",
+      titleAccent: "Doğru Araç",
       text: "Her yolculuğa uygun olağanüstü konfor, stil ve kapasite sunan geniş araç yelpazemizi keşfedin.",
       intro: "VIPTransfer.com olarak, her yolculukta güvenlik, konfor ve zarafet sağlayan özenle seçilmiş premium araç filomuzla gurur duyuyoruz.",
       premium: "PREMIUM KOLEKSİYON",
