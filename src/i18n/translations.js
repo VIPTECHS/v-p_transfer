@@ -351,6 +351,10 @@ export const translations = {
       tagline: "We deliver a premium transfer experience anywhere in the world.",
       rights: "© 2026 viptransfer.com. All rights reserved.",
       paymentsAria: "Accepted payment methods",
+      appsLabel: "Download our app",
+      patentAria: "VIPTransfer.com trademark registration certificate",
+      patentLabel: "Trademark registration",
+      patentClose: "Close",
       partner: {
         title: "Join Our Partner Network",
         text: "Work with us to grow your transfer operations worldwide.",
@@ -827,6 +831,10 @@ export const translations = {
       tagline: "Dünyanın her yerinde premium transfer deneyimi sunuyoruz.",
       rights: "© 2026 viptransfer.com. Tüm hakları saklıdır.",
       paymentsAria: "Kabul edilen ödeme yöntemleri",
+      appsLabel: "Uygulamamızı indirin",
+      patentAria: "VIPTransfer.com marka tescil belgesi",
+      patentLabel: "Marka tescil belgesi",
+      patentClose: "Kapat",
       partner: {
         title: "Partner Ağımıza Katılın",
         text: "Dünyanın her yerindeki transfer operasyonlarınızı büyütmek için bizimle çalışın.",

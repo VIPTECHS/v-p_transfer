@@ -342,6 +342,10 @@ export default {
     tagline: "Wir bieten weltweit ein Premium-Transfererlebnis.",
     rights: "© 2026 viptransfer.com. Alle Rechte vorbehalten.",
     paymentsAria: "Akzeptierte Zahlungsmethoden",
+    appsLabel: "App herunterladen",
+    patentAria: "VIPTransfer.com Markenregistrierungszertifikat",
+    patentLabel: "Markenregistrierung",
+    patentClose: "Schließen",
     partner: {
       title: "Werden Sie Teil unseres Partnernetzwerks",
       text: "Arbeiten Sie mit uns, um Ihre Transfergeschäfte weltweit auszubauen.",

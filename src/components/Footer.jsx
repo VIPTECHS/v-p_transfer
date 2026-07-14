@@ -1,4 +1,9 @@
-import { EMAIL, PHONE, PHONE_DISPLAY, FACEBOOK_URL, INSTAGRAM_URL } from "../data/content";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import {
+  EMAIL, PHONE, PHONE_DISPLAY, FACEBOOK_URL, INSTAGRAM_URL, TURSAB_DDS_URL,
+  APP_STORE_URL, GOOGLE_PLAY_URL, PATENT_VIP_URL,
+} from "../data/content";
 import { useI18n } from "../i18n/I18nContext";
 
 const COLUMN_LINKS = {
@@ -35,69 +40,98 @@ function PartnerNetworkIcon() {
   );
 }
 
-function PayVisa() {
+const PAYMENT_LOGOS = [
+  { src: "/images/payments/visa.svg", label: "Visa" },
+  { src: "/images/payments/mastercard.svg", label: "Mastercard" },
+  { src: "/images/payments/amex.svg", label: "American Express" },
+  { src: "/images/payments/wechat-pay.svg", label: "WeChat Pay" },
+  { src: "/images/payments/unionpay.svg", label: "UnionPay" },
+];
+
+function PayLogo({ src, label }) {
   return (
-    <span className="footer-pay" title="Visa" aria-label="Visa">
-      <svg viewBox="0 0 50 32" aria-hidden="true">
-        <rect width="50" height="32" rx="6" fill="#fff" />
-        <text x="25" y="21" textAnchor="middle" fill="#1A1F71" fontFamily="Arial Black, Arial, sans-serif" fontWeight="900" fontSize="13" letterSpacing="-0.5">VISA</text>
-      </svg>
+    <span className="footer-pay" title={label} aria-label={label}>
+      <img src={src} alt={label} loading="lazy" />
     </span>
   );
 }
 
-function PayMastercard() {
+function AppStoreBadge() {
   return (
-    <span className="footer-pay" title="Mastercard" aria-label="Mastercard">
-      <svg viewBox="0 0 50 32" aria-hidden="true">
-        <rect width="50" height="32" rx="6" fill="#fff" />
-        <circle cx="20" cy="16" r="7" fill="#EB001B" />
-        <circle cx="30" cy="16" r="7" fill="#F79E1B" />
-        <path d="M25 10.6a7 7 0 0 1 0 10.8 7 7 0 0 1 0-10.8z" fill="#FF5F00" />
-      </svg>
-    </span>
+    <svg viewBox="0 0 135 40" aria-hidden="true">
+      <rect width="135" height="40" rx="6" fill="#000" />
+      <path fill="#fff" d="M24.8 20.3c-.04-4.3 3.5-6.4 3.66-6.5-2-2.9-5.1-3.3-6.2-3.4-2.64-.27-5.16 1.56-6.5 1.56-1.36 0-3.44-1.52-5.66-1.48-2.91.04-5.6 1.7-7.1 4.3-3.03 5.26-.77 13.04 2.17 17.32 1.44 2.08 3.15 4.42 5.4 4.34 2.17-.09 2.99-1.4 5.62-1.4 2.62 0 3.37 1.4 5.67 1.35 2.34-.04 3.82-2.12 5.24-4.21 1.65-2.4 2.33-4.74 2.36-4.86-.05-.02-4.53-1.74-4.57-6.91zM20.3 6.8c1.2-1.45 2.01-3.47 1.79-5.48-1.73.07-3.82 1.15-5.06 2.6-1.11 1.29-2.08 3.35-1.82 5.32 1.92.15 3.88-.98 5.09-2.44z" />
+      <text x="44" y="14" fill="#fff" fontFamily="Arial, Helvetica, sans-serif" fontSize="8">Download on the</text>
+      <text x="44" y="28" fill="#fff" fontFamily="Arial, Helvetica, sans-serif" fontWeight="600" fontSize="14">App Store</text>
+    </svg>
   );
 }
 
-function PayAmex() {
+function GooglePlayBadge() {
   return (
-    <span className="footer-pay" title="American Express" aria-label="American Express">
-      <svg viewBox="0 0 50 32" aria-hidden="true">
-        <rect width="50" height="32" rx="6" fill="#2E77BC" />
-        <text x="25" y="20.5" textAnchor="middle" fill="#fff" fontFamily="Arial, Helvetica, sans-serif" fontWeight="800" fontSize="9" letterSpacing="0.6">AMEX</text>
-      </svg>
-    </span>
+    <svg viewBox="0 0 135 40" aria-hidden="true">
+      <rect width="135" height="40" rx="6" fill="#000" />
+      <path fill="#EA4335" d="M10 8.5 24.5 20 10 31.5V8.5z" />
+      <path fill="#FBBC04" d="M10 8.5 24.5 20 32 14.5 10 8.5z" />
+      <path fill="#34A853" d="M10 31.5 24.5 20 32 25.5 10 31.5z" />
+      <path fill="#4285F4" d="M32 14.5 24.5 20 32 25.5 38 22.5 38 17.5 32 14.5z" />
+      <text x="44" y="14" fill="#fff" fontFamily="Arial, Helvetica, sans-serif" fontSize="8">GET IT ON</text>
+      <text x="44" y="28" fill="#fff" fontFamily="Arial, Helvetica, sans-serif" fontWeight="600" fontSize="14">Google Play</text>
+    </svg>
   );
 }
 
-function PayApple() {
-  return (
-    <span className="footer-pay" title="Apple Pay" aria-label="Apple Pay">
-      <svg viewBox="0 0 54 32" aria-hidden="true">
-        <rect width="54" height="32" rx="6" fill="#fff" />
-        <path fill="#111" d="M16.1 10.7c-.4.5-1.05.88-1.75.82-.08-.62.23-1.3.62-1.72.4-.48 1.1-.82 1.68-.84.08.65-.18 1.3-.55 1.74zm.62.9c-.95-.05-1.75.55-2.22.55-.5 0-1.24-.52-2.08-.52-1.06 0-2.04.62-2.58 1.56-1.1 1.9-.29 4.7.8 6.22.52.76 1.12 1.56 1.92 1.54.76-.04 1.06-.5 2-.5.93 0 1.2.5 2 .48.84-.03 1.35-.7 1.85-1.46.57-.84.8-1.64.8-1.67-.03 0-1.6-.62-1.6-2.37 0-1.5 1.22-2.22 1.28-2.26-.7-1.02-1.78-1.14-2.22-1.14z" />
-        <text x="36" y="21" textAnchor="middle" fill="#111" fontFamily="Arial, Helvetica, sans-serif" fontWeight="600" fontSize="12">Pay</text>
-      </svg>
-    </span>
-  );
-}
+function FooterPatent({ t }) {
+  const [open, setOpen] = useState(false);
 
-function PayGoogle() {
+  useEffect(() => {
+    if (!open) return undefined;
+    const onKey = (event) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
   return (
-    <span className="footer-pay" title="Google Pay" aria-label="Google Pay">
-      <svg viewBox="0 0 62 32" aria-hidden="true">
-        <rect width="62" height="32" rx="6" fill="#fff" />
-        <text x="7" y="21" fontFamily="Arial, Helvetica, sans-serif" fontWeight="700" fontSize="12">
-          <tspan fill="#4285F4">G</tspan>
-          <tspan fill="#EA4335">o</tspan>
-          <tspan fill="#FBBC04">o</tspan>
-          <tspan fill="#4285F4">g</tspan>
-          <tspan fill="#34A853">l</tspan>
-          <tspan fill="#EA4335">e</tspan>
-        </text>
-        <text x="51" y="21" textAnchor="middle" fill="#5F6368" fontFamily="Arial, Helvetica, sans-serif" fontWeight="600" fontSize="11">Pay</text>
-      </svg>
-    </span>
+    <>
+      <button
+        type="button"
+        className="footer-patent"
+        onClick={() => setOpen(true)}
+        aria-label={t("footer.patentAria")}
+      >
+        <img src={PATENT_VIP_URL} alt="Marka tescil belgesi" />
+        <span className="footer-patent-label">{t("footer.patentLabel")}</span>
+      </button>
+
+      {open && createPortal(
+        <div className="footer-patent-overlay" onClick={() => setOpen(false)} role="presentation">
+          <div
+            className="footer-patent-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label={t("footer.patentAria")}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="footer-patent-close"
+              onClick={() => setOpen(false)}
+              aria-label={t("footer.patentClose")}
+            >
+              ×
+            </button>
+            <img src={PATENT_VIP_URL} alt="Marka tescil belgesi" />
+          </div>
+        </div>,
+        document.body,
+      )}
+    </>
   );
 }
 
@@ -105,11 +139,10 @@ function BadgeTursab() {
   return (
     <a
       className="footer-badge footer-badge--logo"
-      href="https://www.tursab.org.tr/tr/ddsv"
+      href={TURSAB_DDS_URL}
       target="_blank"
-      rel="noopener noreferrer"
-      title="TÜRSAB"
-      aria-label="TÜRSAB"
+      title="TÜRSAB Dijital Doğrulama"
+      aria-label="TÜRSAB Dijital Doğrulama"
     >
       <img src="/images/tursab_logo.png" alt="TÜRSAB" />
     </a>
@@ -224,6 +257,18 @@ export default function Footer({ navigate }) {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31.5 31.5 0 0 0 0 12a31.5 31.5 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31.5 31.5 0 0 0 24 12a31.5 31.5 0 0 0-.5-5.8zM9.8 15.5v-7l6.3 3.5-6.3 3.5z" /></svg>
             </a>
           </div>
+
+          <div className="footer-apps">
+            <p className="footer-apps-label">{t("footer.appsLabel")}</p>
+            <div className="footer-apps-badges">
+              <a className="footer-app-badge" href={APP_STORE_URL} target="_blank" rel="noopener noreferrer" aria-label="App Store">
+                <AppStoreBadge />
+              </a>
+              <a className="footer-app-badge" href={GOOGLE_PLAY_URL} target="_blank" rel="noopener noreferrer" aria-label="Google Play">
+                <GooglePlayBadge />
+              </a>
+            </div>
+          </div>
         </div>
 
         {(["services", "corporate", "support"]).map((column) => (
@@ -238,6 +283,7 @@ export default function Footer({ navigate }) {
                 {t(`footer.columns.${column}.links.${link.key}`)}
               </a>
             ))}
+            {column === "support" && <FooterPatent t={t} />}
           </div>
         ))}
 
@@ -273,11 +319,9 @@ export default function Footer({ navigate }) {
           <BadgeSsl />
         </div>
         <div className="footer-payments" aria-label={t("footer.paymentsAria")}>
-          <PayVisa />
-          <PayMastercard />
-          <PayAmex />
-          <PayApple />
-          <PayGoogle />
+          {PAYMENT_LOGOS.map((logo) => (
+            <PayLogo key={logo.label} src={logo.src} label={logo.label} />
+          ))}
         </div>
       </div>
 

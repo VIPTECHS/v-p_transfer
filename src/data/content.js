@@ -45,3 +45,7 @@ export const EMAIL = "info@viptransfer.com";
 export const INSTAGRAM_HANDLE = "viptransfercom";
 export const INSTAGRAM_URL = "https://www.instagram.com/viptransfercom/";
 export const FACEBOOK_URL = "https://www.facebook.com/viptransfer.com/";
+export const TURSAB_DDS_URL = "https://www.tursab.org.tr/tr/ddsv";
+export const APP_STORE_URL = "https://apps.apple.com/app/vip-transfer/id6745813490";
+export const GOOGLE_PLAY_URL = "https://play.google.com/store/apps/details?id=com.viptransfernew.viptransfer";
+export const PATENT_VIP_URL = "/patent_vip.png";
