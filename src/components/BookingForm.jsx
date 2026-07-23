@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useI18n } from "../i18n/I18nContext";
 import LocationMapField, { getSelectedAirport, locationLabel } from "./LocationMapField";
 import PickupDateTimeField, { createDefaultPickupISO } from "./PickupDateTimeField";
@@ -101,6 +101,20 @@ export default function BookingForm({ visible, onSearch }) {
 
   const needsTo = requiresDestination(bookingType);
   const fromAirport = getSelectedAirport(fromPoint);
+  const toAirport = getSelectedAirport(toPoint);
+  // Group transfers can accommodate large parties (mini-buses / coaches).
+  const passengerMax = bookingType === "group" ? 50 : 16;
+
+  // Keep passenger count within the current booking-type ceiling; when the
+  // user switches away from Group (e.g. from 24 pax back to Transfer) we clamp
+  // down to the smaller limit automatically.
+  useEffect(() => {
+    setPassengers((count) => {
+      const parsed = Number(count);
+      if (!Number.isFinite(parsed) || parsed < 1) return 1;
+      return Math.min(passengerMax, Math.round(parsed));
+    });
+  }, [passengerMax]);
 
   const swapDirections = () => {
     setFromPoint(toPoint);
@@ -130,7 +144,7 @@ export default function BookingForm({ visible, onSearch }) {
       return;
     }
 
-    const passengerCount = Math.min(16, Math.max(1, Number(passengers) || 1));
+    const passengerCount = Math.min(passengerMax, Math.max(1, Number(passengers) || 1));
 
     const data = {
       type: bookingType,
@@ -180,6 +194,7 @@ export default function BookingForm({ visible, onSearch }) {
               other={toPoint}
               onChange={setFromPoint}
               icon={<FromIcon />}
+              destinationAirport={toAirport}
             />
           </div>
 
@@ -255,7 +270,7 @@ export default function BookingForm({ visible, onSearch }) {
               type="number"
               inputMode="numeric"
               min={1}
-              max={16}
+              max={passengerMax}
               value={passengers}
               onChange={(event) => {
                 const next = event.target.value;
@@ -265,21 +280,21 @@ export default function BookingForm({ visible, onSearch }) {
                 }
                 const parsed = Number(next);
                 if (!Number.isFinite(parsed)) return;
-                setPassengers(Math.min(16, Math.max(1, Math.round(parsed))));
+                setPassengers(Math.min(passengerMax, Math.max(1, Math.round(parsed))));
               }}
               onBlur={() => {
                 setPassengers((count) => {
                   const parsed = Number(count);
                   if (!Number.isFinite(parsed) || parsed < 1) return 1;
-                  return Math.min(16, Math.round(parsed));
+                  return Math.min(passengerMax, Math.round(parsed));
                 });
               }}
             />
             <button
               type="button"
               className="passenger-stepper-btn"
-              onClick={() => setPassengers((count) => Math.min(16, Number(count || 1) + 1))}
-              disabled={Number(passengers) >= 16}
+              onClick={() => setPassengers((count) => Math.min(passengerMax, Number(count || 1) + 1))}
+              disabled={Number(passengers) >= passengerMax}
               aria-label="+"
             >
               +

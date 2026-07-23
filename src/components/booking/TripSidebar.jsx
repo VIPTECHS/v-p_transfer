@@ -131,7 +131,14 @@ export default function TripSidebar({
           {/* Counters */}
           {showCounters && onPassengersChange && onLuggageChange && (
             <div className="bw-sidebar-counters">
-              <CounterField icon={<PassengerIcon />} label={t("booking.details.passengers")} value={passengers} onChange={onPassengersChange} min={1} max={16} />
+              <CounterField
+                icon={<PassengerIcon />}
+                label={t("booking.details.passengers")}
+                value={passengers}
+                onChange={onPassengersChange}
+                min={1}
+                max={type === "group" ? 50 : 16}
+              />
               <CounterField icon={<LuggageIcon />} label={t("booking.details.luggage")} value={luggage} onChange={onLuggageChange} min={0} max={20} />
               <CounterField icon={<BabyIcon />} label={t("booking.details.baby")} value={childSeat} onChange={onChildSeatChange} min={0} max={4} />
             </div>

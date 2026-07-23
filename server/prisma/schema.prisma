@@ -24,6 +24,7 @@ model Booking {
   lastName             String?
   email                String
   phone                String
+  whatsappNumber       String?
   passengers           Int       @default(1)
   luggage              Int       @default(0)
   childSeat            Int       @default(0)

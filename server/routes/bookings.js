@@ -28,6 +28,7 @@ function mapBookingPayload(body) {
     lastName: body.lastName || null,
     email: body.email || "",
     phone: body.phone || "",
+    whatsappNumber: body.whatsappNumber?.trim() || null,
     passengers: Number(body.passengers) || 1,
     luggage: Number(body.luggage) || 0,
     childSeat: Number(body.childSeat) || 0,

@@ -3,21 +3,22 @@ import { createPortal } from "react-dom";
 import { useI18n } from "../i18n/I18nContext";
 import { searchPlaces } from "../utils/geocode";
 
-const LocationMapPopover = lazy(() => import("./LocationMapPopover"));
+// Lazy import kept in a module-level variable so we can prefetch it before
+// the user actually clicks the map button.
+let popoverImportPromise = null;
+function prefetchLocationMapPopover() {
+  if (!popoverImportPromise) {
+    popoverImportPromise = import("./LocationMapPopover");
+  }
+  return popoverImportPromise;
+}
+const LocationMapPopover = lazy(() => prefetchLocationMapPopover());
 
 /** @typedef {{ label: string, lng: number, lat: number }} LocationPoint */
 
 const MAX_VISIBLE_SUGGESTIONS = 6;
 
 const POPULAR_AIRPORTS = [
-  {
-    label: "Dubai Havalimanı (DXB)",
-    city: "Dubai",
-    code: "DXB",
-    lng: 55.3657,
-    lat: 25.2532,
-    aliases: ["dubai airport", "dxb airport"],
-  },
   {
     label: "İstanbul Havalimanı (IST)",
     city: "İstanbul",
@@ -41,6 +42,14 @@ const POPULAR_AIRPORTS = [
     lng: 30.8005,
     lat: 36.8987,
     aliases: ["antalya airport", "ayt airport"],
+  },
+  {
+    label: "Dubai Havalimanı (DXB)",
+    city: "Dubai",
+    code: "DXB",
+    lng: 55.3657,
+    lat: 25.2532,
+    aliases: ["dubai airport", "dxb airport"],
   },
   {
     label: "Paris Charles de Gaulle Havalimanı (CDG)",
@@ -390,9 +399,61 @@ function popularCityDestinationSuggestions(airport, query) {
     }));
 }
 
-function popularAirportSuggestions(query) {
+// Build a fast lookup from normalized airport-city name -> that city's display
+// name. Used to detect what city a picked place belongs to (e.g. a place whose
+// label ends in "..., İstanbul" resolves to the "İstanbul" airport city).
+const AIRPORT_CITY_INDEX = (() => {
+  const map = new Map();
+  for (const airport of FEATURED_AIRPORTS) {
+    const key = normalizeSearchText(airport.city);
+    if (!map.has(key)) map.set(key, airport.city);
+  }
+  return map;
+})();
+
+function resolveKnownCity(rawCity) {
+  const norm = normalizeSearchText(rawCity || "");
+  if (!norm) return null;
+  if (AIRPORT_CITY_INDEX.has(norm)) return AIRPORT_CITY_INDEX.get(norm);
+  const aliasKey = CITY_DESTINATION_ALIASES[norm];
+  if (aliasKey && AIRPORT_CITY_INDEX.has(aliasKey)) {
+    return AIRPORT_CITY_INDEX.get(aliasKey);
+  }
+  return null;
+}
+
+function getCityFromPoint(point) {
+  if (!point) return null;
+  const direct = resolveKnownCity(point.city);
+  if (direct) return direct;
+  const label = point.label || "";
+  const parts = label.split(",").map((part) => part.trim()).filter(Boolean);
+  // Walk the label right-to-left; the most specific city usually comes last
+  // before the country (e.g. "Kadıköy, İstanbul, Türkiye").
+  for (let i = parts.length - 1; i >= 0; i -= 1) {
+    const matched = resolveKnownCity(parts[i]);
+    if (matched) return matched;
+  }
+  return null;
+}
+
+function popularAirportSuggestions(query, preferredCity) {
+  const preferredCityKey = preferredCity ? normalizeSearchText(preferredCity) : null;
+  const isPreferred = (airport) => (
+    preferredCityKey != null &&
+    normalizeSearchText(airport.city) === preferredCityKey
+  );
+
   const normalizedQuery = normalizeSearchText(query.trim());
-  if (!normalizedQuery) return FEATURED_AIRPORTS;
+  if (!normalizedQuery) {
+    if (!preferredCityKey) return FEATURED_AIRPORTS;
+    // No query: show the preferred city's airports first, then the rest so the
+    // user sees relevant options at the very top before scrolling.
+    const preferred = FEATURED_AIRPORTS.filter(isPreferred);
+    if (preferred.length === 0) return FEATURED_AIRPORTS;
+    const rest = FEATURED_AIRPORTS.filter((airport) => !isPreferred(airport));
+    return [...preferred, ...rest];
+  }
 
   return FEATURED_AIRPORTS
     .map((airport, index) => {
@@ -402,13 +463,17 @@ function popularAirportSuggestions(query) {
         ...airport.aliases,
       ].map(normalizeSearchText);
 
-      const score = fields.reduce((best, field, fieldIndex) => {
+      let score = fields.reduce((best, field, fieldIndex) => {
         if (field.startsWith(normalizedQuery)) return Math.min(best, fieldIndex);
         const wordStarts = field
           .split(/[\s().'-]+/)
           .some((word) => word.startsWith(normalizedQuery));
         return wordStarts ? Math.min(best, fieldIndex + 3) : best;
       }, 99);
+
+      // Slight boost so that same-city airports outrank equally-matched
+      // ones somewhere else in the world.
+      if (score < 99 && isPreferred(airport)) score -= 10;
 
       return { airport, score, index };
     })
@@ -472,6 +537,7 @@ export default function LocationMapField({
 }) {
   const { t, lang } = useI18n();
   const [open, setOpen] = useState(false);
+  const [popoverMounted, setPopoverMounted] = useState(false);
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
   const [suggestionStyle, setSuggestionStyle] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
@@ -482,21 +548,55 @@ export default function LocationMapField({
   const suggestionsRef = useRef(null);
   const searchRequestRef = useRef(0);
   const trimmedQuery = query.trim();
-  const citySuggestions = destinationAirport
+  // City popular list — computed twice: query-filtered (best matches) and
+  // unfiltered (fallback so the dropdown never feels empty when the user is
+  // typing something that lives in a different city).
+  const matchingCitySuggestions = destinationAirport
     ? popularCityDestinationSuggestions(destinationAirport, query)
     : [];
-  const airportSuggestions = destinationAirport ? [] : popularAirportSuggestions(query);
+  const allCitySuggestions = destinationAirport
+    ? popularCityDestinationSuggestions(destinationAirport, "")
+    : [];
+  // When the OTHER field already has a place (not an airport) picked in a
+  // known city, surface that city's airports at the very top so the user
+  // sees them the moment they open the empty field.
+  const otherCityForBoost = destinationAirport ? null : getCityFromPoint(other);
+  const airportSuggestions = destinationAirport
+    ? []
+    : popularAirportSuggestions(query, otherCityForBoost);
   const placeSuggestions = filterPlaceSuggestions(searchResults, { allowAirports: !destinationAirport });
-  const suggestions = (
-    trimmedQuery.length < 2
-      ? (destinationAirport ? citySuggestions : airportSuggestions)
-      : mergeSuggestions(destinationAirport ? citySuggestions : airportSuggestions, placeSuggestions)
-  ).slice(0, MAX_VISIBLE_SUGGESTIONS);
-  const suggestionsTitle = destinationAirport
-    ? `${destinationAirport.city} Popüler Noktalar`
-    : trimmedQuery.length < 2
-      ? "Havalimanı Seç"
-      : "Konum Seç";
+
+  // Track whether the visible list is a real match or just a helpful
+  // fallback. When we're only showing a fallback we surface a subtle hint
+  // so the user knows their query didn't match exactly.
+  const suggestionState = (() => {
+    if (trimmedQuery.length < 2) {
+      const list = (destinationAirport ? allCitySuggestions : airportSuggestions)
+        .slice(0, MAX_VISIBLE_SUGGESTIONS);
+      return { list, isFallback: false };
+    }
+
+    const primary = destinationAirport ? matchingCitySuggestions : airportSuggestions;
+    const merged = mergeSuggestions(primary, placeSuggestions);
+    if (merged.length > 0) return { list: merged, isFallback: false };
+
+    // Nothing matched exactly. Always fall back to the top popular list so
+    // the dropdown stays useful instead of showing a dead-end "not found"
+    // for anything vaguely misspelled or partial.
+    const fallbackList = destinationAirport
+      ? allCitySuggestions
+      : FEATURED_AIRPORTS.slice(0, MAX_VISIBLE_SUGGESTIONS);
+    return { list: fallbackList.slice(0, MAX_VISIBLE_SUGGESTIONS), isFallback: true };
+  })();
+  const suggestions = suggestionState.list;
+  const showingFallback = suggestionState.isFallback && !searching;
+
+  // Title reflects what's actually being shown: as soon as the user types,
+  // we're really showing "Konum Seç" (global picker) with popular hints,
+  // not a pure popular list — so stop pretending it's city-only.
+  const suggestionsTitle = trimmedQuery.length < 2
+    ? (destinationAirport ? `${destinationAirport.city} Popüler Noktalar` : "Havalimanı Seç")
+    : "Konum Seç";
 
   const updateSuggestionPosition = () => {
     const rect = rootRef.current?.getBoundingClientRect();
@@ -588,10 +688,14 @@ export default function LocationMapField({
     const requestId = ++searchRequestRef.current;
     const timer = window.setTimeout(async () => {
       try {
-        const places = await searchPlaces(
-          destinationAirport?.city ? `${trimmedQuery} ${destinationAirport.city}` : trimmedQuery,
-          lang,
-        );
+        // Always run a global search. When the other side is a known airport,
+        // the "popular destinations in <city>" hints are already shown from
+        // the local list above, so the network query does not need to be
+        // scoped to that city — otherwise typing a destination in a different
+        // city (e.g. "Ege Üniversitesi" while the airport is IST) would
+        // return no results because the query becomes "Ege Üniversitesi
+        // İstanbul".
+        const places = await searchPlaces(trimmedQuery, lang);
         if (requestId === searchRequestRef.current) {
           setSearchResults(places);
         }
@@ -607,7 +711,7 @@ export default function LocationMapField({
     }, 320);
 
     return () => window.clearTimeout(timer);
-  }, [trimmedQuery, lang, suggestionsOpen, destinationAirport]);
+  }, [trimmedQuery, lang, suggestionsOpen]);
 
   const pickSuggestion = (suggestion) => {
     const point = {
@@ -625,9 +729,12 @@ export default function LocationMapField({
     onChange(point);
   };
 
-  const popover = open && typeof document !== "undefined"
+  // The popover is mounted lazily on first open, then kept in the DOM.
+  // Toggling visibility (instead of re-mounting) preserves the MapLibre GL
+  // WebGL context, style, tiles and airport layer, so re-opening is instant.
+  const popover = popoverMounted && typeof document !== "undefined"
     ? createPortal(
-        <div ref={popoverRef}>
+        <div ref={popoverRef} className={`location-map-portal ${open ? "" : "location-map-portal--hidden"}`} aria-hidden={!open}>
           <Suspense fallback={<div className="location-map-popover location-map-popover--portal location-map-loading">{t("map.loading")}</div>}>
             <LocationMapPopover
               variant={variant}
@@ -660,6 +767,11 @@ export default function LocationMapField({
           <div className="location-suggestions-title">{suggestionsTitle}</div>
           {searching && suggestions.length === 0 && (
             <div className="location-suggestion-empty">Aranıyor...</div>
+          )}
+          {showingFallback && suggestions.length > 0 && (
+            <div className="location-suggestion-hint">
+              Tam eşleşme bulunamadı — popüler öneriler:
+            </div>
           )}
           {!searching && trimmedQuery.length >= 2 && suggestions.length === 0 && (
             <div className="location-suggestion-empty">Sonuç bulunamadı</div>
@@ -702,6 +814,8 @@ export default function LocationMapField({
             onChange(text.trim() ? { label: text } : null);
           }}
           onFocus={() => {
+            // Warm up the map popover chunk while the user is still typing.
+            prefetchLocationMapPopover();
             if (!open) showSuggestions();
           }}
           autoComplete="off"
@@ -711,8 +825,11 @@ export default function LocationMapField({
         <button
           type="button"
           className="map-btn"
+          onPointerEnter={prefetchLocationMapPopover}
+          onFocus={prefetchLocationMapPopover}
           onClick={() => {
             setSuggestionsOpen(false);
+            setPopoverMounted(true);
             setOpen(true);
           }}
           aria-label={t("booking.showOnMap")}

@@ -18,7 +18,16 @@ const initialState = {
   luggage: 1,
   childSeat: 0,
   selectedVehicle: null,
-  contact: { firstName: "", lastName: "", email: "", phoneCode: "+90", phone: "" },
+  contact: {
+    firstName: "",
+    lastName: "",
+    email: "",
+    phoneCode: "+90",
+    phone: "",
+    whatsappDifferent: false,
+    whatsappCode: "+90",
+    whatsappNumber: "",
+  },
   flightNumber: "",
   meetAndGreetSelected: false,
   meetAndGreetName: "",
@@ -62,6 +71,10 @@ export default function BookingWizard({ bookingData, onBack }) {
     tripData: bookingData || { type: "transfer" },
     step: hasTrip ? 2 : 1,
     selectedVehicle: bookingData?.vehicle || null,
+    // Carry passenger/luggage counts through from the home form so the user
+    // does not have to re-enter them (previously they were reset to 1/1 here).
+    passengers: Math.max(1, Number(bookingData?.passengers) || initialState.passengers),
+    luggage: Math.max(0, Number(bookingData?.luggage) || initialState.luggage),
   });
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
@@ -108,12 +121,21 @@ export default function BookingWizard({ bookingData, onBack }) {
 
     setStatus("loading");
     try {
+      // Only send the WhatsApp number when the guest has explicitly opted in
+      // to a different one; otherwise the primary phone is used for WhatsApp
+      // by default and we skip the extra field.
+      const whatsappNumber = state.contact.whatsappDifferent
+        && state.contact.whatsappNumber.trim()
+        ? `${state.contact.whatsappCode}${state.contact.whatsappNumber.trim()}`
+        : undefined;
+
       const result = await submitBooking({
         ...state.tripData,
         firstName: state.contact.firstName.trim(),
         lastName: state.contact.lastName.trim(),
         email: state.contact.email.trim(),
         phone: `${state.contact.phoneCode}${state.contact.phone.trim()}`,
+        whatsappNumber,
         passengers: state.passengers,
         luggage: state.luggage,
         childSeat: state.childSeat,

@@ -229,15 +229,15 @@ const Map = forwardRef<MapRef, MapProps>(function Map(
 
     const styleDataHandler = () => {
       clearStyleTimeout();
-      // Delay to ensure style is fully processed before allowing layer operations
-      // This is a workaround to avoid race conditions with the style loading
-      // else we have to force update every layer on setStyle change
+      // A microtask is enough to let MapLibre finish committing the current
+      // style tick before we flip `isStyleLoaded`. This avoids the previous
+      // 100 ms delay that made the first map paint feel sluggish.
       styleTimeoutRef.current = setTimeout(() => {
         setIsStyleLoaded(true);
         if (projection) {
           map.setProjection(projection);
         }
-      }, 100);
+      }, 0);
     };
     const loadHandler = () => setIsLoaded(true);
 
