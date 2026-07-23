@@ -303,13 +303,27 @@ export default function BookingForm({ visible, onSearch }) {
         </div>
 
         <div className="field-group field-group--submit">
-          <label className="booking-roundtrip booking-roundtrip--inline">
+          <label
+            className={`booking-roundtrip booking-roundtrip--inline booking-roundtrip--pill ${roundTrip ? "is-active" : ""}`}
+          >
             <input
               type="checkbox"
+              className="booking-roundtrip-input"
               checked={roundTrip}
               onChange={(event) => setRoundTrip(event.target.checked)}
             />
-            <span>{t("booking.roundTrip")}</span>
+            <span className="booking-roundtrip-icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 8h13l-3-3" />
+                <path d="M20 16H7l3 3" />
+              </svg>
+            </span>
+            <span className="booking-roundtrip-label">{t("booking.roundTrip")}</span>
+            <span className="booking-roundtrip-check" aria-hidden="true">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12l5 5L20 7" />
+              </svg>
+            </span>
           </label>
           <button className="btn-search" type="submit">
             {t("booking.seePrices")}

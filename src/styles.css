@@ -1060,8 +1060,97 @@ input, select, textarea { color-scheme: var(--scheme); }
   user-select: none;
   min-height: 24px;
 }
-.booking-form--bar .booking-roundtrip input,
-.booking-form--bar .booking-roundtrip--inline input {
+
+/* Modern pill-style Round Trip toggle. Hides the native checkbox and paints
+   a custom pill that lights up gold when active. */
+.booking-roundtrip--pill {
+  position: relative;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 8px 14px !important;
+  min-height: 36px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(212, 175, 55, 0.28) !important;
+  background: rgba(255, 255, 255, 0.02) !important;
+  color: rgba(255, 255, 255, 0.72) !important;
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease,
+    box-shadow 0.2s ease, transform 0.15s ease;
+  white-space: nowrap;
+  isolation: isolate;
+}
+.booking-roundtrip--pill:hover {
+  border-color: rgba(212, 175, 55, 0.55) !important;
+  background: rgba(212, 175, 55, 0.08) !important;
+  color: rgba(255, 255, 255, 0.92) !important;
+  transform: translateY(-1px);
+}
+.booking-roundtrip--pill.is-active {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.18), rgba(212, 175, 55, 0.28)) !important;
+  border-color: rgba(212, 175, 55, 0.85) !important;
+  color: #fff8dd !important;
+  box-shadow:
+    0 0 0 3px rgba(212, 175, 55, 0.14),
+    0 4px 14px -6px rgba(212, 175, 55, 0.45);
+}
+.booking-roundtrip-input {
+  position: absolute !important;
+  opacity: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  border: 0 !important;
+  pointer-events: none;
+}
+.booking-roundtrip-input:focus-visible + .booking-roundtrip-icon {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+.booking-roundtrip-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold);
+  opacity: 0.85;
+  transition: opacity 0.2s ease, transform 0.3s ease;
+}
+.booking-roundtrip--pill.is-active .booking-roundtrip-icon {
+  opacity: 1;
+  transform: rotate(-8deg) scale(1.05);
+}
+.booking-roundtrip-label {
+  line-height: 1;
+}
+.booking-roundtrip-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--gold);
+  color: #1a1200;
+  opacity: 0;
+  transform: scale(0.4);
+  transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  margin-left: 2px;
+}
+.booking-roundtrip--pill.is-active .booking-roundtrip-check {
+  opacity: 1;
+  transform: scale(1);
+}
+/* Backwards compat: some markup still uses the checkbox variant. */
+.booking-form--bar .booking-roundtrip input:not(.booking-roundtrip-input),
+.booking-form--bar .booking-roundtrip--inline input:not(.booking-roundtrip-input) {
   width: 15px;
   height: 15px;
   accent-color: var(--gold);
@@ -3264,7 +3353,13 @@ footer.site-footer,
     padding: 0 4px;
     font-size: 14px;
   }
-  .booking-form--bar .booking-roundtrip input {
+  .booking-form--bar .booking-roundtrip--pill {
+    min-height: 42px !important;
+    padding: 9px 16px !important;
+    font-size: 12px !important;
+    justify-content: center;
+  }
+  .booking-form--bar .booking-roundtrip input:not(.booking-roundtrip-input) {
     width: 20px;
     height: 20px;
   }
@@ -4014,6 +4109,20 @@ footer.site-footer,
 [data-theme="light"] .hero .booking-form .passenger-stepper-value,
 [data-theme="light"] .hero .booking-form .passenger-stepper-input { color: #1a1a2e !important; }
 [data-theme="light"] .hero .booking-form .booking-roundtrip { color: #444; }
+[data-theme="light"] .hero .booking-form .booking-roundtrip--pill {
+  color: #55555a !important;
+  border-color: rgba(212, 175, 55, 0.35) !important;
+  background: rgba(0, 0, 0, 0.02) !important;
+}
+[data-theme="light"] .hero .booking-form .booking-roundtrip--pill:hover {
+  background: rgba(212, 175, 55, 0.1) !important;
+  color: #1a1a2e !important;
+}
+[data-theme="light"] .hero .booking-form .booking-roundtrip--pill.is-active {
+  color: #6b4d0a !important;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.3)) !important;
+  border-color: rgba(212, 175, 55, 0.9) !important;
+}
 [data-theme="light"] .location-field-trigger { color: #1a1a2e; }
 [data-theme="light"] .location-map-popover { background: #fff; border-color: rgba(212,175,55,.2); box-shadow: 0 28px 70px rgba(0,0,0,.15); }
 [data-theme="light"] .location-map-popover-header { border-color: rgba(0,0,0,.08); }
