@@ -2195,6 +2195,72 @@ h1,h2 { font-family: var(--font-display); font-weight: 600; margin: 0; }
 .bw-trip-submit { align-self: flex-start; padding: 13px 32px; border-radius: 10px; background: var(--gold); color: #1a1200; font-weight: 700; font-size: 13px; border: 0; cursor: pointer; transition: background .2s, transform .2s; }
 .bw-trip-submit:hover { background: #e6c455; transform: translateY(-1px); }
 
+/* Passenger stepper inside the Trip Details wizard step (Grup Transferi tab). */
+.bw-trip-passengers { max-width: 220px; }
+.bw-trip-form .passenger-stepper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid #dcdce3;
+  background: #fff;
+}
+.bw-trip-form .passenger-stepper-btn {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  border-radius: 8px;
+  background: rgba(212, 175, 55, 0.1);
+  color: #8a6d12;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: background .2s, border-color .2s, opacity .2s;
+}
+.bw-trip-form .passenger-stepper-btn:hover:not(:disabled) {
+  background: rgba(212, 175, 55, 0.2);
+  border-color: rgba(212, 175, 55, 0.7);
+}
+.bw-trip-form .passenger-stepper-btn:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+}
+.bw-trip-form .passenger-stepper-input {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  border: 0 !important;
+  background: transparent !important;
+  color: #1a1a2e !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  text-align: center;
+  outline: 0 !important;
+  padding: 0 !important;
+  -moz-appearance: textfield;
+}
+.bw-trip-form .passenger-stepper-input::-webkit-outer-spin-button,
+.bw-trip-form .passenger-stepper-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+[data-theme="dark"] .bw-trip-form .passenger-stepper {
+  background: #1c1c24;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+[data-theme="dark"] .bw-trip-form .passenger-stepper-btn {
+  background: rgba(212, 175, 55, 0.14);
+  border-color: rgba(212, 175, 55, 0.35);
+  color: var(--gold, #d4af37);
+}
+[data-theme="dark"] .bw-trip-form .passenger-stepper-input {
+  color: #f4f4f4 !important;
+}
+
 [data-theme="dark"] .bw-trip-tabs { background: rgba(255,255,255,.06); }
 [data-theme="dark"] .bw-trip-tabs button { color: #b8b8c2; }
 [data-theme="dark"] .bw-trip-tabs button.active { background: #2a2a33; color: #fff; box-shadow: none; }

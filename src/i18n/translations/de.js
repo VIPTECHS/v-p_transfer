@@ -64,7 +64,7 @@ export default {
     swap: "Richtung tauschen",
     showOnMap: "Auf Karte zeigen",
     search: "Suchen",
-    seePrices: "Preise anzeigen",
+    seePrices: "Reservierung fortsetzen",
     searching: "Suche läuft...",
     success: "Angebotsanfrage erhalten. Referenz: {ref}",
     error: "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut oder rufen Sie uns an.",

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useI18n } from "../../i18n/I18nContext";
 import { defaultPickupDate, toPickupISO } from "../../utils/datetime";
 import { BOOKING_TYPES, requiresDestination, requiresDuration } from "../../utils/bookingTypes";
@@ -36,10 +36,28 @@ export default function TripDetails({ state, dispatch, onContinue }) {
   const [fromPoint, setFromPoint] = useState(pointFrom(tripData?.from, tripData?.fromCoords));
   const [toPoint, setToPoint] = useState(pointFrom(tripData?.to, tripData?.toCoords));
   const [durationHours, setDurationHours] = useState(String(tripData?.durationHours || "4"));
+  // Group transfers (mini-bus / coach) can carry a larger party than the
+  // usual sedan/van fleet; keep the ceiling in sync with the home form.
+  const passengerMax = bookingType === "group" ? 50 : 16;
+  const initialPassengers = Math.max(
+    1,
+    Math.min(passengerMax, Number(state.passengers) || 1),
+  );
+  const [passengers, setPassengers] = useState(initialPassengers);
   const [message, setMessage] = useState("");
 
   const minPickup = toPickupISO(new Date());
   const hasCoords = (p) => p && p.lng != null && p.lat != null;
+
+  // When the tab is switched (e.g. Group → Transfer) clamp the count so the
+  // number never exceeds the new fleet's ceiling.
+  useEffect(() => {
+    setPassengers((count) => {
+      const parsed = Number(count);
+      if (!Number.isFinite(parsed) || parsed < 1) return 1;
+      return Math.min(passengerMax, Math.round(parsed));
+    });
+  }, [passengerMax]);
 
   // Same symmetric behavior as the home page BookingForm: if one side is a
   // known airport, the other side proposes popular destinations in that
@@ -74,6 +92,11 @@ export default function TripDetails({ state, dispatch, onContinue }) {
       return;
     }
 
+    const passengerCount = Math.max(
+      1,
+      Math.min(passengerMax, Number(passengers) || 1),
+    );
+
     dispatch({
       type: "SET_TRIP",
       payload: {
@@ -86,6 +109,10 @@ export default function TripDetails({ state, dispatch, onContinue }) {
         toCoords: hasCoords(toPoint) && needsTo ? { lng: toPoint.lng, lat: toPoint.lat } : undefined,
       },
     });
+    // Persist the passenger count so the next steps (Service selection,
+    // Sidebar summary, Checkout) all reflect the number the guest picked
+    // here — no need to re-enter it later.
+    dispatch({ type: "SET_PASSENGERS", payload: passengerCount });
     onContinue();
   };
 
@@ -158,6 +185,65 @@ export default function TripDetails({ state, dispatch, onContinue }) {
               </label>
             )}
           </div>
+
+          {bookingType === "group" && (
+            <div className="vehicle-book-field bw-trip-passengers">
+              <span>{t("booking.passengersLabel")}</span>
+              <div className="passenger-stepper">
+                <button
+                  type="button"
+                  className="passenger-stepper-btn"
+                  onClick={() =>
+                    setPassengers((count) => Math.max(1, Number(count || 1) - 1))
+                  }
+                  disabled={Number(passengers || 1) <= 1}
+                  aria-label="-"
+                >
+                  −
+                </button>
+                <input
+                  className="passenger-stepper-input"
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  max={passengerMax}
+                  value={passengers}
+                  onChange={(event) => {
+                    const next = event.target.value;
+                    if (next === "") {
+                      setPassengers("");
+                      return;
+                    }
+                    const parsed = Number(next);
+                    if (!Number.isFinite(parsed)) return;
+                    setPassengers(
+                      Math.min(passengerMax, Math.max(1, Math.round(parsed))),
+                    );
+                  }}
+                  onBlur={() => {
+                    setPassengers((count) => {
+                      const parsed = Number(count);
+                      if (!Number.isFinite(parsed) || parsed < 1) return 1;
+                      return Math.min(passengerMax, Math.round(parsed));
+                    });
+                  }}
+                />
+                <button
+                  type="button"
+                  className="passenger-stepper-btn"
+                  onClick={() =>
+                    setPassengers((count) =>
+                      Math.min(passengerMax, Number(count || 1) + 1),
+                    )
+                  }
+                  disabled={Number(passengers) >= passengerMax}
+                  aria-label="+"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          )}
 
           <button className="bw-trip-submit" type="submit">
             {t("wizard.continue")}
