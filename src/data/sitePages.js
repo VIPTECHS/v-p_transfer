@@ -1,8 +1,8 @@
 // Footer bağlantı sayfaları — tek kaynak. SitePage.jsx buradan beslenir.
 // Her sayfa dile göre içerik taşır: intro + başlıklı bölümler.
 
-import { enrichedSitePages } from "./sitePagesEnrich";
-import { extraSitePages } from "./sitePagesExtra";
+import { enrichedSitePages } from "./sitePagesEnrich.js";
+import { extraSitePages } from "./sitePagesExtra.js";
 
 const baseSitePages = [
   // ---------------- CORPORATE ----------------

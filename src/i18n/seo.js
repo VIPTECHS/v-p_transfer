@@ -187,10 +187,11 @@ export function injectServiceLd({ name, description, url }) {
   upsertJsonLd("ld-service", {
     "@context": "https://schema.org",
     "@type": "Service",
+    "@id": url ? `${url}#service` : undefined,
     name,
     description,
-    provider: { "@type": "Organization", name: "VIP Transfer", url: SITE_URL },
-    areaServed: "Istanbul, Turkey",
+    provider: { "@type": "LocalBusiness", "@id": `${SITE_URL}/#business` },
+    areaServed: { "@type": "City", name: "Istanbul" },
     url,
   });
 }
