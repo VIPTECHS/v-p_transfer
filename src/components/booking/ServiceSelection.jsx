@@ -13,7 +13,7 @@ export default function ServiceSelection({
   const { t } = useI18n();
   const [showStopsModal, setShowStopsModal] = useState(false);
 
-  const { tripData, selectedVehicle, passengers, luggage, childSeat, pets, stops } = state;
+  const { tripData, selectedVehicle, passengers, luggage, childSeat, stops } = state;
 
   return (
     <div className="bw-layout">
@@ -23,11 +23,9 @@ export default function ServiceSelection({
         passengers={passengers}
         luggage={luggage}
         childSeat={childSeat}
-        pets={pets}
         onPassengersChange={(v) => dispatch({ type: "SET_PASSENGERS", payload: v })}
         onLuggageChange={(v) => dispatch({ type: "SET_LUGGAGE", payload: v })}
         onChildSeatChange={(v) => dispatch({ type: "SET_CHILD_SEAT", payload: v })}
-        onPetsChange={(v) => dispatch({ type: "SET_PETS", payload: v })}
         onAddStops={() => setShowStopsModal(true)}
         onEdit={onEdit}
         editable

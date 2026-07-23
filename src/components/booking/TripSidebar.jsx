@@ -25,15 +25,6 @@ const BabyIcon = () => (
   </svg>
 );
 
-const PetIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="11" cy="4" r="2"/>
-    <circle cx="18" cy="8" r="2"/>
-    <circle cx="20" cy="16" r="2"/>
-    <path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z"/>
-  </svg>
-);
-
 function CounterField({ icon, label, value, onChange, min = 0, max = 20 }) {
   return (
     <div className="bw-counter">
@@ -58,14 +49,12 @@ export default function TripSidebar({
   passengers,
   luggage,
   childSeat = 0,
-  pets = 0,
   selectedVehicle,
   vehicleName,
   contact,
   onPassengersChange,
   onLuggageChange,
   onChildSeatChange,
-  onPetsChange,
   onAddStops,
   editable = false,
   showCounters = false,
@@ -145,7 +134,6 @@ export default function TripSidebar({
               <CounterField icon={<PassengerIcon />} label={t("booking.details.passengers")} value={passengers} onChange={onPassengersChange} min={1} max={16} />
               <CounterField icon={<LuggageIcon />} label={t("booking.details.luggage")} value={luggage} onChange={onLuggageChange} min={0} max={20} />
               <CounterField icon={<BabyIcon />} label={t("booking.details.baby")} value={childSeat} onChange={onChildSeatChange} min={0} max={4} />
-              <CounterField icon={<PetIcon />} label={t("booking.details.pets")} value={pets} onChange={onPetsChange} min={0} max={3} />
             </div>
           )}
 
@@ -155,7 +143,6 @@ export default function TripSidebar({
               <div className="bw-sidebar-meta-item"><PassengerIcon /> <span>{passengers}</span></div>
               <div className="bw-sidebar-meta-item"><LuggageIcon /> <span>{luggage}</span></div>
               {childSeat > 0 && <div className="bw-sidebar-meta-item"><BabyIcon /> <span>{childSeat}</span></div>}
-              {pets > 0 && <div className="bw-sidebar-meta-item"><PetIcon /> <span>{pets}</span></div>}
             </div>
           )}
 

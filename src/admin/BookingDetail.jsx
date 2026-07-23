@@ -186,7 +186,7 @@ export default function BookingDetail({ id, onBack }) {
           <DetailRow label="Telefon" value={booking.phone} />
           <DetailRow label="Çocuk koltuğu" value={booking.childSeat} />
           {booking.flightNumber && <DetailRow label="Uçuş" value={booking.flightNumber} />}
-          {booking.meetAndGreetName && <DetailRow label="Karşılama" value={booking.meetAndGreetName} />}
+          {booking.meetAndGreetRequested && <DetailRow label="Karşılama" value={booking.meetAndGreetName || "İstendi"} />}
           {booking.notes && <DetailRow label="Not" value={booking.notes} />}
         </div>
 

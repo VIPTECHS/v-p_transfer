@@ -198,10 +198,11 @@ export default function AdminApp() {
 
         <aside className={`admin-sidebar${menuOpen ? " admin-sidebar--open" : ""}`}>
           <div className="admin-brand">
-            <div className="admin-brand__mark">
-              <span className="brand-vip">VIP</span>
-              <span className="admin-brand__rest">TRANSFER</span>
-            </div>
+            <img
+              className="admin-brand__logo"
+              src="/images/viptransfer-logo.png"
+              alt="VIP Transfer"
+            />
             <p className="admin-brand__tag">Yönetim Paneli</p>
             <button
               type="button"

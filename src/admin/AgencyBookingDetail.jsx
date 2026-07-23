@@ -65,7 +65,7 @@ export default function AgencyBookingDetail({
           <DetailRow label="Telefon" value={detail.phone} />
           <DetailRow label="E-posta" value={detail.email} />
           {detail.flightNumber && <DetailRow label="Uçuş" value={detail.flightNumber} />}
-          {detail.meetAndGreetName && <DetailRow label="Karşılama" value={detail.meetAndGreetName} />}
+          {detail.meetAndGreetRequested && <DetailRow label="Karşılama" value={detail.meetAndGreetName || "İstendi"} />}
           {detail.notes && <DetailRow label="Not" value={detail.notes} />}
         </div>
 

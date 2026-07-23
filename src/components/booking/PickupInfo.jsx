@@ -86,7 +86,7 @@ function PhoneCodeSelect({ value, onChange }) {
 
 export default function PickupInfo({ state, dispatch }) {
   const { t } = useI18n();
-  const { tripData, contact, flightNumber, meetAndGreetName, returnTransfer, notes, selectedVehicle, passengers, luggage, stops } = state;
+  const { tripData, contact, flightNumber, meetAndGreetName, meetAndGreetSelected, returnTransfer, notes, selectedVehicle, passengers, luggage, stops } = state;
   const isAirport = tripInvolvesAirport(tripData.from, tripData.to);
 
   const vehicleName = selectedVehicle
@@ -103,7 +103,6 @@ export default function PickupInfo({ state, dispatch }) {
         passengers={passengers}
         luggage={luggage}
         childSeat={state.childSeat}
-        pets={state.pets}
         selectedVehicle={selectedVehicle}
         vehicleName={vehicleName}
         showVehicle
@@ -143,13 +142,20 @@ export default function PickupInfo({ state, dispatch }) {
           <h3 className="bw-section-title">{t("wizard.extras")}</h3>
           <div className="bw-extras-grid">
             {isAirport && (
-              <div className="bw-extra-card">
+              <div className={`bw-extra-card ${meetAndGreetSelected ? "bw-extra-card--active" : ""}`}>
                 <div className="bw-extra-card-icon">✈️</div>
                 <div className="bw-extra-card-info">
                   <span className="bw-extra-card-title">{t("wizard.airportFee")}</span>
                   <span className="bw-extra-card-desc">{t("wizard.airportFeeDesc")}</span>
                 </div>
-                <span className="bw-extra-included">{t("wizard.included")}</span>
+                <label className="bw-toggle" aria-label={t("wizard.airportFee")}>
+                  <input
+                    type="checkbox"
+                    checked={meetAndGreetSelected}
+                    onChange={(e) => dispatch({ type: "SET_MEET_GREET_SELECTED", payload: e.target.checked })}
+                  />
+                  <span className="bw-toggle-slider" />
+                </label>
               </div>
             )}
 
@@ -163,19 +169,6 @@ export default function PickupInfo({ state, dispatch }) {
                 <button type="button" className="bw-counter-btn" onClick={() => dispatch({ type: "SET_CHILD_SEAT", payload: Math.max(0, state.childSeat - 1) })} disabled={state.childSeat === 0}>−</button>
                 <span className="bw-counter-value">{state.childSeat}</span>
                 <button type="button" className="bw-counter-btn" onClick={() => dispatch({ type: "SET_CHILD_SEAT", payload: state.childSeat + 1 })}>+</button>
-              </div>
-            </div>
-
-            <div className="bw-extra-card">
-              <div className="bw-extra-card-icon">🐾</div>
-              <div className="bw-extra-card-info">
-                <span className="bw-extra-card-title">{t("booking.details.pets")}</span>
-                <span className="bw-extra-card-desc">{t("wizard.petsDesc")}</span>
-              </div>
-              <div className="bw-extra-counter">
-                <button type="button" className="bw-counter-btn" onClick={() => dispatch({ type: "SET_PETS", payload: Math.max(0, state.pets - 1) })} disabled={state.pets === 0}>−</button>
-                <span className="bw-counter-value">{state.pets}</span>
-                <button type="button" className="bw-counter-btn" onClick={() => dispatch({ type: "SET_PETS", payload: state.pets + 1 })}>+</button>
               </div>
             </div>
 
@@ -201,7 +194,7 @@ export default function PickupInfo({ state, dispatch }) {
             <p className="bw-field-hint">{t("wizard.flightHint")}</p>
             <input type="text" value={flightNumber} onChange={(e) => dispatch({ type: "SET_FLIGHT", payload: e.target.value.toUpperCase() })} placeholder={t("booking.flightPlaceholder")} />
           </label>
-          {isAirport && (
+          {isAirport && meetAndGreetSelected && (
             <label className="bw-field">
               <span>{t("booking.meetAndGreet")}</span>
               <input type="text" value={meetAndGreetName} onChange={(e) => dispatch({ type: "SET_MEET_GREET", payload: e.target.value })} placeholder={t("booking.meetAndGreetPlaceholder")} />

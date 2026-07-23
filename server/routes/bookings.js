@@ -34,6 +34,7 @@ function mapBookingPayload(body) {
     vehicle: body.vehicle || null,
     notes: body.notes || null,
     flightNumber: body.flightNumber?.trim() || null,
+    meetAndGreetRequested: Boolean(body.meetAndGreetRequested),
     meetAndGreetName: body.meetAndGreetName?.trim() || null,
     returnTransfer: Boolean(body.returnTransfer),
   };
@@ -89,6 +90,7 @@ router.post("/", async (req, res) => {
       childSeat: Number(req.body.childSeat) || 0,
       durationHours: req.body.durationHours != null ? Number(req.body.durationHours) : undefined,
       returnTransfer: Boolean(req.body.returnTransfer),
+      meetAndGreetRequested: Boolean(req.body.meetAndGreetRequested),
     });
 
     if (!parsed.ok) {
@@ -221,6 +223,7 @@ router.patch("/:id", requireAdmin, async (req, res) => {
     if (req.body.vehicle !== undefined) data.vehicle = req.body.vehicle;
     if (req.body.pickupAt) data.pickupAt = new Date(req.body.pickupAt);
     if (req.body.flightNumber !== undefined) data.flightNumber = req.body.flightNumber;
+    if (req.body.meetAndGreetRequested !== undefined) data.meetAndGreetRequested = Boolean(req.body.meetAndGreetRequested);
     if (req.body.meetAndGreetName !== undefined) data.meetAndGreetName = req.body.meetAndGreetName;
     if (req.body.returnTransfer !== undefined) data.returnTransfer = Boolean(req.body.returnTransfer);
     if (req.body.assignedDriverId !== undefined) data.assignedDriverId = req.body.assignedDriverId || null;

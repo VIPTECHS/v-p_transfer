@@ -30,6 +30,7 @@ model Booking {
   vehicle              String?
   notes                String?
   flightNumber         String?
+  meetAndGreetRequested Boolean  @default(false)
   meetAndGreetName     String?
   returnTransfer       Boolean   @default(false)
   paymentStatus        String    @default("unpaid")

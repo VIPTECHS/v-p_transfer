@@ -17,10 +17,10 @@ const initialState = {
   passengers: 1,
   luggage: 1,
   childSeat: 0,
-  pets: 0,
   selectedVehicle: null,
   contact: { firstName: "", lastName: "", email: "", phoneCode: "+90", phone: "" },
   flightNumber: "",
+  meetAndGreetSelected: false,
   meetAndGreetName: "",
   returnTransfer: false,
   notes: "",
@@ -36,9 +36,13 @@ function reducer(state, action) {
     case "SET_PASSENGERS": return { ...state, passengers: action.payload };
     case "SET_LUGGAGE": return { ...state, luggage: action.payload };
     case "SET_CHILD_SEAT": return { ...state, childSeat: action.payload };
-    case "SET_PETS": return { ...state, pets: action.payload };
     case "SET_CONTACT": return { ...state, contact: action.payload };
     case "SET_FLIGHT": return { ...state, flightNumber: action.payload };
+    case "SET_MEET_GREET_SELECTED": return {
+      ...state,
+      meetAndGreetSelected: action.payload,
+      meetAndGreetName: action.payload ? state.meetAndGreetName : "",
+    };
     case "SET_MEET_GREET": return { ...state, meetAndGreetName: action.payload };
     case "SET_RETURN": return { ...state, returnTransfer: action.payload };
     case "SET_NOTES": return { ...state, notes: action.payload };
@@ -116,7 +120,8 @@ export default function BookingWizard({ bookingData, onBack }) {
         vehicle: state.selectedVehicle,
         notes: state.notes.trim(),
         flightNumber: state.flightNumber.trim() || undefined,
-        meetAndGreetName: state.meetAndGreetName.trim() || undefined,
+        meetAndGreetRequested: state.meetAndGreetSelected,
+        meetAndGreetName: state.meetAndGreetSelected ? state.meetAndGreetName.trim() || undefined : undefined,
         returnTransfer: state.returnTransfer,
         stops: state.stops.length > 0 ? state.stops : undefined,
       });

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useI18n } from "../i18n/I18nContext";
-import LocationMapField, { locationLabel } from "./LocationMapField";
+import LocationMapField, { getSelectedAirport, locationLabel } from "./LocationMapField";
 import PickupDateTimeField, { createDefaultPickupISO } from "./PickupDateTimeField";
 import { requiresDestination, requiresDuration } from "../utils/bookingTypes";
 
@@ -100,6 +100,7 @@ export default function BookingForm({ visible, onSearch }) {
   const [message, setMessage] = useState("");
 
   const needsTo = requiresDestination(bookingType);
+  const fromAirport = getSelectedAirport(fromPoint);
 
   const swapDirections = () => {
     setFromPoint(toPoint);
@@ -204,6 +205,7 @@ export default function BookingForm({ visible, onSearch }) {
                   icon={<ToIcon />}
                   showSwap
                   onSwap={swapDirections}
+                  destinationAirport={fromAirport}
                 />
               </div>
             </>

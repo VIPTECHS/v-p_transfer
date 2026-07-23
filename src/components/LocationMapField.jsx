@@ -7,6 +7,8 @@ const LocationMapPopover = lazy(() => import("./LocationMapPopover"));
 
 /** @typedef {{ label: string, lng: number, lat: number }} LocationPoint */
 
+const MAX_VISIBLE_SUGGESTIONS = 6;
+
 const POPULAR_AIRPORTS = [
   {
     label: "Dubai Havalimanı (DXB)",
@@ -166,6 +168,146 @@ const TURKEY_AIRPORTS = [
 
 const FEATURED_AIRPORTS = dedupeAirports([...POPULAR_AIRPORTS, ...TURKEY_AIRPORTS]);
 
+const CITY_POPULAR_DESTINATIONS = {
+  istanbul: [
+    { label: "Taksim, İstanbul", lng: 28.9851, lat: 41.0369 },
+    { label: "Sultanahmet, İstanbul", lng: 28.9768, lat: 41.0054 },
+    { label: "Beşiktaş, İstanbul", lng: 29.0075, lat: 41.0422 },
+    { label: "Kadıköy, İstanbul", lng: 29.0252, lat: 40.9919 },
+    { label: "Şişli, İstanbul", lng: 28.9872, lat: 41.0602 },
+    { label: "Bakırköy, İstanbul", lng: 28.8718, lat: 40.9792 },
+  ],
+  antalya: [
+    { label: "Lara, Antalya", lng: 30.7917, lat: 36.8528 },
+    { label: "Kaleiçi, Antalya", lng: 30.7046, lat: 36.8857 },
+    { label: "Konyaaltı, Antalya", lng: 30.6376, lat: 36.8665 },
+    { label: "Kundu, Antalya", lng: 30.8806, lat: 36.8558 },
+    { label: "Belek, Antalya", lng: 31.0556, lat: 36.862 },
+    { label: "Side, Antalya", lng: 31.3906, lat: 36.7667 },
+  ],
+  dubai: [
+    { label: "Downtown Dubai, Dubai", lng: 55.2744, lat: 25.1972 },
+    { label: "Dubai Marina, Dubai", lng: 55.1386, lat: 25.0801 },
+    { label: "Palm Jumeirah, Dubai", lng: 55.1388, lat: 25.1124 },
+    { label: "Jumeirah Beach Residence, Dubai", lng: 55.1322, lat: 25.0804 },
+    { label: "Business Bay, Dubai", lng: 55.2635, lat: 25.184 },
+    { label: "Deira, Dubai", lng: 55.3095, lat: 25.2697 },
+  ],
+  paris: [
+    { label: "Eiffel Tower, Paris", lng: 2.2945, lat: 48.8584 },
+    { label: "Champs-Élysées, Paris", lng: 2.3078, lat: 48.8698 },
+    { label: "Louvre Museum, Paris", lng: 2.3376, lat: 48.8606 },
+    { label: "Le Marais, Paris", lng: 2.3631, lat: 48.8575 },
+    { label: "La Défense, Paris", lng: 2.2386, lat: 48.8924 },
+    { label: "Saint-Germain-des-Prés, Paris", lng: 2.3333, lat: 48.8543 },
+  ],
+  nice: [
+    { label: "Promenade des Anglais, Nice", lng: 7.2603, lat: 43.6951 },
+    { label: "Vieux Nice, Nice", lng: 7.276, lat: 43.6975 },
+    { label: "Place Masséna, Nice", lng: 7.2708, lat: 43.697 },
+    { label: "Port Lympia, Nice", lng: 7.2863, lat: 43.6993 },
+    { label: "Monaco Monte-Carlo", lng: 7.4246, lat: 43.7384 },
+    { label: "Cannes Croisette", lng: 7.0174, lat: 43.5513 },
+  ],
+  ankara: [
+    { label: "Kızılay, Ankara", lng: 32.8541, lat: 39.9208 },
+    { label: "Çankaya, Ankara", lng: 32.8597, lat: 39.9023 },
+    { label: "Anıtkabir, Ankara", lng: 32.8369, lat: 39.9251 },
+    { label: "Tunalı Hilmi, Ankara", lng: 32.8626, lat: 39.9116 },
+    { label: "Bilkent, Ankara", lng: 32.7484, lat: 39.8677 },
+    { label: "Söğütözü, Ankara", lng: 32.8008, lat: 39.9131 },
+  ],
+  izmir: [
+    { label: "Alsancak, İzmir", lng: 27.1441, lat: 38.4407 },
+    { label: "Konak, İzmir", lng: 27.1287, lat: 38.4189 },
+    { label: "Karşıyaka, İzmir", lng: 27.1165, lat: 38.4613 },
+    { label: "Bornova, İzmir", lng: 27.2167, lat: 38.4688 },
+    { label: "Çeşme, İzmir", lng: 26.3057, lat: 38.3246 },
+    { label: "Alaçatı, İzmir", lng: 26.3746, lat: 38.2826 },
+  ],
+  bodrum: [
+    { label: "Bodrum Merkez", lng: 27.4305, lat: 37.0344 },
+    { label: "Yalıkavak, Bodrum", lng: 27.2839, lat: 37.106 },
+    { label: "Türkbükü, Bodrum", lng: 27.3761, lat: 37.1283 },
+    { label: "Gümüşlük, Bodrum", lng: 27.236, lat: 37.055 },
+    { label: "Bitez, Bodrum", lng: 27.3847, lat: 37.0338 },
+    { label: "Turgutreis, Bodrum", lng: 27.2588, lat: 37.0026 },
+  ],
+  dalaman: [
+    { label: "Marmaris", lng: 28.2742, lat: 36.855 },
+    { label: "Fethiye", lng: 29.1263, lat: 36.6592 },
+    { label: "Göcek", lng: 28.9378, lat: 36.7547 },
+    { label: "Ölüdeniz", lng: 29.123, lat: 36.5482 },
+    { label: "Akyaka", lng: 28.3247, lat: 37.0544 },
+    { label: "Dalyan", lng: 28.6449, lat: 36.8346 },
+  ],
+  trabzon: [
+    { label: "Trabzon Meydan", lng: 39.7215, lat: 41.005 },
+    { label: "Uzungöl, Trabzon", lng: 40.2953, lat: 40.6193 },
+    { label: "Sümela Manastırı, Trabzon", lng: 39.6585, lat: 40.6901 },
+    { label: "Akçaabat, Trabzon", lng: 39.5715, lat: 41.0215 },
+    { label: "Boztepe, Trabzon", lng: 39.7357, lat: 41.0042 },
+    { label: "Forum Trabzon", lng: 39.7758, lat: 40.9987 },
+  ],
+  rize: [
+    { label: "Rize Merkez", lng: 40.5219, lat: 41.0255 },
+    { label: "Ayder Yaylası, Rize", lng: 41.0919, lat: 40.9525 },
+    { label: "Çamlıhemşin, Rize", lng: 41.0045, lat: 41.0477 },
+    { label: "Fırtına Vadisi, Rize", lng: 40.9968, lat: 41.0261 },
+    { label: "Pazar, Rize", lng: 40.8873, lat: 41.1794 },
+    { label: "Artvin Merkez", lng: 41.8194, lat: 41.1828 },
+  ],
+  kayseri: [
+    { label: "Kayseri Cumhuriyet Meydanı", lng: 35.4846, lat: 38.7225 },
+    { label: "Erciyes Kayak Merkezi, Kayseri", lng: 35.5257, lat: 38.5312 },
+    { label: "Talas, Kayseri", lng: 35.5537, lat: 38.6908 },
+    { label: "Forum Kayseri", lng: 35.4891, lat: 38.7298 },
+    { label: "Kapalı Çarşı, Kayseri", lng: 35.4877, lat: 38.7222 },
+    { label: "Melikgazi, Kayseri", lng: 35.4917, lat: 38.7205 },
+  ],
+  gaziantep: [
+    { label: "Gaziantep Merkez", lng: 37.3781, lat: 37.0662 },
+    { label: "Gaziantep Kalesi", lng: 37.3833, lat: 37.065 },
+    { label: "Şahinbey, Gaziantep", lng: 37.3825, lat: 37.0544 },
+    { label: "Şehitkamil, Gaziantep", lng: 37.3764, lat: 37.0816 },
+    { label: "Zeugma Mozaik Müzesi, Gaziantep", lng: 37.3856, lat: 37.0753 },
+    { label: "Gaziantep Organize Sanayi", lng: 37.308, lat: 37.181 },
+  ],
+  adana: [
+    { label: "Adana Merkez", lng: 35.3213, lat: 37.0 },
+    { label: "Seyhan, Adana", lng: 35.3059, lat: 36.9914 },
+    { label: "Çukurova, Adana", lng: 35.2533, lat: 37.0436 },
+    { label: "Tarsus, Mersin", lng: 34.8951, lat: 36.9177 },
+    { label: "Mersin Marina", lng: 34.5766, lat: 36.7712 },
+    { label: "Yüreğir, Adana", lng: 35.3608, lat: 36.9986 },
+  ],
+  balikesir: [
+    { label: "Balıkesir Merkez", lng: 27.8826, lat: 39.6484 },
+    { label: "Edremit, Balıkesir", lng: 27.0245, lat: 39.5961 },
+    { label: "Ayvalık, Balıkesir", lng: 26.6954, lat: 39.3193 },
+    { label: "Cunda Adası, Ayvalık", lng: 26.6619, lat: 39.3335 },
+    { label: "Akçay, Balıkesir", lng: 26.9369, lat: 39.5856 },
+    { label: "Altınoluk, Balıkesir", lng: 26.7393, lat: 39.5798 },
+  ],
+};
+
+const CITY_DESTINATION_ALIASES = {
+  "istanbul": "istanbul",
+  "ıstanbul": "istanbul",
+  "i̇stanbul": "istanbul",
+  "muğla": "dalaman",
+  "mugla": "dalaman",
+  "tarsus": "adana",
+  "edremit": "balikesir",
+  "balıkesir": "balikesir",
+  "balikesir": "balikesir",
+  "alanya": "antalya",
+  "nevşehir": "kayseri",
+  "nevsehir": "kayseri",
+  "kütahya": "ankara",
+  "kutahya": "ankara",
+};
+
 function dedupeAirports(airports) {
   const seen = new Set();
   return airports.filter((airport) => {
@@ -186,6 +328,66 @@ function normalizeSearchText(value) {
     .replace(/ş/g, "s")
     .replace(/ö/g, "o")
     .replace(/ç/g, "c");
+}
+
+function getAirportByPoint(point) {
+  if (!point) return null;
+  if (point.code && POPULAR_AIRPORT_CODES.has(point.code)) {
+    return FEATURED_AIRPORTS.find((airport) => airport.code === point.code) ?? null;
+  }
+
+  const label = point.label || "";
+  const codeMatch = label.match(/\(([A-Z]{3})\)/);
+  if (codeMatch && POPULAR_AIRPORT_CODES.has(codeMatch[1])) {
+    return FEATURED_AIRPORTS.find((airport) => airport.code === codeMatch[1]) ?? null;
+  }
+
+  const normalizedLabel = normalizeSearchText(label);
+  return FEATURED_AIRPORTS.find((airport) => normalizeSearchText(airport.label) === normalizedLabel) ?? null;
+}
+
+function cityDestinationKey(city) {
+  const normalizedCity = normalizeSearchText(city || "");
+  return CITY_DESTINATION_ALIASES[normalizedCity] || normalizedCity;
+}
+
+function matchesSuggestionQuery(suggestion, query) {
+  const normalizedQuery = normalizeSearchText(query.trim());
+  if (!normalizedQuery) return true;
+
+  return normalizeSearchText(suggestion.label)
+    .split(/[\s,().'-]+/)
+    .some((word) => word.startsWith(normalizedQuery));
+}
+
+function genericCityDestinationSuggestions(airport) {
+  const city = airport.city;
+  return [
+    `${city} Merkez`,
+    `${city} Oteller Bölgesi`,
+    `${city} Otogar`,
+    `${city} Üniversitesi`,
+    `${city} Şehir Hastanesi`,
+    `${city} AVM`,
+  ].map((label) => ({
+    label,
+    city,
+    kind: "city-destination",
+  }));
+}
+
+function popularCityDestinationSuggestions(airport, query) {
+  if (!airport?.city) return [];
+  const key = cityDestinationKey(airport.city);
+  const destinations = CITY_POPULAR_DESTINATIONS[key] || genericCityDestinationSuggestions(airport);
+
+  return destinations
+    .filter((destination) => matchesSuggestionQuery(destination, query))
+    .map((destination) => ({
+      ...destination,
+      city: airport.city,
+      kind: "city-destination",
+    }));
 }
 
 function popularAirportSuggestions(query) {
@@ -222,7 +424,7 @@ function mergeSuggestions(primary, secondary) {
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
-  }).slice(0, 10);
+  }).slice(0, MAX_VISIBLE_SUGGESTIONS);
 }
 
 const POPULAR_AIRPORT_CODES = new Set(FEATURED_AIRPORTS.map((airport) => airport.code));
@@ -244,8 +446,15 @@ function isPopularAirportResult(item) {
   ));
 }
 
-function filterPlaceSuggestions(results) {
-  return results.filter((item) => !isAirportLikeResult(item) || isPopularAirportResult(item));
+function filterPlaceSuggestions(results, { allowAirports = true } = {}) {
+  return results.filter((item) => (
+    !isAirportLikeResult(item) ||
+    (allowAirports && isPopularAirportResult(item))
+  ));
+}
+
+export function getSelectedAirport(point) {
+  return getAirportByPoint(point);
 }
 
 export default function LocationMapField({
@@ -259,6 +468,7 @@ export default function LocationMapField({
   icon,
   showSwap,
   onSwap,
+  destinationAirport,
 }) {
   const { t, lang } = useI18n();
   const [open, setOpen] = useState(false);
@@ -272,11 +482,21 @@ export default function LocationMapField({
   const suggestionsRef = useRef(null);
   const searchRequestRef = useRef(0);
   const trimmedQuery = query.trim();
-  const airportSuggestions = popularAirportSuggestions(query);
-  const placeSuggestions = filterPlaceSuggestions(searchResults);
-  const suggestions = trimmedQuery.length < 2
-    ? airportSuggestions
-    : mergeSuggestions(airportSuggestions, placeSuggestions);
+  const citySuggestions = destinationAirport
+    ? popularCityDestinationSuggestions(destinationAirport, query)
+    : [];
+  const airportSuggestions = destinationAirport ? [] : popularAirportSuggestions(query);
+  const placeSuggestions = filterPlaceSuggestions(searchResults, { allowAirports: !destinationAirport });
+  const suggestions = (
+    trimmedQuery.length < 2
+      ? (destinationAirport ? citySuggestions : airportSuggestions)
+      : mergeSuggestions(destinationAirport ? citySuggestions : airportSuggestions, placeSuggestions)
+  ).slice(0, MAX_VISIBLE_SUGGESTIONS);
+  const suggestionsTitle = destinationAirport
+    ? `${destinationAirport.city} Popüler Noktalar`
+    : trimmedQuery.length < 2
+      ? "Havalimanı Seç"
+      : "Konum Seç";
 
   const updateSuggestionPosition = () => {
     const rect = rootRef.current?.getBoundingClientRect();
@@ -291,7 +511,6 @@ export default function LocationMapField({
       left,
       top: rect.bottom + gap,
       width,
-      maxHeight: Math.max(180, window.innerHeight - rect.bottom - gap - 16),
     });
   };
 
@@ -369,7 +588,10 @@ export default function LocationMapField({
     const requestId = ++searchRequestRef.current;
     const timer = window.setTimeout(async () => {
       try {
-        const places = await searchPlaces(trimmedQuery, lang);
+        const places = await searchPlaces(
+          destinationAirport?.city ? `${trimmedQuery} ${destinationAirport.city}` : trimmedQuery,
+          lang,
+        );
         if (requestId === searchRequestRef.current) {
           setSearchResults(places);
         }
@@ -385,14 +607,21 @@ export default function LocationMapField({
     }, 320);
 
     return () => window.clearTimeout(timer);
-  }, [trimmedQuery, lang, suggestionsOpen]);
+  }, [trimmedQuery, lang, suggestionsOpen, destinationAirport]);
 
   const pickSuggestion = (suggestion) => {
-    const point = { label: suggestion.label, lng: suggestion.lng, lat: suggestion.lat };
+    const point = {
+      label: suggestion.label,
+      lng: suggestion.lng,
+      lat: suggestion.lat,
+      city: suggestion.city,
+      code: suggestion.code,
+      kind: suggestion.kind || (suggestion.code ? "airport" : "place"),
+    };
     window.dispatchEvent(new CustomEvent("location-field:active", { detail: id }));
     setQuery(point.label);
     setSuggestionsOpen(false);
-    setOpen(true);
+    setOpen(false);
     onChange(point);
   };
 
@@ -425,12 +654,10 @@ export default function LocationMapField({
           ref={suggestionsRef}
           className="location-suggestions location-suggestions--portal"
           role="listbox"
-          aria-label={trimmedQuery.length < 2 ? "Havalimanı seç" : "Konum seç"}
+          aria-label={suggestionsTitle}
           style={suggestionStyle ?? undefined}
         >
-          <div className="location-suggestions-title">
-            {trimmedQuery.length < 2 ? "Havalimanı Seç" : "Konum Seç"}
-          </div>
+          <div className="location-suggestions-title">{suggestionsTitle}</div>
           {searching && suggestions.length === 0 && (
             <div className="location-suggestion-empty">Aranıyor...</div>
           )}

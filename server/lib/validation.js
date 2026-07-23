@@ -24,6 +24,7 @@ export const bookingCreateSchema = z.object({
   vehicle: z.string().max(80).optional().nullable(),
   notes: z.string().max(2000).optional().nullable(),
   flightNumber: z.string().max(20).optional().nullable(),
+  meetAndGreetRequested: z.boolean().optional(),
   meetAndGreetName: z.string().max(120).optional().nullable(),
   returnTransfer: z.boolean().optional(),
   stops: z.array(z.string().max(500)).max(5).optional(),
