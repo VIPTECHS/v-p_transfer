@@ -13,6 +13,7 @@ import WhatsAppCTA from "./components/WhatsAppCTA";
 import BlogPost from "./components/BlogPost";
 import LandingPage from "./components/LandingPage";
 import SitePage from "./components/SitePage";
+import CustomPage from "./components/CustomPage";
 import Testimonials from "./components/Testimonials";
 import MediaPage from "./components/MediaPage";
 import FAQPage from "./components/FAQPage";
@@ -57,6 +58,11 @@ function parseRoute(pathname) {
 
   const sitePage = getSitePage(slug);
   if (sitePage) return { type: "page", slug: sitePage.slug };
+
+  // Single-segment unknown slug → try a DB-backed custom page.
+  if (slug && /^[a-z0-9-]+$/i.test(slug)) {
+    return { type: "custom", slug };
+  }
 
   return { type: "home" };
 }
@@ -110,6 +116,17 @@ export default function App() {
       <div id="top">
         <Header isHome={false} navigate={navigate} onBook={startBooking} />
         <SitePage slug={route.slug} navigate={navigate} />
+        <Footer navigate={navigate} />
+        <WhatsAppCTA />
+      </div>
+    );
+  }
+
+  if (route.type === "custom") {
+    return (
+      <div id="top">
+        <Header isHome={false} navigate={navigate} onBook={startBooking} />
+        <CustomPage slug={route.slug} navigate={navigate} />
         <Footer navigate={navigate} />
         <WhatsAppCTA />
       </div>

@@ -464,3 +464,17 @@ model LedgerEntry {
   @@index([reservationId])
   @@index([entryDate])
 }
+
+model CustomPage {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  status       String   @default("draft")
+  jsonLdType   String?
+  ogImage      String?
+  // JSON string: { tr: {title, metaDescription, bodyHtml}, en: {...}, de: {...} }
+  translations String   @default("{}")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([status])
+}

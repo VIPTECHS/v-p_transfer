@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   LayoutDashboard, CalendarCheck, ClipboardList, Calendar,
   Users, Building2, Briefcase, Car, UserCog,
-  CreditCard, BarChart3, Settings, Menu, X, LogOut,
+  CreditCard, BarChart3, Settings, Menu, X, LogOut, FileText,
 } from "lucide-react";
 import Dashboard from "./Dashboard";
 import ReservationsList from "./ReservationsList";
@@ -20,6 +20,7 @@ import VehiclesList from "./VehiclesList";
 import PaymentsView from "./PaymentsView";
 import ReportsView from "./ReportsView";
 import SettingsView from "./SettingsView";
+import PagesList from "./PagesList";
 import AdminLogin from "./AdminLogin";
 import { clearAdminPassword, hasAdminPassword, getSessionRole } from "../api/admin";
 import { LANG_PREFIX_RE } from "../i18n/locale";
@@ -37,6 +38,7 @@ const VIEWS = {
   drivers: DriversList,
   payments: PaymentsView,
   reports: ReportsView,
+  pages: PagesList,
   settings: SettingsView,
 };
 
@@ -73,6 +75,7 @@ const NAV_GROUPS = [
     label: "Sistem",
     items: [
       { id: "reports", label: "Raporlar", icon: BarChart3 },
+      { id: "pages", label: "Sayfalar", icon: FileText },
       { id: "settings", label: "Ayarlar", icon: Settings },
     ],
   },
@@ -90,6 +93,7 @@ const PAGE_META = {
   drivers: { title: "Sürücüler", subtitle: "Sürücü ve bağlantı bilgileri" },
   payments: { title: "Ödemeler", subtitle: "Cari hesap ve tahsilat takibi" },
   reports: { title: "Raporlar", subtitle: "Gelir ve performans analizi" },
+  pages: { title: "Sayfalar", subtitle: "Kendi SEO sayfalarınızı oluşturun ve yönetin" },
   settings: { title: "Ayarlar", subtitle: "Lokasyon ve sistem yapılandırması" },
 };
 

@@ -188,6 +188,12 @@ async function run() {
     process.exit(1);
   }
 
+  // Preserve the pristine Vite shell (empty #root) BEFORE the homepage snapshot
+  // overwrites dist/index.html. The server uses it to render DB-backed pages.
+  const pristineShell = await readFile(path.join(DIST, "index.html"), "utf-8");
+  await writeFile(path.join(DIST, "app-shell.html"), pristineShell, "utf-8");
+  console.log("✓ saved dist/app-shell.html (clean shell for custom pages)");
+
   const server = await startServer();
   const browser = await puppeteer.launch({
     headless: "new",

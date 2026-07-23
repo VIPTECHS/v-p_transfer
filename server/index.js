@@ -1,5 +1,5 @@
 import path from "node:path";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { config } from "dotenv";
 import cors from "cors";
@@ -26,6 +26,9 @@ import reportsRouter from "./routes/reports.js";
 import flightsRouter from "./routes/flights.js";
 import ledgerRouter from "./routes/ledger.js";
 import documentsRouter from "./routes/documents.js";
+import pagesRouter from "./routes/pages.js";
+import prisma from "./lib/prisma.js";
+import { renderCustomPageHtml } from "./lib/renderCustomPage.js";
 import { rematchBookingsWithoutCity } from "./lib/cityMatcher.js";
 import { ensureMigrations } from "./lib/ensureMigrations.js";
 import { rateLimit } from "./middleware/rateLimit.js";
@@ -173,6 +176,8 @@ mountRoutes("/suppliers", suppliersRouter);
 mountRoutes("/payments", paymentsRouter, requireAdmin);
 mountRoutes("/ledger", ledgerRouter);
 mountRoutes("/documents", documentsRouter);
+// Auth is handled inside the router: /public/:slug is open, the rest is admin-only.
+mountRoutes("/pages", pagesRouter);
 mountRoutes("/reports", reportsRouter, requireAdmin);
 mountRoutes("/flights", flightsRouter);
 
@@ -198,9 +203,58 @@ const distPath = path.join(__dirname, "..", "dist");
 const serveFrontend = isProd || existsSync(distPath);
 
 if (serveFrontend && existsSync(distPath)) {
+  // Dynamic sitemap: merge the build-time sitemap with published custom pages so
+  // admin-created pages are discoverable without a rebuild. Must precede static.
+  app.get("/sitemap.xml", async (_req, res) => {
+    try {
+      const base = readFileSync(path.join(distPath, "sitemap.xml"), "utf-8");
+      const pages = await prisma.customPage.findMany({ where: { status: "published" } });
+      const SITE = "https://viptransfer.com";
+      const lastmod = new Date().toISOString().split("T")[0];
+      const extra = pages
+        .map((page) => {
+          let tr = {};
+          try {
+            tr = JSON.parse(page.translations || "{}");
+          } catch {
+            tr = {};
+          }
+          const langs = ["tr", "en", "de"].filter((l) => tr[l] && (tr[l].title || tr[l].bodyHtml));
+          if (!langs.length) return "";
+          const href = (l) => (l === "tr" ? `${SITE}/${page.slug}` : `${SITE}/${l}/${page.slug}`);
+          const alts = langs
+            .map((l) => `    <xhtml:link rel="alternate" hreflang="${l}" href="${href(l)}"/>`)
+            .join("\n");
+          return langs
+            .map(
+              (l) => `  <url>\n    <loc>${href(l)}</loc>\n    <lastmod>${lastmod}</lastmod>\n${alts}\n  </url>`,
+            )
+            .join("\n");
+        })
+        .filter(Boolean)
+        .join("\n");
+      const merged = extra ? base.replace(/<\/urlset>\s*$/, `${extra}\n</urlset>`) : base;
+      res.set("Content-Type", "application/xml; charset=utf-8");
+      return res.send(merged);
+    } catch (error) {
+      console.error("dynamic sitemap", error);
+      return res.sendFile(path.join(distPath, "sitemap.xml"));
+    }
+  });
+
   app.use(express.static(distPath, { fallthrough: true, index: false }));
 
-  app.get("/{*splat}", (req, res, next) => {
+  // Parse an optional /en|/de language prefix + single-segment slug candidate
+  // for DB-backed custom pages. Returns null for nested or non-matching paths.
+  const parseCustomPagePath = (urlPath) => {
+    const clean = urlPath.replace(/^\/+|\/+$/g, "");
+    if (!clean) return null;
+    const m = clean.match(/^(?:(en|de)\/)?([a-z0-9-]+)$/i);
+    if (!m) return null;
+    return { lang: m[1] || "tr", slug: m[2].toLowerCase() };
+  };
+
+  app.get("/{*splat}", async (req, res, next) => {
     const urlPath = req.path;
 
     // Skip API routes — they are handled by mounted routers above
@@ -214,6 +268,31 @@ if (serveFrontend && existsSync(distPath)) {
     const htmlPath = resolvePrerenderedHtml(distPath, urlPath);
     if (existsSync(htmlPath)) {
       return res.sendFile(htmlPath);
+    }
+
+    // DB-backed custom page: render full SEO HTML so crawlers see the content.
+    const candidate = parseCustomPagePath(urlPath);
+    if (candidate) {
+      try {
+        const page = await prisma.customPage.findUnique({ where: { slug: candidate.slug } });
+        if (page && page.status === "published") {
+          let translations = {};
+          try {
+            translations = JSON.parse(page.translations || "{}");
+          } catch {
+            translations = {};
+          }
+          const shellPath = existsSync(path.join(distPath, "app-shell.html"))
+            ? path.join(distPath, "app-shell.html")
+            : path.join(distPath, "index.html");
+          const shell = readFileSync(shellPath, "utf-8");
+          const html = renderCustomPageHtml(shell, { ...page, translations }, candidate.lang);
+          res.set("Content-Type", "text/html; charset=utf-8");
+          return res.send(html);
+        }
+      } catch (error) {
+        console.error("custom page render", urlPath, error);
+      }
     }
 
     // Unknown path: still boot the SPA (deep links, client routes)
