@@ -1247,6 +1247,71 @@ input, select, textarea { color-scheme: var(--scheme); }
 .field-group--location { position: relative; z-index: 11; }
 .field-group--location.open,
 .location-field.open { z-index: 30; }
+.location-suggestions {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 10px);
+  z-index: 55;
+  width: min(330px, calc(100vw - 32px));
+  max-height: min(360px, 62vh);
+  overflow-y: auto;
+  padding: 14px 16px 16px;
+  border: 1px solid rgba(212, 175, 55, 0.55);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.92),
+    0 0 0 3px rgba(212, 175, 55, 0.62),
+    0 0 0 5px rgba(5, 5, 5, 0.72),
+    0 18px 45px rgba(0, 0, 0, 0.28);
+}
+.location-suggestions--portal {
+  position: fixed;
+  z-index: 260;
+}
+.location-suggestions-title {
+  margin: 0 0 8px;
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 700;
+}
+.location-suggestion {
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 38px;
+  align-items: center;
+  margin: 0 0 8px;
+  padding: 8px 11px;
+  border: 1px solid #dde3ec;
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #111827;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+.location-suggestion:last-child {
+  margin-bottom: 0;
+}
+.location-suggestion-empty {
+  padding: 10px 2px 2px;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 600;
+}
+.location-suggestion:hover,
+.location-suggestion:focus-visible {
+  border-color: rgba(212, 175, 55, 0.62);
+  background: rgba(212, 175, 55, 0.1);
+  color: #8d6714;
+  outline: 0;
+  transform: translateY(-1px);
+}
 .location-map-popover {
   position: absolute;
   left: 0;
