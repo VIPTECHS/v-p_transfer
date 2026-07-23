@@ -86,11 +86,34 @@ app.use(
       ? {
           directives: {
             defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'"],
+            // Cloudflare Web Analytics beacon is injected automatically when
+            // the site is served through Cloudflare. Whitelist it (and the
+            // matching connect endpoint) so it doesn't get blocked.
+            scriptSrc: [
+              "'self'",
+              "'unsafe-inline'",
+              "https://static.cloudflareinsights.com",
+            ],
             styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
             fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
             imgSrc: ["'self'", "data:", "https:", "blob:"],
-            connectSrc: ["'self'", "https://nominatim.openstreetmap.org", "https://*.openstreetmap.org", "https://tiles.openfreemap.org", "https://*.openfreemap.org"],
+            connectSrc: [
+              "'self'",
+              "https://nominatim.openstreetmap.org",
+              "https://*.openstreetmap.org",
+              "https://tiles.openfreemap.org",
+              "https://*.openfreemap.org",
+              // MapLibre basemap tiles + style JSON from CartoCDN
+              "https://basemaps.cartocdn.com",
+              "https://*.basemaps.cartocdn.com",
+              // Cloudflare Insights beacon endpoint
+              "https://cloudflareinsights.com",
+              "https://*.cloudflareinsights.com",
+            ],
+            // MapLibre GL spawns its worker from a Blob URL — required, or
+            // the map fails to render under CSP.
+            workerSrc: ["'self'", "blob:"],
+            childSrc: ["'self'", "blob:"],
             mediaSrc: ["'self'", "blob:"],
             frameSrc: ["'none'"],
           },

@@ -106,6 +106,28 @@ export default function BookingWizard({ bookingData, onBack }) {
         setStatus("error");
         return;
       }
+      // Email must contain '@' and a domain with a dot.
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailPattern.test(contact.email.trim())) {
+        setMessage(t("booking.details.emailValidation"));
+        setStatus("error");
+        return;
+      }
+      // Phone must be exactly 10 digits (national number, country code is
+      // stored separately as `phoneCode`).
+      if (contact.phone.replace(/\D+/g, "").length !== 10) {
+        setMessage(t("booking.details.phoneLengthValidation"));
+        setStatus("error");
+        return;
+      }
+      if (
+        contact.whatsappDifferent
+        && contact.whatsappNumber.replace(/\D+/g, "").length !== 10
+      ) {
+        setMessage(t("booking.details.phoneLengthValidation"));
+        setStatus("error");
+        return;
+      }
       setStatus("idle");
       goTo(4);
     }

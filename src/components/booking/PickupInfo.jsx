@@ -94,6 +94,10 @@ export default function PickupInfo({ state, dispatch }) {
     : "";
 
   const setContact = (field, value) => dispatch({ type: "SET_CONTACT", payload: { ...contact, [field]: value } });
+  // Phone inputs should accept only digits so the value stored is a clean
+  // number that can be concatenated to the country code without sanitising
+  // on submit. We strip everything except 0-9 as the user types.
+  const digitsOnly = (value) => value.replace(/\D+/g, "");
 
   return (
     <div className="bw-layout">
@@ -125,13 +129,30 @@ export default function PickupInfo({ state, dispatch }) {
           <div className="bw-form-grid">
             <label className="bw-field">
               <span>{t("booking.details.email")} <span className="bw-req">*</span></span>
-              <input type="email" value={contact.email} onChange={(e) => setContact("email", e.target.value)} autoComplete="email" />
+              <input
+                type="email"
+                value={contact.email}
+                onChange={(e) => setContact("email", e.target.value)}
+                autoComplete="email"
+                required
+                pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
+                title="Geçerli bir e-posta adresi girin (örn. ad@ornek.com)"
+              />
             </label>
             <div className="bw-field">
               <span>{t("booking.details.phone")} <span className="bw-req">*</span></span>
               <div className="bw-phone-row">
                 <PhoneCodeSelect value={contact.phoneCode} onChange={(v) => setContact("phoneCode", v)} />
-                <input type="tel" value={contact.phone} onChange={(e) => setContact("phone", e.target.value)} autoComplete="tel" />
+                <input
+                  type="tel"
+                  value={contact.phone}
+                  onChange={(e) => setContact("phone", digitsOnly(e.target.value).slice(0, 10))}
+                  autoComplete="tel"
+                  inputMode="numeric"
+                  pattern="[0-9]{10}"
+                  maxLength={10}
+                  placeholder="5xxxxxxxxx"
+                />
               </div>
             </div>
           </div>
@@ -139,7 +160,18 @@ export default function PickupInfo({ state, dispatch }) {
           <button
             type="button"
             className={`bw-whatsapp-toggle ${contact.whatsappDifferent ? "bw-whatsapp-toggle--active" : ""}`}
-            onClick={() => setContact("whatsappDifferent", !contact.whatsappDifferent)}
+            onClick={() => {
+              // Closing the panel clears any half-typed WhatsApp number so we
+              // don't accidentally send it to the server.
+              if (contact.whatsappDifferent) {
+                dispatch({
+                  type: "SET_CONTACT",
+                  payload: { ...contact, whatsappDifferent: false, whatsappNumber: "" },
+                });
+              } else {
+                setContact("whatsappDifferent", true);
+              }
+            }}
             aria-pressed={contact.whatsappDifferent}
           >
             <svg
@@ -152,7 +184,27 @@ export default function PickupInfo({ state, dispatch }) {
             >
               <path d="M20.52 3.48A11.86 11.86 0 0 0 12.06.02C5.5.02.18 5.34.18 11.9c0 2.09.55 4.13 1.6 5.93L0 24l6.34-1.66a11.86 11.86 0 0 0 5.72 1.46h.01c6.55 0 11.88-5.32 11.88-11.88 0-3.17-1.23-6.15-3.43-8.4Zm-8.46 18.28h-.01a9.86 9.86 0 0 1-5.03-1.38l-.36-.21-3.76.99 1-3.67-.24-.38a9.86 9.86 0 1 1 18.27-5.21c0 5.44-4.43 9.86-9.87 9.86Zm5.42-7.39c-.3-.15-1.77-.87-2.05-.97-.28-.1-.48-.15-.68.15-.2.3-.78.97-.96 1.17-.18.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.68-1.63-.93-2.24-.24-.58-.5-.5-.68-.51-.18-.01-.38-.01-.58-.01-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.22 3.08c.15.2 2.1 3.2 5.1 4.49.71.31 1.27.5 1.71.63.72.23 1.37.2 1.88.12.57-.08 1.77-.72 2.02-1.42.25-.7.25-1.3.18-1.42-.07-.12-.27-.2-.57-.35Z" />
             </svg>
-            <span>{t("wizard.whatsappDifferent")}</span>
+            <span>
+              {contact.whatsappDifferent
+                ? t("wizard.whatsappSame")
+                : t("wizard.whatsappDifferent")}
+            </span>
+            {contact.whatsappDifferent && (
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+                className="bw-whatsapp-toggle-close"
+              >
+                <path d="M18 6 6 18M6 6l12 12" />
+              </svg>
+            )}
           </button>
 
           {contact.whatsappDifferent && (
@@ -163,10 +215,12 @@ export default function PickupInfo({ state, dispatch }) {
                 <input
                   type="tel"
                   value={contact.whatsappNumber}
-                  onChange={(e) => setContact("whatsappNumber", e.target.value)}
+                  onChange={(e) => setContact("whatsappNumber", digitsOnly(e.target.value).slice(0, 10))}
                   placeholder={t("wizard.whatsappPlaceholder")}
                   autoComplete="off"
-                  inputMode="tel"
+                  inputMode="numeric"
+                  pattern="[0-9]{10}"
+                  maxLength={10}
                 />
               </div>
             </div>
