@@ -227,17 +227,15 @@ const Map = forwardRef<MapRef, MapProps>(function Map(
       ...viewport,
     });
 
+    // Flip the flag on the very first styledata tick — waiting for
+    // subsequent ticks (fonts, sprites, tile sources) noticeably delayed
+    // the first map paint. Layers added afterwards still work because
+    // MapLibre queues them if the style is still committing.
     const styleDataHandler = () => {
-      clearStyleTimeout();
-      // A microtask is enough to let MapLibre finish committing the current
-      // style tick before we flip `isStyleLoaded`. This avoids the previous
-      // 100 ms delay that made the first map paint feel sluggish.
-      styleTimeoutRef.current = setTimeout(() => {
-        setIsStyleLoaded(true);
-        if (projection) {
-          map.setProjection(projection);
-        }
-      }, 0);
+      setIsStyleLoaded(true);
+      if (projection) {
+        map.setProjection(projection);
+      }
     };
     const loadHandler = () => setIsLoaded(true);
 
@@ -248,7 +246,7 @@ const Map = forwardRef<MapRef, MapProps>(function Map(
     };
 
     map.on("load", loadHandler);
-    map.on("styledata", styleDataHandler);
+    map.once("styledata", styleDataHandler);
     map.on("move", handleMove);
     setMapInstance(map);
 
@@ -306,6 +304,8 @@ const Map = forwardRef<MapRef, MapProps>(function Map(
     currentStyleRef.current = newStyle;
     setIsStyleLoaded(false);
 
+    // Re-arm the one-shot styledata handler for the incoming style.
+    mapInstance.once("styledata", () => setIsStyleLoaded(true));
     mapInstance.setStyle(newStyle, { diff: true });
   }, [mapInstance, resolvedTheme, mapStyles, clearStyleTimeout]);
 

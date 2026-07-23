@@ -49,6 +49,16 @@
     <link rel="dns-prefetch" href="https://b.basemaps.cartocdn.com" />
     <link rel="dns-prefetch" href="https://c.basemaps.cartocdn.com" />
     <link rel="dns-prefetch" href="https://d.basemaps.cartocdn.com" />
+    <!-- Warm the browser cache for the map style JSON so MapLibre doesn't have
+         to wait on a round trip the first time the location map is opened.
+         `as="fetch"` + crossorigin matches MapLibre's own request signature so
+         the preload is actually reused instead of duplicated. -->
+    <link
+      rel="preload"
+      as="fetch"
+      crossorigin="anonymous"
+      href="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
+    />
     <link
       href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
       rel="stylesheet"

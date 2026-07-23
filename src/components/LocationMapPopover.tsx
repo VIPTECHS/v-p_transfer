@@ -65,9 +65,10 @@ function MapFlyTo({ point }: { point: LocationPoint | null }) {
 const AIRPORT_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30"><circle cx="15" cy="15" r="12" fill="#e11d2a" stroke="#ffffff" stroke-width="2.5"/><g transform="translate(7 7) scale(0.66)" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 4.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></g></svg>`;
 
 // Highlights every airport worldwide as a single MapLibre symbol layer.
-// The GeoJSON is ~2 MB and parsing it blocks the main thread, so we wait
-// until the map has finished its first paint (idle) before loading it.
-// This keeps the initial map open feeling snappy.
+// The GeoJSON is ~2 MB but `LocationMapField` pre-fetches it during idle
+// time so, by the time the popover opens, `loadAirportGeoJSON()` typically
+// resolves synchronously. We still guard against the cold-open path where
+// the user opens the map before the idle prefetch runs.
 function AirportLayer() {
   const { map, isLoaded } = useMap();
 
@@ -155,41 +156,14 @@ function AirportLayer() {
       });
     };
 
-    // Defer the heavy airport layer until after the map has settled and the
-    // browser is idle. Fallback to a small timeout for browsers without
-    // requestIdleCallback (Safari).
-    const scheduleIdle = (cb: () => void) => {
-      const ric = (window as unknown as {
-        requestIdleCallback?: (cb: IdleRequestCallback, opts?: { timeout: number }) => number;
-      }).requestIdleCallback;
-      if (ric) return ric(cb, { timeout: 1500 });
-      return window.setTimeout(cb, 300);
-    };
-
-    let idleHandle: number | null = null;
-    const runOnce = () => {
-      if (cancelled || idleHandle != null) return;
-      idleHandle = scheduleIdle(() => {
-        if (!cancelled) startLoading();
-      });
-    };
-
-    if (map.loaded()) {
-      runOnce();
-    } else {
-      map.once("idle", runOnce);
-    }
+    // Kick off the data fetch immediately. The idle-time prefetch in
+    // LocationMapField usually means this resolves synchronously; if not,
+    // we still start loading right away instead of gating on `map.idle`
+    // (which noticeably delays the airport pins appearing).
+    startLoading();
 
     return () => {
       cancelled = true;
-      map.off("idle", runOnce);
-      if (idleHandle != null) {
-        const cic = (window as unknown as {
-          cancelIdleCallback?: (handle: number) => void;
-        }).cancelIdleCallback;
-        if (cic) cic(idleHandle);
-        else window.clearTimeout(idleHandle);
-      }
       try {
         if (map.getLayer(layerId)) map.removeLayer(layerId);
         if (map.getSource(sourceId)) map.removeSource(sourceId);

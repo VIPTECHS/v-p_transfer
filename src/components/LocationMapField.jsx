@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useI18n } from "../i18n/I18nContext";
-import { searchPlaces } from "../utils/geocode";
+import { loadAirportGeoJSON, searchPlaces } from "../utils/geocode";
 
 // Lazy import kept in a module-level variable so we can prefetch it before
 // the user actually clicks the map button.
@@ -13,6 +13,35 @@ function prefetchLocationMapPopover() {
   return popoverImportPromise;
 }
 const LocationMapPopover = lazy(() => prefetchLocationMapPopover());
+
+// Once the page is idle, warm the map bundle and airport dataset in the
+// background so the first click on the map button feels instant. Both of
+// these are large (MapLibre chunk ~500 KB, airports.json ~2.3 MB), so
+// pre-fetching them while the browser has spare capacity is the biggest
+// perceived-perf win we can do without shipping a smaller dataset.
+let idlePrefetchScheduled = false;
+function scheduleIdlePrefetch() {
+  if (idlePrefetchScheduled) return;
+  if (typeof window === "undefined") return;
+  idlePrefetchScheduled = true;
+
+  const run = () => {
+    prefetchLocationMapPopover();
+    // Fire-and-forget: the fetched module caches the parsed GeoJSON so the
+    // popover can render airport pins immediately on first open.
+    loadAirportGeoJSON().catch(() => {});
+  };
+
+  const ric = window.requestIdleCallback;
+  const kick = () => {
+    if (ric) ric(run, { timeout: 4000 });
+    else window.setTimeout(run, 1200);
+  };
+
+  if (document.readyState === "complete") kick();
+  else window.addEventListener("load", kick, { once: true });
+}
+scheduleIdlePrefetch();
 
 /** @typedef {{ label: string, lng: number, lat: number }} LocationPoint */
 
@@ -797,7 +826,11 @@ export default function LocationMapField({
     : null;
 
   return (
-    <div className={`location-field ${open || suggestionsOpen ? "open" : ""}`} ref={rootRef}>
+    <div
+      className={`location-field ${open || suggestionsOpen ? "open" : ""}`}
+      ref={rootRef}
+      onPointerEnter={prefetchLocationMapPopover}
+    >
       <label htmlFor={id} className="field-label">{label}</label>
       <div className="field-input-wrapper">
         {icon}
