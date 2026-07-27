@@ -2,6 +2,7 @@ import { Router } from "express";
 import prisma from "../lib/prisma.js";
 import { requireAdmin } from "../middleware/auth.js";
 import { enquiryCreateSchema, parseBody } from "../lib/validation.js";
+import { notifyNewEnquiry } from "../lib/notifications.js";
 
 const router = Router();
 
@@ -38,6 +39,8 @@ router.post("/", async (req, res) => {
         status: "new",
       },
     });
+
+    await notifyNewEnquiry(enquiry);
 
     return res.status(201).json({ success: true, enquiry: serializeEnquiry(enquiry) });
   } catch (error) {
