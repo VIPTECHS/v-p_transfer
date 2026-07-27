@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { adminLogin, agencyLogin } from "../api/admin";
 
+// Panel ayrı bir subdomain'de çalıştığı için "/" artık public siteye çıkmıyor.
+const PUBLIC_SITE_URL = import.meta.env.VITE_PUBLIC_SITE_URL || "https://viptransfer.com/";
+
 export default function AdminLogin({ onSuccess }) {
   const [mode, setMode] = useState("admin");
   const [password, setPassword] = useState("");
@@ -58,7 +61,7 @@ export default function AdminLogin({ onSuccess }) {
         <button type="submit" className="admin-btn admin-btn--gold" disabled={loading}>
           {loading ? "Giriş..." : "Giriş Yap"}
         </button>
-        <a href="/" className="admin-login-back">← Siteye dön</a>
+        <a href={PUBLIC_SITE_URL} className="admin-login-back">← Siteye dön</a>
       </form>
     </div>
   );

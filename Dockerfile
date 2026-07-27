@@ -23,11 +23,13 @@ COPY --from=base /app/server ./server
 
 ENV NODE_ENV=production
 ENV PORT=3001
-ENV DATABASE_URL="file:./data/prod.db"
+# Mutlak yol: Prisma "file:./..." yolunu schema.prisma'nın klasörüne göre çözer,
+# bu yüzden göreli yol veriyi volume dışına (server/prisma/data) yazardı.
+ENV DATABASE_URL="file:/app/data/prod.db"
 
 EXPOSE 3001
 
-RUN mkdir -p /app/data
+RUN mkdir -p /app/data /app/server/uploads/documents
 
 COPY --from=base /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=base /app/server/prisma ./server/prisma

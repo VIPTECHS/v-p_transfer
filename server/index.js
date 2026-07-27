@@ -149,6 +149,21 @@ app.get("/health", (_req, res) => {
   res.json({ ok: true, env: process.env.NODE_ENV || "development" });
 });
 
+// Panel subdomain'i: kök yollar panelin kendi rotalarıdır, API değil.
+// API router'ları aşağıda hem /api hem de kökten mount ediliyor; panelin
+// görünüm adlarının çoğu (/reservations, /customers, ...) bunlarla çakışıyor.
+// Bu yüzden mount'lardan önce paneli servis edip zinciri burada kesiyoruz.
+// Statik dosyalar (uzantılı yollar) ve /api altındakiler dokunulmadan geçer.
+app.use((req, res, next) => {
+  if (!isAdminHost(req)) return next();
+  if (req.method !== "GET") return next();
+  if (req.path.startsWith("/api")) return next();
+  if (path.extname(req.path)) return next();
+  const adminHtml = path.join(distPath, "admin.html");
+  if (!existsSync(adminHtml)) return next();
+  return res.sendFile(adminHtml);
+});
+
 function mountRoutes(basePath, router, ...middleware) {
   const stack = middleware.length ? [...middleware, router] : [router];
   app.use(basePath, ...stack);
@@ -198,7 +213,18 @@ function send404(res) {
 </body></html>`);
 }
 
-// Production (or built dist present): serve frontend + SPA fallback for /admin
+// Operasyon panelinin subdomain'i. Birden fazla host virgülle verilebilir.
+const adminHosts = (process.env.ADMIN_HOST || "operasyon.viptransfer.com")
+  .split(",")
+  .map((h) => h.trim().toLowerCase())
+  .filter(Boolean);
+
+function isAdminHost(req) {
+  const host = (req.hostname || "").toLowerCase();
+  return adminHosts.includes(host);
+}
+
+// Production (or built dist present): serve frontend, panel on its own host
 const distPath = path.join(__dirname, "..", "dist");
 const serveFrontend = isProd || existsSync(distPath);
 
@@ -242,6 +268,12 @@ if (serveFrontend && existsSync(distPath)) {
     }
   });
 
+  // Panel subdomain'i tamamen taramaya kapalı; public robots.txt'in üstüne geçer.
+  app.get("/robots.txt", (req, res, next) => {
+    if (!isAdminHost(req)) return next();
+    res.type("text/plain").send("User-agent: *\nDisallow: /\n");
+  });
+
   app.use(express.static(distPath, { fallthrough: true, index: false }));
 
   // Parse an optional /en|/de language prefix + single-segment slug candidate
@@ -260,9 +292,9 @@ if (serveFrontend && existsSync(distPath)) {
     // Skip API routes — they are handled by mounted routers above
     if (urlPath.startsWith("/api")) return next();
 
-    // Client-only admin SPA (not prerendered)
+    // Public domainde panele erişim yok — /admin tamamen kapalı.
     if (urlPath.startsWith("/admin")) {
-      return res.sendFile(path.join(distPath, "index.html"));
+      return res.status(404).json({ error: "NOT_FOUND" });
     }
 
     const htmlPath = resolvePrerenderedHtml(distPath, urlPath);

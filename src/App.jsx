@@ -24,7 +24,6 @@ import { LANG_PREFIX_RE } from "./i18n/locale";
 import { useI18n } from "./i18n/I18nContext";
 import { applyHomeSeo } from "./i18n/seo";
 
-const AdminApp = lazy(() => import("./admin/AdminApp"));
 const BookingWizard = lazy(() => import("./components/booking/BookingWizard"));
 
 function HomeSeo() {
@@ -37,10 +36,6 @@ function HomeSeo() {
 
 function parseRoute(pathname) {
   const clean = pathname.replace(LANG_PREFIX_RE, "");
-
-  if (clean.startsWith("/admin")) {
-    return { type: "admin" };
-  }
 
   const blogMatch = clean.match(/^\/blog\/([^/]+)\/?$/);
   if (blogMatch) return { type: "post", slug: decodeURIComponent(blogMatch[1]) };
@@ -91,14 +86,6 @@ export default function App() {
     setBookingData({ type: "transfer" });
     window.scrollTo(0, 0);
   }, []);
-
-  if (route.type === "admin") {
-    return (
-      <Suspense fallback={<div style={{ minHeight: "100vh", background: "#0a0a0a", color: "#888", display: "grid", placeItems: "center" }}>Yükleniyor...</div>}>
-        <AdminApp />
-      </Suspense>
-    );
-  }
 
   if (route.type === "post") {
     return (

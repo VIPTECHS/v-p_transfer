@@ -12,6 +12,16 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      // İki ayrı giriş: public site ve operasyon paneli. Panel kodu public
+      // bundle'a hiç girmez, kendi HTML'i ve chunk'larıyla çıkar.
+      input: {
+        main: path.resolve(__dirname, "index.html"),
+        admin: path.resolve(__dirname, "admin.html"),
+      },
+    },
+  },
   server: {
     proxy: {
       "/api": {

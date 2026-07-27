@@ -104,9 +104,11 @@ const DETAIL_VIEWS = {
   "customer-detail": { section: "customers", Component: CustomerDetail, prop: "id" },
 };
 
+// Panel kendi subdomain'inde kökten çalışır (operasyon.viptransfer.com/reservations).
+// Eski /admin önekli linkler kırılmasın diye o biçim de kabul edilir.
 function parseAdminRoute(pathname) {
-  const clean = pathname.replace(LANG_PREFIX_RE, "");
-  const match = clean.match(/^\/admin(?:\/([^/]+))?(?:\/([^/]+))?/);
+  const clean = pathname.replace(LANG_PREFIX_RE, "").replace(/^\/admin(?=\/|$)/, "");
+  const match = clean.match(/^\/?([^/]+)?(?:\/([^/]+))?/);
   if (!match) return { view: "dashboard" };
   const view = match[1] || "dashboard";
   const id = match[2] || null;
@@ -165,15 +167,15 @@ export default function AdminApp() {
   const goTo = (view, id) => {
     setMenuOpen(false);
     const detailPaths = {
-      "reservation-detail": `/admin/reservation/${id}`,
-      "supplier-detail": `/admin/supplier/${id}`,
-      "agency-detail": `/admin/agency/${id}`,
-      "customer-detail": `/admin/customer/${id}`,
+      "reservation-detail": `/reservation/${id}`,
+      "supplier-detail": `/supplier/${id}`,
+      "agency-detail": `/agency/${id}`,
+      "customer-detail": `/customer/${id}`,
     };
     if (detailPaths[view] && id) {
       navigate(detailPaths[view]);
     } else {
-      navigate(`/admin/${view === "dashboard" ? "" : view}`);
+      navigate(`/${view === "dashboard" ? "" : view}`);
     }
   };
 
