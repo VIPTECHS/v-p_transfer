@@ -392,3 +392,45 @@ export function fetchFlightStatus(code, date) {
 // --- Reports API ---
 export function fetchRevenueReport() { return request("/reports/revenue"); }
 export function fetchSuppliersReport() { return request("/reports/suppliers"); }
+
+// --- AI sohbet paneli (ai.viptransfer.com) ---
+// Ortak request() hata gövdesini atar; AI uçlarında sağlayıcı hata ayrıntısı
+// gerektiği için gövdeyi koruyan ayrı bir istemci kullanılır.
+async function aiRequest(path, options = {}) {
+  const response = await fetch(`${API_URL.replace(/\/$/, "")}/ai${path}`, {
+    ...options,
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      ...adminHeaders(),
+    },
+  });
+  if (response.status === 401) {
+    clearAdminSession();
+    if (typeof window !== "undefined") window.dispatchEvent(new Event("vip-admin-unauthorized"));
+    const error = new Error("UNAUTHORIZED");
+    error.status = 401;
+    throw error;
+  }
+  if (response.status === 204) return null;
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const error = new Error(data.error || "API_ERROR");
+    error.status = response.status;
+    error.detail = data.detail;
+    throw error;
+  }
+  return data;
+}
+
+export const aiFetchConfig = () => aiRequest("/config");
+export const aiSaveConfig = (data) => aiRequest("/config", { method: "PUT", body: JSON.stringify(data) });
+export const aiTestConfig = () => aiRequest("/config/test", { method: "POST" });
+export const aiListChats = () => aiRequest("/chats");
+export const aiCreateChat = () => aiRequest("/chats", { method: "POST" });
+export const aiGetChat = (id) => aiRequest(`/chats/${id}`);
+export const aiDeleteChat = (id) => aiRequest(`/chats/${id}`, { method: "DELETE" });
+export const aiSendMessage = (id, text) =>
+  aiRequest(`/chats/${id}/messages`, { method: "POST", body: JSON.stringify({ text }) });
+export const aiDecideProposal = (chatId, messageId, approve) =>
+  aiRequest(`/chats/${chatId}/proposals/${messageId}`, { method: "POST", body: JSON.stringify({ approve }) });

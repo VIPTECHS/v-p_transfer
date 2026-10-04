@@ -27,6 +27,7 @@ import flightsRouter from "./routes/flights.js";
 import ledgerRouter from "./routes/ledger.js";
 import documentsRouter from "./routes/documents.js";
 import pagesRouter from "./routes/pages.js";
+import aiRouter from "./routes/ai.js";
 import prisma from "./lib/prisma.js";
 import { renderCustomPageHtml } from "./lib/renderCustomPage.js";
 import { rematchBookingsWithoutCity } from "./lib/cityMatcher.js";
@@ -57,10 +58,27 @@ try {
 const app = express();
 app.set("trust proxy", 1);
 
+// Operasyon paneli ve AI sohbet panelinin subdomain'leri. Birden fazla host
+// virgülle verilebilir. İkisi de aynı panel bundle'ını (admin.html) servis eder;
+// ai.* host'unda panel doğrudan sohbet ekranını açar.
+const parseHosts = (value) =>
+  value
+    .split(",")
+    .map((h) => h.trim().toLowerCase())
+    .filter(Boolean);
+const adminHosts = parseHosts(process.env.ADMIN_HOST || "operasyon.viptransfer.com");
+const aiHosts = parseHosts(process.env.AI_HOST || "ai.viptransfer.com");
+
 const corsOrigins = (process.env.CORS_ORIGIN || "https://viptransfer.com")
   .split(",")
   .map((o) => o.trim())
   .filter(Boolean);
+
+// Panel host'larından gelen istekler (Origin başlığı) CORS_ORIGIN'e ayrıca
+// yazılmadan da kabul edilir.
+for (const host of [...adminHosts, ...aiHosts]) {
+  if (!corsOrigins.includes(`https://${host}`)) corsOrigins.push(`https://${host}`);
+}
 
 if (!isProd) {
   corsOrigins.push(
@@ -195,6 +213,8 @@ mountRoutes("/documents", documentsRouter);
 mountRoutes("/pages", pagesRouter);
 mountRoutes("/reports", reportsRouter, requireAdmin);
 mountRoutes("/flights", flightsRouter);
+// AI sohbet paneli: yalnızca /api/ai altında, admin yetkisi router içinde.
+app.use("/api/ai", aiRouter);
 
 function resolvePrerenderedHtml(distPath, urlPath) {
   const normalized = urlPath.replace(/\/$/, "") || "/";
@@ -213,15 +233,9 @@ function send404(res) {
 </body></html>`);
 }
 
-// Operasyon panelinin subdomain'i. Birden fazla host virgülle verilebilir.
-const adminHosts = (process.env.ADMIN_HOST || "operasyon.viptransfer.com")
-  .split(",")
-  .map((h) => h.trim().toLowerCase())
-  .filter(Boolean);
-
 function isAdminHost(req) {
   const host = (req.hostname || "").toLowerCase();
-  return adminHosts.includes(host);
+  return adminHosts.includes(host) || aiHosts.includes(host);
 }
 
 // Production (or built dist present): serve frontend, panel on its own host

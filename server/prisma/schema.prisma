@@ -478,3 +478,33 @@ model CustomPage {
 
   @@index([status])
 }
+
+// Admin panelinden yönetilen anahtar/değer ayarları (ör. AI sağlayıcı bilgisi).
+// Gizli değerler (API anahtarı) şifreli saklanır, bkz. server/lib/secretBox.js.
+model AppSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+// ai.viptransfer.com sohbet geçmişi.
+model AiChat {
+  id        String      @id @default(cuid())
+  title     String      @default("Yeni sohbet")
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  messages  AiMessage[]
+}
+
+model AiMessage {
+  id        String   @id @default(cuid())
+  chatId    String
+  chat      AiChat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  // user | assistant | tool
+  role      String
+  // JSON string: modelin/aracın ham mesajı + varsa onay kartı (proposal)
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([chatId, createdAt])
+}

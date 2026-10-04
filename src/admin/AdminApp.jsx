@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   LayoutDashboard, CalendarCheck, ClipboardList, Calendar,
   Users, Building2, Briefcase, Car, UserCog,
-  CreditCard, BarChart3, Settings, Menu, X, LogOut, FileText,
+  CreditCard, BarChart3, Settings, Menu, X, LogOut, FileText, Sparkles,
 } from "lucide-react";
 import Dashboard from "./Dashboard";
 import ReservationsList from "./ReservationsList";
@@ -22,6 +22,7 @@ import ReportsView from "./ReportsView";
 import SettingsView from "./SettingsView";
 import PagesList from "./PagesList";
 import AdminLogin from "./AdminLogin";
+import AiChat from "./AiChat";
 import { clearAdminPassword, hasAdminPassword, getSessionRole } from "../api/admin";
 import { LANG_PREFIX_RE } from "../i18n/locale";
 import "./admin.css";
@@ -40,12 +41,16 @@ const VIEWS = {
   reports: ReportsView,
   pages: PagesList,
   settings: SettingsView,
+  ai: AiChat,
 };
 
 const NAV_GROUPS = [
   {
     label: "Genel",
-    items: [{ id: "dashboard", label: "Dashboard", icon: LayoutDashboard }],
+    items: [
+      { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { id: "ai", label: "AI Asistan", icon: Sparkles },
+    ],
   },
   {
     label: "Operasyon",
@@ -94,6 +99,7 @@ const PAGE_META = {
   payments: { title: "Ödemeler", subtitle: "Cari hesap ve tahsilat takibi" },
   reports: { title: "Raporlar", subtitle: "Gelir ve performans analizi" },
   pages: { title: "Sayfalar", subtitle: "Kendi SEO sayfalarınızı oluşturun ve yönetin" },
+  ai: { title: "AI Asistan", subtitle: "Panelin her şeyini yazarak yönetin" },
   settings: { title: "Ayarlar", subtitle: "Lokasyon ve sistem yapılandırması" },
 };
 
@@ -103,6 +109,8 @@ const DETAIL_VIEWS = {
   "agency-detail": { section: "agencies", Component: AgencyDetail, prop: "id" },
   "customer-detail": { section: "customers", Component: CustomerDetail, prop: "id" },
 };
+
+const IS_AI_HOST = typeof window !== "undefined" && /^ai\./i.test(window.location.hostname);
 
 // Panel kendi subdomain'inde kökten çalışır (operasyon.viptransfer.com/reservations).
 // Eski /admin önekli linkler kırılmasın diye o biçim de kabul edilir.
@@ -155,12 +163,31 @@ export default function AdminApp() {
     setRoute(parseAdminRoute(path));
   }, []);
 
-  if (!authenticated) {
+  if (!authenticated || (IS_AI_HOST && role !== "admin")) {
+    if (authenticated && role !== "admin") {
+      clearAdminPassword();
+    }
     return (
       <AdminLogin onSuccess={() => {
         setAuthenticated(true);
         setRole(getSessionRole());
       }} />
+    );
+  }
+
+  // ai.viptransfer.com: panel iskeleti yok, doğrudan tam ekran sohbet.
+  if (IS_AI_HOST) {
+    return (
+      <div className="admin-root">
+        <AiChat
+          standalone
+          onLogout={() => {
+            clearAdminPassword();
+            setAuthenticated(false);
+            setRole(null);
+          }}
+        />
+      </div>
     );
   }
 
