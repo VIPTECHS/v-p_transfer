@@ -157,7 +157,8 @@ export default function AiChat({ standalone = false, onLogout }) {
       refreshChats();
     } catch (err) {
       if (err.message === "UNAUTHORIZED") return;
-      setError(ERROR_TEXT[err.message] || err.detail || "Bir hata oluştu.");
+      const base = ERROR_TEXT[err.message] || "Bir hata oluştu.";
+      setError(err.detail ? `${base} Ayrıntı: ${err.detail}` : base);
       if (err.message === "AI_NOT_CONFIGURED") {
         setConfigured(false);
         setShowSettings(true);
