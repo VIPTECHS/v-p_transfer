@@ -31,3 +31,13 @@ server/prisma/dev.db-journal
 !.env.example
 server/.env
 server/prisma/.env
+
+
+# Veritabani / yukleme / veri (asla commit edilmez)
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+server/uploads/
+data/
