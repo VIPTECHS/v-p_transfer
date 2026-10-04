@@ -157,7 +157,15 @@ app.use(
   }),
 );
 
-app.use(express.json({ limit: "1mb" }));
+// AI sohbetinde ek dosya (küçültülmüş görsel / metin) gövdede base64 gelir; sadece
+// o uçlara geniş limit, diğer her yerde 1mb.
+const jsonSmall = express.json({ limit: "1mb" });
+const jsonLarge = express.json({ limit: "10mb" });
+app.use((req, res, next) =>
+  req.method === "POST" && /^\/api\/ai\/chats\/[^/]+\/messages$/.test(req.path)
+    ? jsonLarge(req, res, next)
+    : jsonSmall(req, res, next),
+);
 app.use(rateLimit);
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));

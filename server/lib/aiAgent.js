@@ -96,7 +96,17 @@ function buildContext(rows) {
     total += size;
     kept.unshift(turns[i]);
   }
-  return kept.flat().map(toApi);
+  // Görseller yalnızca son turda modele gider; eskilerde yer tutucu kalır (token tasarrufu).
+  return kept.map((turn, i) => {
+    const isLast = i === kept.length - 1;
+    return turn.map((m) => {
+      const api = toApi(m);
+      if (!isLast && Array.isArray(api.content)) {
+        api.content = api.content.map((part) => (part.type === "image_url" ? { type: "text", text: "[görsel önceki mesajda gönderilmişti]" } : part));
+      }
+      return api;
+    });
+  }).flat();
 }
 
 async function addMessage(chatId, message) {
@@ -107,8 +117,32 @@ async function addMessage(chatId, message) {
   return { ...message, _id: row.id, _createdAt: row.createdAt };
 }
 
+/**
+ * Kullanıcı mesajı: metin dosyaları metne eklenir, görseller OpenAI "image_url"
+ * parçası olur (görsel destekleyen model gerekir). Ekranda göstermek için
+ * orijinal metin ve ek listesi meta içinde tutulur.
+ */
+function buildUserMessage(userText, attachments) {
+  if (!attachments.length) return { role: "user", content: userText };
+  const texts = attachments.filter((a) => a.kind === "text");
+  const images = attachments.filter((a) => a.kind === "image");
+  const body =
+    [userText || (images.length && !texts.length ? "Ekteki görseli incele." : "Ekteki dosyayı incele."),
+      ...texts.map((a) => `\n[Ek dosya: ${a.name}]\n"""\n${a.data}\n"""`)].join("\n");
+  const meta = {
+    text: userText,
+    attachments: attachments.map((a) => ({ kind: a.kind, name: a.name, ...(a.kind === "image" ? { data: a.data } : {}) })),
+  };
+  if (!images.length) return { role: "user", content: body, meta };
+  return {
+    role: "user",
+    content: [{ type: "text", text: body }, ...images.map((a) => ({ type: "image_url", image_url: { url: a.data } }))],
+    meta,
+  };
+}
+
 /** Kullanıcı mesajından sonra modeli çalıştırır; araç döngüsünü yönetir. */
-export async function runTurn(chatId, userText) {
+export async function runTurn(chatId, userText, attachments = []) {
   const created = [];
   const push = async (m) => {
     const saved = await addMessage(chatId, m);
@@ -116,7 +150,7 @@ export async function runTurn(chatId, userText) {
     return saved;
   };
 
-  await push({ role: "user", content: userText });
+  await push(buildUserMessage(userText, attachments));
 
   for (let step = 0; step < MAX_STEPS; step += 1) {
     const rows = await prisma.aiMessage.findMany({ where: { chatId }, orderBy: { createdAt: "asc" } });

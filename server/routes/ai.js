@@ -11,13 +11,39 @@ router.use(requireAdmin);
 // Aynı anda sohbet başına tek model çağrısı: çift gönderimi engeller.
 const busy = new Set();
 
+const MAX_ATTACHMENTS = 4;
+const MAX_IMAGE_CHARS = 2_000_000; // ~1.5 MB base64
+const MAX_TEXT_CHARS = 100_000;
+
+/** İstemciden gelen ekleri doğrular; geçersizse hata fırlatır. */
+function sanitizeAttachments(raw) {
+  if (raw === undefined || raw === null) return [];
+  if (!Array.isArray(raw) || raw.length > MAX_ATTACHMENTS) throw new Error("ATTACHMENTS_INVALID");
+  return raw.map((a) => {
+    const name = String(a?.name || "dosya").slice(0, 120);
+    if (a?.kind === "image") {
+      const data = String(a.data || "");
+      if (!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(data) || data.length > MAX_IMAGE_CHARS) {
+        throw new Error("ATTACHMENTS_INVALID");
+      }
+      return { kind: "image", name, data };
+    }
+    if (a?.kind === "text") {
+      return { kind: "text", name, data: String(a.data || "").slice(0, MAX_TEXT_CHARS) };
+    }
+    throw new Error("ATTACHMENTS_INVALID");
+  });
+}
+
 /** Depolanan mesajı istemciye uygun (ham OpenAI alanları olmadan) biçime çevirir. */
 function present(id, stored, createdAt) {
   if (stored.meta?.hidden) return null;
   return {
     id,
     role: stored.role,
-    content: stored.content,
+    // Ek varsa ekranda yalnızca kullanıcının yazdığı metin görünür (dosya içeriği modele özel).
+    content: stored.meta && "text" in stored.meta ? stored.meta.text : typeof stored.content === "string" ? stored.content : "",
+    attachments: stored.meta?.attachments,
     toolCalls: stored.tool_calls?.map((c) => ({ id: c.id, name: c.function?.name })),
     toolName: stored.name,
     label: stored.meta?.label,
@@ -58,7 +84,8 @@ router.post("/config/test", async (_req, res) => {
     res.json({ ok: true, reply: String(reply.content || "").slice(0, 80) });
   } catch (error) {
     const notConfigured = error instanceof AiNotConfiguredError;
-    res.status(notConfigured ? 400 : 502).json({
+    // 5xx kullanılmaz: Cloudflare origin'in 502/504 gövdesini kendi hata sayfasıyla ezer.
+    res.status(notConfigured ? 400 : 424).json({
       ok: false,
       error: notConfigured ? "AI_NOT_CONFIGURED" : String(error.message || error).slice(0, 300),
     });
@@ -89,7 +116,13 @@ router.delete("/chats/:id", async (req, res) => {
 
 router.post("/chats/:id/messages", async (req, res) => {
   const text = String(req.body?.text || "").trim().slice(0, 4000);
-  if (!text) return res.status(400).json({ error: "VALIDATION" });
+  let attachments;
+  try {
+    attachments = sanitizeAttachments(req.body?.attachments);
+  } catch {
+    return res.status(400).json({ error: "ATTACHMENTS_INVALID" });
+  }
+  if (!text && !attachments.length) return res.status(400).json({ error: "VALIDATION" });
   const chat = await prisma.aiChat.findUnique({ where: { id: req.params.id } });
   if (!chat) return res.status(404).json({ error: "NOT_FOUND" });
   if (busy.has(chat.id)) return res.status(409).json({ error: "BUSY" });
@@ -97,9 +130,9 @@ router.post("/chats/:id/messages", async (req, res) => {
   busy.add(chat.id);
   try {
     if (chat.title === "Yeni sohbet") {
-      await prisma.aiChat.update({ where: { id: chat.id }, data: { title: text.slice(0, 60) } });
+      await prisma.aiChat.update({ where: { id: chat.id }, data: { title: (text || attachments[0]?.name || "Yeni sohbet").slice(0, 60) } });
     }
-    const created = await runTurn(chat.id, text);
+    const created = await runTurn(chat.id, text, attachments);
     const messages = created
       .map((m) => {
         const { _id, _createdAt, ...stored } = m;
@@ -110,7 +143,7 @@ router.post("/chats/:id/messages", async (req, res) => {
   } catch (error) {
     if (error instanceof AiNotConfiguredError) return res.status(400).json({ error: "AI_NOT_CONFIGURED" });
     console.error("POST /ai/chats/:id/messages", error);
-    res.status(502).json({ error: "AI_ERROR", detail: String(error.message || error).slice(0, 300) });
+    res.status(424).json({ error: "AI_ERROR", detail: String(error.message || error).slice(0, 300) });
   } finally {
     busy.delete(chat.id);
   }

@@ -430,7 +430,7 @@ export const aiListChats = () => aiRequest("/chats");
 export const aiCreateChat = () => aiRequest("/chats", { method: "POST" });
 export const aiGetChat = (id) => aiRequest(`/chats/${id}`);
 export const aiDeleteChat = (id) => aiRequest(`/chats/${id}`, { method: "DELETE" });
-export const aiSendMessage = (id, text) =>
-  aiRequest(`/chats/${id}/messages`, { method: "POST", body: JSON.stringify({ text }) });
+export const aiSendMessage = (id, text, attachments = []) =>
+  aiRequest(`/chats/${id}/messages`, { method: "POST", body: JSON.stringify({ text, attachments }) });
 export const aiDecideProposal = (chatId, messageId, approve) =>
   aiRequest(`/chats/${chatId}/proposals/${messageId}`, { method: "POST", body: JSON.stringify({ approve }) });
