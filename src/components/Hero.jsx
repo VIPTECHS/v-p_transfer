@@ -1,7 +1,7 @@
 import { useI18n } from "../i18n/I18nContext";
 import BookingForm from "./BookingForm";
 
-const HERO_IMAGE_SRC = "/frames/ezgif-frame-300.webp";
+const HERO_IMAGE_SRC = "/images/home-hero-maybach.jpg";
 
 export default function Hero({ onSearch }) {
   const { t } = useI18n();
