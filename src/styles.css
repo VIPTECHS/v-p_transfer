@@ -737,10 +737,10 @@ input, select, textarea { color-scheme: var(--scheme); }
 .blogpost-cta-btn--wa { background: #25d366; color: #062b14; }
 
 .sitepage-hero { position: relative; border-bottom: 1px solid rgba(212,175,55,.18); background: radial-gradient(circle at 15% 0%, rgba(212,175,55,.1), transparent 45%), linear-gradient(180deg,#141414,#0a0a0a); }
-.sitepage-hero-inner { max-width: 720px; margin: 0 auto; padding: 48px 24px 40px; }
+.sitepage-hero-inner { max-width: 720px; margin: 0 auto; padding: 112px 24px 40px; }
 .sitepage-eyebrow { display: block; color: var(--gold); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; margin: 4px 0 14px; }
 [data-theme="light"] .sitepage-hero { background: radial-gradient(circle at 15% 0%, rgba(212,175,55,.12), transparent 45%), linear-gradient(180deg,#fbf9f4,#fff); border-color: rgba(0,0,0,.08); }
-@media (max-width: 760px) { .sitepage-hero-inner { padding: 36px 18px 30px; } }
+@media (max-width: 760px) { .sitepage-hero-inner { padding: calc(84px + env(safe-area-inset-top)) 18px 30px; } }
 
 /* Body sections on all sitepages share the same typographic scale as the
    intro paragraph, so headings + paragraphs feel like one continuous
