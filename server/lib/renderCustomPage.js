@@ -3,8 +3,9 @@
 // stay correct. Only the SEO head fields and the #root content are overridden.
 // The client (CustomPage.jsx) re-renders the same content for JS visitors.
 
+import { populatedSlugs, langPath } from "./pageSlugs.js";
+
 const SITE_URL = "https://viptransfer.com";
-const LANGS = ["tr", "en", "de"];
 
 function escapeHtml(str) {
   return String(str || "")
@@ -14,43 +15,29 @@ function escapeHtml(str) {
     .replace(/"/g, "&quot;");
 }
 
-function langPath(lang, slug) {
-  return lang === "tr" ? `/${slug}` : `/${lang}/${slug}`;
-}
-
 function absolute(pathname) {
   return `${SITE_URL}${pathname}`;
 }
 
-// Pick the best translation for a language, falling back to any populated one.
-function pickTranslation(translations, lang) {
-  const order = [lang, "tr", "en", "de"];
-  for (const l of order) {
-    const t = translations[l];
-    if (t && (t.title || t.bodyHtml)) return { lang: l, ...t };
-  }
-  return { lang, title: "", metaDescription: "", bodyHtml: "" };
-}
-
 export function renderCustomPageHtml(shellHtml, page, lang) {
   const translations = page.translations || {};
-  const t = pickTranslation(translations, lang);
-  const slug = page.slug;
-  const selfPath = langPath(lang, slug);
+  // Strict: the caller only renders languages that have their own content.
+  const t = { lang, ...(translations[lang] || {}) };
+  const slugs = populatedSlugs(page, translations);
+  const selfPath = langPath(lang, slugs[lang] || page.slug);
   const canonical = absolute(selfPath);
 
   const title = t.title ? `${t.title} | VIP Transfer` : "VIP Transfer";
   const description = (t.metaDescription || "").slice(0, 300);
 
   // hreflang: one per language that has content, plus x-default → tr (or first).
-  const populated = LANGS.filter((l) => translations[l] && (translations[l].title || translations[l].bodyHtml));
-  const hreflangLangs = populated.length ? populated : [lang];
+  const hreflangLangs = Object.keys(slugs);
   const alternates = hreflangLangs.map(
-    (l) => `<link rel="alternate" hreflang="${l}" href="${absolute(langPath(l, slug))}"/>`,
+    (l) => `<link rel="alternate" hreflang="${l}" href="${absolute(langPath(l, slugs[l]))}"/>`,
   );
   const xDefaultLang = hreflangLangs.includes("tr") ? "tr" : hreflangLangs[0];
   alternates.push(
-    `<link rel="alternate" hreflang="x-default" href="${absolute(langPath(xDefaultLang, slug))}"/>`,
+    `<link rel="alternate" hreflang="x-default" href="${absolute(langPath(xDefaultLang, slugs[xDefaultLang]))}"/>`,
   );
 
   const jsonLd = {

@@ -2,6 +2,7 @@ import { Router } from "express";
 import prisma from "../lib/prisma.js";
 import { requireAdmin } from "../middleware/auth.js";
 import { sanitizePageHtml } from "../lib/sanitizeHtml.js";
+import { populatedSlugs, hasContent, parseTranslations, effectiveSlug } from "../lib/pageSlugs.js";
 
 const router = Router();
 
@@ -32,12 +33,32 @@ function buildTranslations(input) {
   for (const lang of LANGS) {
     const t = (input && input[lang]) || {};
     out[lang] = {
+      // tr uses the CustomPage.slug column; en/de may override (empty = same).
+      slug: lang === "tr" ? "" : normalizeSlug(t.slug),
       title: String(t.title || "").trim(),
       metaDescription: String(t.metaDescription || "").trim().slice(0, 320),
       bodyHtml: sanitizePageHtml(t.bodyHtml || ""),
     };
   }
   return out;
+}
+
+// Returns an error code if any language slug is reserved or already used by a
+// different page's slug in the same language, otherwise null.
+async function checkSlugs(baseSlug, translations, selfId) {
+  const candidate = { slug: baseSlug };
+  const others = (await prisma.customPage.findMany()).filter((p) => p.id !== selfId);
+  for (const lang of ["tr", "en", "de"]) {
+    if (lang !== "tr" && !hasContent(translations[lang])) continue;
+    const slug = effectiveSlug(candidate, translations, lang);
+    if (RESERVED_SLUGS.has(slug)) return "RESERVED_SLUG";
+    for (const o of others) {
+      const ot = parseTranslations(o);
+      if (lang !== "tr" && !hasContent(ot[lang])) continue;
+      if (effectiveSlug(o, ot, lang) === slug) return "SLUG_TAKEN";
+    }
+  }
+  return null;
 }
 
 function serialize(page) {
@@ -54,6 +75,7 @@ function serialize(page) {
     jsonLdType: page.jsonLdType || null,
     ogImage: page.ogImage || null,
     translations,
+    slugs: populatedSlugs(page, translations),
     createdAt: page.createdAt,
     updatedAt: page.updatedAt,
   };
@@ -64,11 +86,10 @@ router.get("/public/:slug", async (req, res) => {
   try {
     const slug = normalizeSlug(req.params.slug);
     if (!slug) return res.status(404).json({ error: "NOT_FOUND" });
-    const page = await prisma.customPage.findUnique({ where: { slug } });
-    if (!page || page.status !== "published") {
-      return res.status(404).json({ error: "NOT_FOUND" });
-    }
-    return res.json(serialize(page));
+    const pages = await prisma.customPage.findMany({ where: { status: "published" } });
+    const match = pages.find((p) => Object.values(populatedSlugs(p)).includes(slug) || p.slug === slug);
+    if (!match) return res.status(404).json({ error: "NOT_FOUND" });
+    return res.json(serialize(match));
   } catch (error) {
     console.error("GET /pages/public/:slug", error);
     return res.status(500).json({ error: "SERVER_ERROR" });
@@ -112,6 +133,8 @@ router.post("/", async (req, res) => {
     if (!translations.tr.title && !translations.en.title && !translations.de.title) {
       return res.status(400).json({ error: "TITLE_REQUIRED" });
     }
+    const slugError = await checkSlugs(slug, translations, null);
+    if (slugError) return res.status(409).json({ error: slugError });
 
     const page = await prisma.customPage.create({
       data: {
@@ -147,8 +170,14 @@ router.patch("/:id", async (req, res) => {
       }
     }
 
-    if (req.body.translations !== undefined) {
-      data.translations = JSON.stringify(buildTranslations(req.body.translations));
+    if (req.body.translations !== undefined || data.slug) {
+      const translations =
+        req.body.translations !== undefined
+          ? buildTranslations(req.body.translations)
+          : parseTranslations(current);
+      const slugError = await checkSlugs(data.slug || current.slug, translations, current.id);
+      if (slugError) return res.status(409).json({ error: slugError });
+      if (req.body.translations !== undefined) data.translations = JSON.stringify(translations);
     }
     if (req.body.status !== undefined) {
       data.status = req.body.status === "published" ? "published" : "draft";

@@ -11,6 +11,21 @@ export const DOC_TYPES = [
   { value: "other", label: "Diğer Belgeler" },
 ];
 
+// Belge dosyaları yetkilendirmeli; bağlantı doğrudan açılamadığı için token'la çekip blob olarak açıyoruz.
+async function openDocument(filePath) {
+  const token = sessionStorage.getItem("vip_admin_token");
+  const win = window.open("", "_blank");
+  try {
+    const res = await fetch(filePath, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+    if (!res.ok) throw new Error("FETCH_FAILED");
+    const url = URL.createObjectURL(await res.blob());
+    if (win) win.location.href = url;
+  } catch {
+    win?.close();
+    alert("Belge açılamadı.");
+  }
+}
+
 function docTypeLabel(type) {
   return DOC_TYPES.find((d) => d.value === type)?.label || type;
 }
@@ -81,7 +96,7 @@ export default function DocumentsSection({ documents, onUpload, onDelete }) {
                 <td>{formatDate(d.issuedAt)}</td>
                 <td>{formatDate(d.expiresAt)}</td>
                 <td>
-                  <a href={d.filePath} target="_blank" rel="noopener noreferrer" className="admin-btn admin-btn--ghost" style={{ marginRight: 4 }}>Görüntüle</a>
+                  <button type="button" className="admin-btn admin-btn--ghost" style={{ marginRight: 4 }} onClick={() => openDocument(d.filePath)}>Görüntüle</button>
                   <button type="button" className="admin-btn admin-btn--ghost" onClick={() => onDelete(d.id)}><Trash2 size={14} /></button>
                 </td>
               </tr>

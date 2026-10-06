@@ -30,6 +30,7 @@ import pagesRouter from "./routes/pages.js";
 import aiRouter from "./routes/ai.js";
 import prisma from "./lib/prisma.js";
 import { renderCustomPageHtml } from "./lib/renderCustomPage.js";
+import { populatedSlugs, langPath, resolveByLangSlug } from "./lib/pageSlugs.js";
 import { rematchBookingsWithoutCity } from "./lib/cityMatcher.js";
 import { ensureMigrations } from "./lib/ensureMigrations.js";
 import { rateLimit } from "./middleware/rateLimit.js";
@@ -57,6 +58,22 @@ try {
 
 const app = express();
 app.set("trust proxy", 1);
+
+// API yanıtları ve panel host'u arama motorlarına kapalı.
+app.use((req, res, next) => {
+  if (req.path.startsWith("/api") || isAdminHost(req)) {
+    res.set("X-Robots-Tag", "noindex, nofollow");
+  }
+  next();
+});
+
+// Tek kanonik adres: www.viptransfer.com -> https://viptransfer.com (path/query korunur).
+app.use((req, res, next) => {
+  if ((req.hostname || "").toLowerCase() === "www.viptransfer.com") {
+    return res.redirect(301, `https://viptransfer.com${req.originalUrl}`);
+  }
+  next();
+});
 
 // Operasyon paneli ve AI sohbet panelinin subdomain'leri. Birden fazla host
 // virgülle verilebilir. İkisi de aynı panel bundle'ını (admin.html) servis eder;
@@ -168,8 +185,9 @@ app.use((req, res, next) =>
 );
 app.use(rateLimit);
 
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-app.use("/api/uploads", express.static(path.join(__dirname, "uploads")));
+// Yüklenen belgeler (ruhsat, vergi levhası vb.) yalnızca yönetici oturumuyla açılır.
+app.use("/uploads", requireAdmin, express.static(path.join(__dirname, "uploads")));
+app.use("/api/uploads", requireAdmin, express.static(path.join(__dirname, "uploads")));
 
 app.get("/health", (_req, res) => {
   res.json({ ok: true, env: process.env.NODE_ENV || "development" });
@@ -261,15 +279,10 @@ if (serveFrontend && existsSync(distPath)) {
       const lastmod = new Date().toISOString().split("T")[0];
       const extra = pages
         .map((page) => {
-          let tr = {};
-          try {
-            tr = JSON.parse(page.translations || "{}");
-          } catch {
-            tr = {};
-          }
-          const langs = ["tr", "en", "de"].filter((l) => tr[l] && (tr[l].title || tr[l].bodyHtml));
+          const slugs = populatedSlugs(page);
+          const langs = Object.keys(slugs);
           if (!langs.length) return "";
-          const href = (l) => (l === "tr" ? `${SITE}/${page.slug}` : `${SITE}/${l}/${page.slug}`);
+          const href = (l) => `${SITE}${langPath(l, slugs[l])}`;
           const alts = langs
             .map((l) => `    <xhtml:link rel="alternate" hreflang="${l}" href="${href(l)}"/>`)
             .join("\n");
@@ -281,7 +294,11 @@ if (serveFrontend && existsSync(distPath)) {
         })
         .filter(Boolean)
         .join("\n");
-      const merged = extra ? base.replace(/<\/urlset>\s*$/, `${extra}\n</urlset>`) : base;
+      const merged = extra
+        ? base
+            .replace(/<urlset(?![^>]*xmlns:xhtml)/, '<urlset xmlns:xhtml="http://www.w3.org/1999/xhtml"')
+            .replace(/<\/urlset>\s*$/, `${extra}\n</urlset>`)
+        : base;
       res.set("Content-Type", "application/xml; charset=utf-8");
       return res.send(merged);
     } catch (error) {
@@ -328,14 +345,11 @@ if (serveFrontend && existsSync(distPath)) {
     const candidate = parseCustomPagePath(urlPath);
     if (candidate) {
       try {
-        const page = await prisma.customPage.findUnique({ where: { slug: candidate.slug } });
-        if (page && page.status === "published") {
-          let translations = {};
-          try {
-            translations = JSON.parse(page.translations || "{}");
-          } catch {
-            translations = {};
-          }
+        const pages = await prisma.customPage.findMany({ where: { status: "published" } });
+        const match = resolveByLangSlug(pages, candidate.lang, candidate.slug);
+        if (match?.redirectTo) return res.redirect(301, match.redirectTo);
+        if (match) {
+          const { page, translations } = match;
           const shellPath = existsSync(path.join(distPath, "app-shell.html"))
             ? path.join(distPath, "app-shell.html")
             : path.join(distPath, "index.html");
@@ -344,14 +358,23 @@ if (serveFrontend && existsSync(distPath)) {
           res.set("Content-Type", "text/html; charset=utf-8");
           return res.send(html);
         }
+        // Slug exists but not in this language: no duplicate/foreign-language
+        // content for crawlers. The SPA shell still boots so the in-app
+        // language switcher keeps working.
+        if (pages.some((p) => p.slug === candidate.slug || Object.values(populatedSlugs(p)).includes(candidate.slug))) {
+          return res.status(404).sendFile(path.join(distPath, "index.html"));
+        }
       } catch (error) {
         console.error("custom page render", urlPath, error);
       }
     }
 
-    // Unknown path: still boot the SPA (deep links, client routes)
+    // Client-only routes + home keep returning 200; anything else is a real
+    // 404 (the SPA shell still boots so the user sees the in-app 404 view).
     if (!path.extname(urlPath)) {
-      return res.sendFile(path.join(distPath, "index.html"));
+      const knownClientRoute = /^\/(?:(?:en|de|tr)\/?)?(?:(?:yardim|medyada-biz|deneyim)\/?)?$/i.test(urlPath);
+      const file = path.join(distPath, "index.html");
+      return knownClientRoute ? res.sendFile(file) : res.status(404).sendFile(file);
     }
 
     return next();

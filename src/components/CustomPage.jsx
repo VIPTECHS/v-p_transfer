@@ -39,7 +39,18 @@ export default function CustomPage({ slug, navigate }) {
 
   useEffect(() => {
     if (!content) return undefined;
-    const pathFor = (l) => (l === "tr" ? `/${slug}` : `/${l}/${slug}`);
+    const slugs = page.slugs || {};
+    const pathFor = (l) => {
+      const sl = slugs[l] || page.slug;
+      return l === "tr" ? `/${sl}` : `/${l}/${sl}`;
+    };
+    // Keep the address bar on the active language's own slug after a switch.
+    if (typeof window !== "undefined" && slugs[content.lang]) {
+      const want = pathFor(content.lang);
+      if (window.location.pathname.replace(/\/$/, "") !== want) {
+        window.history.replaceState(null, "", want + window.location.search + window.location.hash);
+      }
+    }
     applyPageSeo({
       title: `${content.title} | VIP Transfer`,
       description: content.metaDescription || "",
@@ -51,7 +62,7 @@ export default function CustomPage({ slug, navigate }) {
       { name: content.title, url: absoluteUrl(pathFor(content.lang)) },
     ]);
     return () => removeJsonLd("ld-breadcrumb");
-  }, [content, slug, lang]);
+  }, [content, page, lang]);
 
   if (state.status === "loading") {
     return (

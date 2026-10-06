@@ -59,6 +59,9 @@ function parseRoute(pathname) {
     return { type: "custom", slug };
   }
 
+  // Bilinmeyen çok segmentli yol: ana sayfa yerine 404 görünümü.
+  if (slug) return { type: "custom", slug: "not-found" };
+
   return { type: "home" };
 }
 
