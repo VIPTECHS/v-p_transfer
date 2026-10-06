@@ -9,6 +9,8 @@ import bookingsRouter from "./routes/bookings.js";
 import enquiriesRouter from "./routes/enquiries.js";
 import partnerApplicationsRouter from "./routes/partner-applications.js";
 import transporterApplicationsRouter from "./routes/transporter-applications.js";
+import policyContentRouter from "./routes/policy-content.js";
+import blogPostsRouter from "./routes/blog-posts.js";
 import statsRouter from "./routes/stats.js";
 import driversRouter from "./routes/drivers.js";
 import vehiclesRouter from "./routes/vehicles.js";
@@ -223,6 +225,8 @@ mountRoutes("/bookings", bookingsRouter);
 mountRoutes("/enquiries", enquiriesRouter);
 mountRoutes("/partner-applications", partnerApplicationsRouter);
 mountRoutes("/transporter-applications", transporterApplicationsRouter);
+mountRoutes("/policy-content", policyContentRouter);
+mountRoutes("/blog-posts", blogPostsRouter);
 mountRoutes("/stats", statsRouter, requireAdmin);
 mountRoutes("/drivers", driversRouter);
 mountRoutes("/vehicles", vehiclesRouter);
@@ -278,10 +282,13 @@ if (serveFrontend && existsSync(distPath)) {
   app.get("/sitemap.xml", async (_req, res) => {
     try {
       const base = readFileSync(path.join(distPath, "sitemap.xml"), "utf-8");
-      const pages = await prisma.customPage.findMany({ where: { status: "published" } });
+      const [pages, blogArticles] = await Promise.all([
+        prisma.customPage.findMany({ where: { status: "published" } }),
+        prisma.blogArticle.findMany({ where: { status: "published" } }),
+      ]);
       const SITE = "https://viptransfer.com";
       const lastmod = new Date().toISOString().split("T")[0];
-      const extra = pages
+      const pageUrls = pages
         .map((page) => {
           const slugs = populatedSlugs(page);
           const langs = Object.keys(slugs);
@@ -298,6 +305,26 @@ if (serveFrontend && existsSync(distPath)) {
         })
         .filter(Boolean)
         .join("\n");
+      const blogUrls = blogArticles
+        .map((article) => {
+          let translations = {};
+          try { translations = JSON.parse(article.translations || "{}"); } catch {}
+          const langs = ["tr", "en", "de"].filter((lang) => translations[lang]?.title);
+          if (!langs.length) return "";
+          const href = (lang) => `${SITE}${lang === "tr" ? "" : `/${lang}`}/blog/${article.slug}`;
+          const alts = [...langs, "x-default"]
+            .map((lang) => {
+              const targetLang = lang === "x-default" ? (langs.includes("tr") ? "tr" : langs[0]) : lang;
+              return `    <xhtml:link rel="alternate" hreflang="${lang}" href="${href(targetLang)}"/>`;
+            })
+            .join("\n");
+          return langs
+            .map((lang) => `  <url>\n    <loc>${href(lang)}</loc>\n    <lastmod>${new Date(article.updatedAt).toISOString().split("T")[0]}</lastmod>\n${alts}\n  </url>`)
+            .join("\n");
+        })
+        .filter(Boolean)
+        .join("\n");
+      const extra = [pageUrls, blogUrls].filter(Boolean).join("\n");
       const merged = extra
         ? base
             .replace(/<urlset(?![^>]*xmlns:xhtml)/, '<urlset xmlns:xhtml="http://www.w3.org/1999/xhtml"')
@@ -376,7 +403,8 @@ if (serveFrontend && existsSync(distPath)) {
     // Client-only routes + home keep returning 200; anything else is a real
     // 404 (the SPA shell still boots so the user sees the in-app 404 view).
     if (!path.extname(urlPath)) {
-      const knownClientRoute = /^\/(?:(?:en|de|tr)\/?)?(?:(?:yardim|medyada-biz|deneyim)\/?)?$/i.test(urlPath);
+      const knownClientRoute = /^\/(?:(?:en|de)\/)?(?:blog\/[a-z0-9-]+|(?:yardim|medyada-biz|deneyim))\/?$/i.test(urlPath)
+        || /^\/(?:(?:en|de)\/)?$/.test(urlPath);
       const file = path.join(distPath, "index.html");
       return knownClientRoute ? res.sendFile(file) : res.status(404).sendFile(file);
     }

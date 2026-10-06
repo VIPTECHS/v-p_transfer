@@ -132,6 +132,32 @@ model TransporterApplication {
   @@index([createdAt])
 }
 
+model PolicyContent {
+  id        String   @id @default(cuid())
+  slug      String
+  language  String
+  title     String
+  intro     String
+  body      String
+  updatedAt DateTime @updatedAt
+
+  @@unique([slug, language])
+  @@index([slug])
+}
+
+model BlogArticle {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  status      String   @default("draft")
+  coverImage  String?
+  translations String
+  publishedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status, publishedAt])
+}
+
 model Driver {
   id         String   @id @default(cuid())
   name       String

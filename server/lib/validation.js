@@ -89,6 +89,41 @@ export const transporterApplicationCreateSchema = z.object({
   fax: z.string().max(0).optional(), // honeypot — must stay empty
 });
 
+const blogSectionSchema = z.object({
+  heading: z.string().trim().min(2).max(160),
+  paragraphs: z.array(z.string().trim().min(2).max(3000)).min(1).max(10),
+});
+
+const localizedBlogArticleSchema = z.object({
+  title: z.string().trim().min(3).max(200),
+  excerpt: z.string().trim().min(10).max(400),
+  lead: z.string().trim().min(10).max(3000),
+  sections: z.array(blogSectionSchema).min(1).max(12),
+  conclusion: z.string().trim().max(3000).optional().nullable(),
+});
+
+export const blogArticleCreateSchema = z.object({
+  slug: z.string().trim().min(3).max(160).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  status: z.enum(["draft", "published"]).optional(),
+  coverImage: z.string().trim().max(1000).optional().nullable(),
+  translations: z.object({
+    tr: localizedBlogArticleSchema,
+    en: localizedBlogArticleSchema.optional(),
+    de: localizedBlogArticleSchema.optional(),
+  }),
+});
+
+export const blogArticleUpdateSchema = z.object({
+  slug: z.string().trim().min(3).max(160).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).optional(),
+  status: z.enum(["draft", "published"]).optional(),
+  coverImage: z.string().trim().max(1000).optional().nullable(),
+  translations: z.object({
+    tr: localizedBlogArticleSchema,
+    en: localizedBlogArticleSchema.optional(),
+    de: localizedBlogArticleSchema.optional(),
+  }).optional(),
+});
+
 export const transferSchema = z.object({
   flightCode: z.string().max(20).optional().nullable(),
   fromLabel: z.string().max(500).default(""),

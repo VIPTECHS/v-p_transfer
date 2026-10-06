@@ -2484,7 +2484,6 @@ h1,h2 { font-family: var(--font-display); font-weight: 600; margin: 0; }
 .contact-copy > p { color: var(--text-muted); font-size: 12px; line-height: 1.8; max-width: 650px; }
 .office-grid { position: relative; display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; }
 .office-card { min-height: 330px; padding: 34px; display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--bg-card); box-shadow: 0 20px 55px rgba(0,0,0,.3); }
-.office-number { color: var(--gold); font-size: 8px; letter-spacing: .18em; }
 .office-card h3 { margin: 30px 0 14px; font: 600 27px var(--font-display); }
 .office-card p,.office-card address { margin: 0 0 18px; color: var(--text-muted); font-size: 10px; line-height: 1.8; font-style: normal; }
 .office-card .office-company { color: var(--text-secondary); }
@@ -2599,6 +2598,9 @@ footer.site-footer,
   flex-direction: column;
   align-items: flex-start;
   max-width: 420px;
+}
+@media (min-width: 761px) {
+  .footer-partner-copy { margin-left: -clamp(16px, 2vw, 30px); }
 }
 .footer-partner-icon {
   display: grid;

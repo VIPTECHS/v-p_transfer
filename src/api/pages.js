@@ -46,3 +46,18 @@ export function updatePage(id, data) {
 export function deletePage(id) {
   return json(`/pages/${id}`, { method: "DELETE" });
 }
+
+export function listPolicyContent() {
+  return json("/policy-content");
+}
+
+export function savePolicyContent(slug, language, data) {
+  return json(`/policy-content/${encodeURIComponent(slug)}/${encodeURIComponent(language)}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
+export function fetchPublicPolicyContent(slug, language) {
+  return json(`/policy-content/public/${encodeURIComponent(slug)}/${encodeURIComponent(language)}`);
+}

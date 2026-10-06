@@ -300,6 +300,11 @@ export function updateTransporterApplication(id, data) {
   });
 }
 
+export function fetchBlogArticles() { return request("/blog-posts"); }
+export function updateBlogArticle(id, data) {
+  return request(`/blog-posts/${id}`, { method: "PATCH", body: JSON.stringify(data) });
+}
+
 export function fetchOperations(date) {
   const query = date ? `?date=${date}` : "";
   return request(`/operations${query}`);

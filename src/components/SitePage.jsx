@@ -1,7 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { getSitePage } from "../data/sitePages";
 import { WHATSAPP_URL } from "../data/content";
 import { useI18n } from "../i18n/I18nContext";
+import { fetchPublicPolicyContent } from "../api/pages";
 import {
   absoluteUrl,
   applySitePageSeo,
@@ -9,14 +10,72 @@ import {
   removeJsonLd,
 } from "../i18n/seo";
 
+const EDITABLE_POLICY_SLUGS = new Set([
+  "cancellation-policy", "terms-conditions", "privacy-policy", "cookie-policy",
+]);
+
+function policySections(body, lang) {
+  const sections = [];
+  const fallbackHeading = { tr: "Detaylar", en: "Details", de: "Einzelheiten" }[lang] || "Details";
+  let heading = "";
+  let paragraphLines = [];
+
+  const flushParagraph = () => {
+    const paragraph = paragraphLines.join(" ").trim();
+    if (paragraph) {
+      if (!sections.length || sections[sections.length - 1].heading !== heading) {
+        sections.push({ heading: heading || fallbackHeading, paragraphs: [] });
+      }
+      sections[sections.length - 1].paragraphs.push(paragraph);
+    }
+    paragraphLines = [];
+  };
+
+  for (const line of String(body || "").split(/\r?\n/)) {
+    const value = line.trim();
+    if (value.startsWith("## ")) {
+      flushParagraph();
+      heading = value.slice(3).trim();
+      sections.push({ heading, paragraphs: [] });
+    } else if (!value) {
+      flushParagraph();
+    } else {
+      paragraphLines.push(value);
+    }
+  }
+  flushParagraph();
+  return sections.filter((section) => section.paragraphs.length > 0);
+}
+
 export default function SitePage({ slug, navigate }) {
   const { t, lang } = useI18n();
   const page = getSitePage(slug);
-  const c = page ? page.content[lang] || page.content.en : null;
+  const baseContent = page ? page.content[lang] || page.content.en : null;
+  const [policyOverride, setPolicyOverride] = useState(null);
+
+  useEffect(() => {
+    setPolicyOverride(null);
+    if (!EDITABLE_POLICY_SLUGS.has(slug)) return undefined;
+    let active = true;
+    fetchPublicPolicyContent(slug, lang)
+      .then((content) => { if (active) setPolicyOverride(content); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [slug, lang]);
+
+  const c = policyOverride ? {
+    title: policyOverride.title,
+    intro: policyOverride.intro,
+    sections: policySections(policyOverride.body, lang),
+  } : baseContent;
 
   useEffect(() => {
     if (!page || !c) return undefined;
     applySitePageSeo(page.slug, lang);
+    if (policyOverride) {
+      document.title = `${policyOverride.title} | VIP Transfer`;
+      document.querySelector('meta[name="description"]')?.setAttribute("content", policyOverride.intro);
+    }
     const pageUrl = absoluteUrl(lang === "tr" ? `/${page.slug}` : `/${lang}/${page.slug}`);
     injectBreadcrumbLd([
       { name: "Home", url: absoluteUrl(lang === "tr" ? "/" : `/${lang}/`) },
@@ -24,7 +83,7 @@ export default function SitePage({ slug, navigate }) {
       { name: c.title, url: pageUrl },
     ]);
     return () => removeJsonLd("ld-breadcrumb");
-  }, [page, c, lang, t]);
+  }, [page, c, lang, t, policyOverride]);
 
   if (!page || !c) {
     return (

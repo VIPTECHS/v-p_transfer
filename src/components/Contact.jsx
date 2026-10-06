@@ -74,10 +74,9 @@ export default function Contact() {
         </div>
 
         <div className="office-grid">
-          {offices.map(({ key, hasCompany }, index) => (
+          {offices.map(({ key, hasCompany }) => (
             <article className="office-card" key={key}>
               <div className="office-card-head">
-                <span className="office-number">{String(index + 1).padStart(2, "0")}</span>
                 <span className="office-badge">{t("contact.availability")}</span>
               </div>
               <h3>{t(`contact.offices.${key}.name`)}</h3>

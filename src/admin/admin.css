@@ -2975,8 +2975,37 @@
 .rte__area blockquote { border-left: 3px solid #c9a227; margin: 0 0 10px; padding-left: 14px; color: #555; }
 .rte__area a { color: #c9a227; }
 
+.policy-content-editor__intro {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  margin-bottom: 16px; color: #6b7280; font-size: 13px; line-height: 1.55;
+}
+.policy-content-editor__intro p { margin: 0; }
+.policy-content-editor__intro a { display: inline-flex; align-items: center; gap: 6px; color: #9a7415; text-decoration: none; white-space: nowrap; }
+.policy-content-form { display: grid; gap: 18px; padding: 22px; }
+.policy-content-editor__selectors { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.policy-content-editor__field, .policy-content-editor__selectors label { display: grid; gap: 7px; min-width: 0; }
+.policy-content-editor__field > span, .policy-content-editor__selectors label > span { color: #4b5563; font-size: 12px; font-weight: 600; }
+.policy-content-editor__field input, .policy-content-editor__field textarea,
+.policy-content-editor__selectors select {
+  width: 100%; min-width: 0; border: 1px solid #d1d5db; border-radius: 8px; padding: 10px 12px;
+  background: #fff; color: #1f2937; font: inherit; font-size: 13px; line-height: 1.55;
+}
+.policy-content-editor__field textarea { resize: vertical; }
+.policy-content-editor__field input:focus, .policy-content-editor__field textarea:focus,
+.policy-content-editor__selectors select:focus { outline: none; border-color: var(--admin-gold); box-shadow: 0 0 0 3px rgba(201,162,39,.12); }
+.policy-content-editor__field small { color: #6b7280; font-size: 11px; }
+.policy-content-editor__actions { display: flex; justify-content: flex-end; }
+.policy-content-editor__actions .admin-btn { min-height: 40px; }
+.admin-success { padding: 10px 13px; border: 1px solid #bbebca; border-radius: 8px; background: #effaf2; color: #18733a; font-size: 13px; }
+
 @media (max-width: 820px) {
   .page-editor__grid { grid-template-columns: 1fr; }
   .pages-row { grid-template-columns: 1fr auto; }
   .pages-row__langs { display: none; }
+}
+
+@media (max-width: 640px) {
+  .policy-content-editor__intro { align-items: flex-start; flex-direction: column; }
+  .policy-content-editor__selectors { grid-template-columns: 1fr; }
+  .policy-content-form { padding: 16px; }
 }
