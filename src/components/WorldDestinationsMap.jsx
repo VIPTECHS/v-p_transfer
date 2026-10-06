@@ -65,6 +65,9 @@ function FeaturedCityPin({ city, lit, t, onEnter, onLeave }) {
       <div
         className="global-city-card"
         style={{
+          "--card-dx": `${city.cardDx}px`,
+          "--card-dy": `${city.cardDy}px`,
+          "--card-dy-mobile": `${Math.round(city.cardDy * 0.35)}px`,
           transform: `translate(calc(-50% + ${city.cardDx}px), calc(-50% + ${city.cardDy}px))`,
         }}
       >
