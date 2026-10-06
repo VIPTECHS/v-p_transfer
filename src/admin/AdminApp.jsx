@@ -23,6 +23,8 @@ import SettingsView from "./SettingsView";
 import PagesList from "./PagesList";
 import AdminLogin from "./AdminLogin";
 import AiChat from "./AiChat";
+import PartnerApplicationsList from "./PartnerApplicationsList";
+import TransporterApplicationsList from "./TransporterApplicationsList";
 import { clearAdminPassword, hasAdminPassword, getSessionRole } from "../api/admin";
 import { LANG_PREFIX_RE } from "../i18n/locale";
 import "./admin.css";
@@ -42,6 +44,8 @@ const VIEWS = {
   pages: PagesList,
   settings: SettingsView,
   ai: AiChat,
+  "partner-applications": PartnerApplicationsList,
+  "transporter-applications": TransporterApplicationsList,
 };
 
 const NAV_GROUPS = [
@@ -66,6 +70,8 @@ const NAV_GROUPS = [
       { id: "customers", label: "Müşteriler", icon: Users },
       { id: "suppliers", label: "Tedarikçiler", icon: Building2 },
       { id: "agencies", label: "Acenteler", icon: Briefcase },
+      { id: "partner-applications", label: "Partner Başvuruları", icon: ClipboardList },
+      { id: "transporter-applications", label: "Taşımacı Başvuruları", icon: Car },
       { id: "payments", label: "Ödemeler", icon: CreditCard },
     ],
   },
@@ -99,6 +105,8 @@ const PAGE_META = {
   payments: { title: "Ödemeler", subtitle: "Cari hesap ve tahsilat takibi" },
   reports: { title: "Raporlar", subtitle: "Gelir ve performans analizi" },
   pages: { title: "Sayfalar", subtitle: "Kendi SEO sayfalarınızı oluşturun ve yönetin" },
+  "partner-applications": { title: "Partner Başvuruları", subtitle: "Acente partner başvurularını inceleyin ve durumlarını yönetin" },
+  "transporter-applications": { title: "Taşımacı Başvuruları", subtitle: "Taşımacı partner başvurularını inceleyin ve durumlarını yönetin" },
   ai: { title: "AI Asistan", subtitle: "Panelin her şeyini yazarak yönetin" },
   settings: { title: "Ayarlar", subtitle: "Lokasyon ve sistem yapılandırması" },
 };

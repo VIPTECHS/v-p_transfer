@@ -7,6 +7,8 @@ import express from "express";
 import helmet from "helmet";
 import bookingsRouter from "./routes/bookings.js";
 import enquiriesRouter from "./routes/enquiries.js";
+import partnerApplicationsRouter from "./routes/partner-applications.js";
+import transporterApplicationsRouter from "./routes/transporter-applications.js";
 import statsRouter from "./routes/stats.js";
 import driversRouter from "./routes/drivers.js";
 import vehiclesRouter from "./routes/vehicles.js";
@@ -219,6 +221,8 @@ function mountRoutes(basePath, router, ...middleware) {
 mountRoutes("/auth", authRouter);
 mountRoutes("/bookings", bookingsRouter);
 mountRoutes("/enquiries", enquiriesRouter);
+mountRoutes("/partner-applications", partnerApplicationsRouter);
+mountRoutes("/transporter-applications", transporterApplicationsRouter);
 mountRoutes("/stats", statsRouter, requireAdmin);
 mountRoutes("/drivers", driversRouter);
 mountRoutes("/vehicles", vehiclesRouter);

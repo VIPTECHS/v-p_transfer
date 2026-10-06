@@ -83,6 +83,55 @@ model Enquiry {
   @@index([createdAt])
 }
 
+model PartnerApplication {
+  id                  String   @id @default(cuid())
+  companyName         String
+  website             String?
+  countryCity         String
+  contactName         String
+  email               String
+  phone               String
+  companyType         String
+  companyTypeOther    String?
+  monthlyVolume       String
+  destinations        String
+  workPreference      String
+  workPreferenceOther String?
+  notes               String?
+  privacyAccepted     Boolean  @default(false)
+  privacyAcceptedAt   DateTime @default(now())
+  status              String   @default("new")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model TransporterApplication {
+  id                   String   @id @default(cuid())
+  companyName          String
+  onlinePresence       String?
+  countryCity          String
+  contactName          String
+  email                String
+  phone                String
+  serviceRegions       String
+  vehicleTypes         String
+  vehicleCount         String
+  offers24h            Boolean
+  offersFixedB2bPrice  Boolean
+  notes                String?
+  privacyAccepted      Boolean  @default(false)
+  privacyAcceptedAt    DateTime @default(now())
+  status               String   @default("new")
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
 model Driver {
   id         String   @id @default(cuid())
   name       String

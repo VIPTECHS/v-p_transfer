@@ -54,6 +54,41 @@ export const enquiryCreateSchema = z.object({
   website: z.string().max(0).optional(), // honeypot
 });
 
+export const partnerApplicationCreateSchema = z.object({
+  companyName: z.string().trim().min(2).max(200),
+  website: z.string().trim().max(240).optional().nullable(),
+  countryCity: z.string().trim().min(2).max(200),
+  contactName: z.string().trim().min(2).max(160),
+  email: emailSchema,
+  phone: phoneSchema,
+  companyType: z.enum(["travel_agency", "tour_operator", "dmc", "ota", "corporate_travel", "other"]),
+  companyTypeOther: z.string().trim().max(160).optional().nullable(),
+  monthlyVolume: z.enum(["1-10", "11-50", "51-100", "101-500", "500+"]),
+  destinations: z.string().trim().min(2).max(2000),
+  workPreference: z.enum(["b2b_portal", "api", "white_label", "other"]),
+  workPreferenceOther: z.string().trim().max(160).optional().nullable(),
+  notes: z.string().trim().max(3000).optional().nullable(),
+  privacyAccepted: z.literal(true),
+  fax: z.string().max(0).optional(), // honeypot — must stay empty
+});
+
+export const transporterApplicationCreateSchema = z.object({
+  companyName: z.string().trim().min(2).max(200),
+  onlinePresence: z.string().trim().max(500).optional().nullable(),
+  countryCity: z.string().trim().min(2).max(200),
+  contactName: z.string().trim().min(2).max(160),
+  email: emailSchema,
+  phone: phoneSchema,
+  serviceRegions: z.string().trim().min(2).max(3000),
+  vehicleTypes: z.array(z.enum(["sedan", "business_sedan", "suv", "minivan_mpv", "vip_van", "minibus", "coach"])).min(1).max(7),
+  vehicleCount: z.enum(["1-5", "6-10", "11-25", "26-50", "50+"]),
+  offers24h: z.boolean(),
+  offersFixedB2bPrice: z.boolean(),
+  notes: z.string().trim().max(3000).optional().nullable(),
+  privacyAccepted: z.literal(true),
+  fax: z.string().max(0).optional(), // honeypot — must stay empty
+});
+
 export const transferSchema = z.object({
   flightCode: z.string().max(20).optional().nullable(),
   fromLabel: z.string().max(500).default(""),

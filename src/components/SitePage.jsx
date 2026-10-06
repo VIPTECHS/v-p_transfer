@@ -40,6 +40,7 @@ export default function SitePage({ slug, navigate }) {
   }
 
   const columnLabel = t(`footer.columns.${page.column}.title`);
+  const isPartnerPage = page.slug === "travel-partners";
 
   return (
     <article className="blogpost sitepage">
@@ -67,10 +68,25 @@ export default function SitePage({ slug, navigate }) {
         ))}
 
         <div className="blogpost-cta">
-          <p>{t("blog.ctaText")}</p>
-          <a className="btn btn-gold" href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-            {t("blog.ctaButton")}
-          </a>
+          {isPartnerPage ? (
+            <>
+              <p>{c.sections.at(-1)?.paragraphs?.[0]}</p>
+              <a
+                className="btn btn-gold"
+                href="/partner-application"
+                onClick={(event) => { event.preventDefault(); navigate("/partner-application"); }}
+              >
+                {t("footer.partner.cta")}
+              </a>
+            </>
+          ) : (
+            <>
+              <p>{t("blog.ctaText")}</p>
+              <a className="btn btn-gold" href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
+                {t("blog.ctaButton")}
+              </a>
+            </>
+          )}
         </div>
       </div>
     </article>

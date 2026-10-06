@@ -18,6 +18,8 @@ import Testimonials from "./components/Testimonials";
 import MediaPage from "./components/MediaPage";
 import FAQPage from "./components/FAQPage";
 import ExperiencePage from "./components/ExperiencePage";
+import PartnerApplicationPage from "./components/PartnerApplicationPage";
+import TransporterApplicationPage from "./components/TransporterApplicationPage";
 import { getLandingPage } from "./data/landingPages";
 import { getSitePage } from "./data/sitePages";
 import { LANG_PREFIX_RE } from "./i18n/locale";
@@ -47,6 +49,9 @@ function parseRoute(pathname) {
   if (clean === "/medyada-biz") return { type: "media" };
 
   if (clean === "/yardim") return { type: "faq" };
+
+  if (clean === "/partner-application") return { type: "partner-application" };
+  if (clean === "/transporter-application") return { type: "transporter-application" };
 
   const landing = getLandingPage(slug);
   if (landing) return { type: "landing", page: landing };
@@ -154,6 +159,14 @@ export default function App() {
         <WhatsAppCTA />
       </div>
     );
+  }
+
+  if (route.type === "partner-application") {
+    return <PartnerApplicationPage navigate={navigate} onBook={startBooking} />;
+  }
+
+  if (route.type === "transporter-application") {
+    return <TransporterApplicationPage navigate={navigate} onBook={startBooking} />;
   }
 
   if (route.type === "experience") {

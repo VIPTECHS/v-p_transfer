@@ -500,6 +500,23 @@
   overflow-x: auto;
 }
 
+.partner-application-admin-details {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px 22px;
+  padding: 18px 20px;
+  background: var(--admin-surface-muted);
+}
+.partner-application-admin-details > div { display: grid; align-content: start; gap: 5px; min-width: 0; }
+.partner-application-admin-details span { color: var(--admin-text-muted); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+.partner-application-admin-details strong,
+.partner-application-admin-details a { color: var(--admin-text); font-size: 13px; font-weight: 500; overflow-wrap: anywhere; }
+.partner-application-admin-details a { color: #805f00; }
+.partner-application-admin-details__wide { grid-column: 1 / -1; }
+@media (max-width: 760px) {
+  .partner-application-admin-details { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 .admin-ref {
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.02em;

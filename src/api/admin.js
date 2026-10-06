@@ -272,6 +272,34 @@ export function updateEnquiry(id, data) {
   });
 }
 
+export function fetchPartnerApplications(params = {}) {
+  const query = new URLSearchParams();
+  if (params.status) query.set("status", params.status);
+  const qs = query.toString();
+  return request(`/partner-applications${qs ? `?${qs}` : ""}`);
+}
+
+export function updatePartnerApplication(id, data) {
+  return request(`/partner-applications/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
+export function fetchTransporterApplications(params = {}) {
+  const query = new URLSearchParams();
+  if (params.status) query.set("status", params.status);
+  const qs = query.toString();
+  return request(`/transporter-applications${qs ? `?${qs}` : ""}`);
+}
+
+export function updateTransporterApplication(id, data) {
+  return request(`/transporter-applications/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
 export function fetchOperations(date) {
   const query = date ? `?date=${date}` : "";
   return request(`/operations${query}`);
