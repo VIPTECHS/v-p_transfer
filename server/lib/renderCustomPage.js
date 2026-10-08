@@ -30,12 +30,12 @@ export function renderCustomPageHtml(shellHtml, page, lang) {
   const title = t.title ? `${t.title} | VIP Transfer` : "VIP Transfer";
   const description = (t.metaDescription || "").slice(0, 300);
 
-  // hreflang: one per language that has content, plus x-default → tr (or first).
+  // hreflang: one per language that has content, plus x-default → en (or first).
   const hreflangLangs = Object.keys(slugs);
   const alternates = hreflangLangs.map(
     (l) => `<link rel="alternate" hreflang="${l}" href="${absolute(langPath(l, slugs[l]))}"/>`,
   );
-  const xDefaultLang = hreflangLangs.includes("tr") ? "tr" : hreflangLangs[0];
+  const xDefaultLang = hreflangLangs.includes("en") ? "en" : hreflangLangs[0];
   alternates.push(
     `<link rel="alternate" hreflang="x-default" href="${absolute(langPath(xDefaultLang, slugs[xDefaultLang]))}"/>`,
   );
