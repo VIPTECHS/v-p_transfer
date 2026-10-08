@@ -7,7 +7,7 @@ export const serviceItems = [
 
 export const fleetItems = [
   { key: "vClassStandard", image: "/images/fleet/v-class-vip-transfer.png", popular: true, taglineKey: "vClassStandard" },
-  { key: "vClassLux", image: "/images/fleet/v-class-lux.png", popular: false, taglineKey: "vClassLux" },
+  { key: "vClassLux", image: "/images/fleet/v-class-lux-vip-transfer.png", popular: false, taglineKey: "vClassLux" },
   { key: "vClassUltraLux", image: "/images/fleet/v-class-vip-transfer.png", popular: false, taglineKey: "vClassUltraLux" },
   { key: "sprinterStandard", image: "/images/fleet/sprinter-standard.png", popular: false, taglineKey: "sprinterStandard" },
   { key: "sprinterUltraLux", image: "/images/fleet/sprinter-ultra-lux.png", popular: false, taglineKey: "sprinterUltraLux" },
