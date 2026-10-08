@@ -13,7 +13,7 @@ export const fleetItems = [
   { key: "sprinterUltraLux", image: "/images/fleet/sprinter-ultra-lux.png", popular: false, taglineKey: "sprinterUltraLux" },
   { key: "eClass", image: "/images/fleet/e-class-vip-transfer.png", popular: false, taglineKey: "eClass" },
   { key: "sClass", image: "/images/fleet/s-class-vip-transfer.png", popular: false, taglineKey: "sClass" },
-  { key: "maybach", image: "/images/fleet/maybach.png", popular: false, taglineKey: "maybach" },
+  { key: "maybach", image: "/images/fleet/maybach-vip-transfer.png", popular: false, taglineKey: "maybach" },
 ];
 
 /** First-screen fleet preview under the map (5 vehicles). */
