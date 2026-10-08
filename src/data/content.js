@@ -11,7 +11,7 @@ export const fleetItems = [
   { key: "vClassUltraLux", image: "/images/fleet/v-class-vip-transfer.png", popular: false, taglineKey: "vClassUltraLux" },
   { key: "sprinterStandard", image: "/images/fleet/sprinter-standard.png", popular: false, taglineKey: "sprinterStandard" },
   { key: "sprinterUltraLux", image: "/images/fleet/sprinter-ultra-lux.png", popular: false, taglineKey: "sprinterUltraLux" },
-  { key: "eClass", image: "/images/fleet/e-class.png", popular: false, taglineKey: "eClass" },
+  { key: "eClass", image: "/images/fleet/e-class-vip-transfer.png", popular: false, taglineKey: "eClass" },
   { key: "sClass", image: "/images/fleet/s-class.png", popular: false, taglineKey: "sClass" },
   { key: "maybach", image: "/images/fleet/maybach.png", popular: false, taglineKey: "maybach" },
 ];
