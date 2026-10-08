@@ -12,6 +12,7 @@ const RESERVED_SLUGS = new Set([
   "admin", "api", "blog", "de", "en", "tr", "deneyim", "medyada-biz",
   "yardim", "uploads", "assets", "images", "frames", "videos",
   "sitemap.xml", "robots.txt", "llms.txt", "istanbul-airport-transfer",
+  "istanbul-airport-vip-transfer", "flughafen-istanbul-vip-transfer",
   "sabiha-gokcen-airport-transfer", "istanbul-vip-transfer",
   "istanbul-chauffeur-service", "istanbul-to-bursa-transfer",
   "istanbul-to-sapanca-transfer",

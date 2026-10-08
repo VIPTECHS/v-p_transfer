@@ -79,6 +79,76 @@ app.use((req, res, next) => {
   next();
 });
 
+const legacyLandingRedirects = new Map([
+  ["/istanbul-airport-transfer", "/istanbul-airport-vip-transfer"],
+  ["/en/istanbul-airport-transfer", "/en/istanbul-airport-vip-transfer"],
+  ["/de/istanbul-airport-transfer", "/de/flughafen-istanbul-vip-transfer"],
+]);
+
+const legacyWordPressPath = /^\/(?:wp-json|wp-admin|wp-content|wp-includes|xmlrpc\.php|wp-login\.php)(?:\/|$)/i;
+const legacyDateArchivePath = /^\/\d{4}\/(?:0?[1-9]|1[0-2])(?:\/(?:0?[1-9]|[12]\d|3[01]))?(?:\/|$)/;
+
+// Retired WordPress endpoints and date archives must remain genuine 404s,
+// even if a future static asset or SPA fallback happens to match the path.
+app.use((req, res, next) => {
+  if (req.method !== "GET" && req.method !== "HEAD") return next();
+  if (legacyWordPressPath.test(req.path) || legacyDateArchivePath.test(req.path)) {
+    return send404(res);
+  }
+  next();
+});
+
+const apiRoutePrefixes = [
+  "/auth", "/bookings", "/enquiries", "/partner-applications",
+  "/transporter-applications", "/policy-content", "/blog-posts", "/stats",
+  "/drivers", "/vehicles", "/operations", "/countries", "/cities",
+  "/districts", "/locations", "/agencies", "/agency", "/reservations",
+  "/customers", "/suppliers", "/payments", "/ledger", "/documents",
+  "/pages", "/reports", "/flights",
+];
+
+app.use((req, res, next) => {
+  const pathname = req.path.replace(/\/+$/, "") || "/";
+  const destination = legacyLandingRedirects.get(pathname);
+  if (!destination) return next();
+
+  const queryIndex = req.originalUrl.indexOf("?");
+  const query = queryIndex >= 0 ? req.originalUrl.slice(queryIndex) : "";
+  return res.redirect(301, `${destination}${query}`);
+});
+
+// Public page URLs use a slashless canonical form. Keep the localized home
+// pages (/en/ and /de/) as exceptions because their canonical URLs include a
+// trailing slash. Do not normalize API, panel, health, upload, or file paths.
+app.use((req, res, next) => {
+  if (req.method !== "GET" && req.method !== "HEAD") return next();
+  if (isAdminHost(req)) return next();
+
+  const pathname = req.path;
+  if (
+    pathname === "/" ||
+    pathname === "/en/" ||
+    pathname === "/de/" ||
+    pathname.startsWith("/api/") ||
+    pathname === "/api" ||
+    apiRoutePrefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)) ||
+    pathname.startsWith("/admin/") ||
+    pathname === "/admin" ||
+    pathname.startsWith("/uploads/") ||
+    pathname.startsWith("/health") ||
+    path.extname(pathname)
+  ) {
+    return next();
+  }
+
+  const normalizedPath = pathname.replace(/\/+$/, "") || "/";
+  if (normalizedPath === pathname) return next();
+
+  const queryIndex = req.originalUrl.indexOf("?");
+  const query = queryIndex >= 0 ? req.originalUrl.slice(queryIndex) : "";
+  return res.redirect(301, `${normalizedPath}${query}`);
+});
+
 // Operasyon paneli ve AI sohbet panelinin subdomain'leri. Birden fazla host
 // virgülle verilebilir. İkisi de aynı panel bundle'ını (admin.html) servis eder;
 // ai.* host'unda panel doğrudan sohbet ekranını açar.
@@ -294,8 +364,12 @@ if (serveFrontend && existsSync(distPath)) {
           const langs = Object.keys(slugs);
           if (!langs.length) return "";
           const href = (l) => `${SITE}${langPath(l, slugs[l])}`;
-          const alts = langs
-            .map((l) => `    <xhtml:link rel="alternate" hreflang="${l}" href="${href(l)}"/>`)
+          const xDefaultLang = langs.includes("en") ? "en" : langs[0];
+          const alts = [...langs, "x-default"]
+            .map((lang) => {
+              const targetLang = lang === "x-default" ? xDefaultLang : lang;
+              return `    <xhtml:link rel="alternate" hreflang="${lang}" href="${href(targetLang)}"/>`;
+            })
             .join("\n");
           return langs
             .map(
@@ -314,7 +388,7 @@ if (serveFrontend && existsSync(distPath)) {
           const href = (lang) => `${SITE}${lang === "tr" ? "" : `/${lang}`}/blog/${article.slug}`;
           const alts = [...langs, "x-default"]
             .map((lang) => {
-              const targetLang = lang === "x-default" ? (langs.includes("tr") ? "tr" : langs[0]) : lang;
+              const targetLang = lang === "x-default" ? (langs.includes("en") ? "en" : langs[0]) : lang;
               return `    <xhtml:link rel="alternate" hreflang="${lang}" href="${href(targetLang)}"/>`;
             })
             .join("\n");
