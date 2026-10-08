@@ -9,7 +9,7 @@ function VehicleCard({ item, onSearch }) {
   const { t } = useI18n();
   const { key, image, hoverImage, popular } = item;
 
-  const [flipped, setFlipped] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [pickupAt, setPickupAt] = useState(() => toPickupISO(defaultPickupDate()));
   const [fromPoint, setFromPoint] = useState(null);
   const [toPoint, setToPoint] = useState(null);
@@ -44,57 +44,59 @@ function VehicleCard({ item, onSearch }) {
 
   return (
     <article
-      className={`vehicle-card ${popular ? "vehicle-card--popular" : ""}${hoverImage ? " vehicle-card--has-flip" : ""}${flipped ? " vehicle-card--booking" : ""}`}
+      className={`vehicle-card ${popular ? "vehicle-card--popular" : ""}${hoverImage ? " vehicle-card--has-flip" : ""}${isExpanded ? " vehicle-card--booking" : ""}`}
     >
-      <div className={`vehicle-card-flip${flipped ? " is-flipped" : ""}`}>
+      <div className="vehicle-card-front">
         <div
-          className="vehicle-card-face vehicle-card-front"
+          className={`vehicle-visual${hoverImage ? " vehicle-visual--flip" : ""}`}
           role="button"
           tabIndex={0}
+          aria-expanded={isExpanded}
+          aria-controls={`${key}-booking-panel`}
           aria-label={`${name} — ${t("fleet.select")}`}
-          onClick={() => setFlipped(true)}
+          onClick={() => setIsExpanded(true)}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
-              setFlipped(true);
+              setIsExpanded(true);
             }
           }}
         >
-          <div className={`vehicle-visual${hoverImage ? " vehicle-visual--flip" : ""}`}>
-            {popular && <span className="vehicle-popular-badge">{t("booking.mostPopular")}</span>}
-            {hoverImage ? (
-              <div className="vehicle-flip-inner">
-                <div className="vehicle-flip-face vehicle-flip-front">
-                  <img src={image} alt={name} loading="lazy" />
-                </div>
-                <div className="vehicle-flip-face vehicle-flip-back">
-                  <img src={hoverImage} alt={`${name} interior`} loading="lazy" />
-                </div>
+          {popular && <span className="vehicle-popular-badge">{t("booking.mostPopular")}</span>}
+          {hoverImage ? (
+            <div className="vehicle-flip-inner">
+              <div className="vehicle-flip-face vehicle-flip-front">
+                <img src={image} alt={name} loading="lazy" />
               </div>
-            ) : (
-              <img src={image} alt={name} loading="lazy" />
-            )}
-          </div>
-          <div className="vehicle-info">
-            <h3>{name}</h3>
-            <div className="vehicle-specs">
-              <span><Icon name="users" size={16} />{t(`fleet.items.${key}.passengers`)}</span>
-              <span><Icon name="bag" size={16} />{t(`fleet.items.${key}.bags`)}</span>
+              <div className="vehicle-flip-face vehicle-flip-back">
+                <img src={hoverImage} alt={`${name} interior`} loading="lazy" />
+              </div>
             </div>
+          ) : (
+            <img src={image} alt={name} loading="lazy" />
+          )}
+        </div>
+        <div className="vehicle-info">
+          <h3>{name}</h3>
+          <div className="vehicle-specs">
+            <span><Icon name="users" size={16} />{t(`fleet.items.${key}.passengers`)}</span>
+            <span><Icon name="bag" size={16} />{t(`fleet.items.${key}.bags`)}</span>
           </div>
         </div>
+      </div>
 
-        <div className="vehicle-card-face vehicle-card-back">
+      {isExpanded && (
+        <div id={`${key}-booking-panel`} className="vehicle-card-booking-panel">
           <div className="vehicle-back-head">
+            <h3>{name}</h3>
             <button
               type="button"
-              className="vehicle-back-btn"
-              onClick={() => setFlipped(false)}
-              aria-label={t("calendar.prevMonth")}
+              className="vehicle-booking-close"
+              onClick={() => setIsExpanded(false)}
+              aria-label={t("close")}
             >
-              <Icon name="arrow" size={15} />
+              ×
             </button>
-            <h3>{name}</h3>
           </div>
 
           <form className="vehicle-book-form" onSubmit={handleBook}>
@@ -133,7 +135,7 @@ function VehicleCard({ item, onSearch }) {
             )}
           </form>
         </div>
-      </div>
+      )}
     </article>
   );
 }
