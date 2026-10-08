@@ -477,7 +477,7 @@ export default function ReservationDetail({ id, onBack }) {
           <div style={{ marginBottom: 8, display: "flex", gap: 8, flexWrap: "wrap" }}>
             <select
               value={form.source || "manual"}
-              onChange={(e) => setForm({ ...form, source: e.target.value, agencyId: e.target.value === "agency" ? form.agencyId : "" })}
+              onChange={(e) => setForm({ ...form, source: e.target.value })}
               style={{ background: "#f9fafb", color: "#1a1a2e", border: "1px solid #d1d5db", borderRadius: 6, padding: "4px 8px", fontSize: 12 }}
             >
               <option value="manual">Manuel</option>
@@ -485,16 +485,6 @@ export default function ReservationDetail({ id, onBack }) {
               <option value="agency">Acente</option>
               <option value="api">API</option>
             </select>
-            {form.source === "agency" && (
-              <select
-                value={form.agencyId || ""}
-                onChange={(e) => setForm({ ...form, agencyId: e.target.value })}
-                style={{ background: "#f9fafb", border: "1px solid #d1d5db", borderRadius: 6, padding: "4px 8px", fontSize: 12 }}
-              >
-                <option value="">Acente seç</option>
-                {agencies.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
-              </select>
-            )}
             {form.source === "api" && (
               <input
                 placeholder="API kaynak adı"
@@ -836,6 +826,15 @@ export default function ReservationDetail({ id, onBack }) {
               value={form.customerId}
               onChange={(v) => setForm({ ...form, customerId: v })}
               placeholder="Müşteri seçin"
+            />
+          </div>
+          <div className="detail-field">
+            <label>Acente</label>
+            <SearchableSelect
+              options={agencies.map((a) => ({ id: a.id, name: a.name }))}
+              value={form.agencyId}
+              onChange={(v) => setForm({ ...form, agencyId: v })}
+              placeholder="Acente seçin"
             />
           </div>
           <div className="detail-field">
