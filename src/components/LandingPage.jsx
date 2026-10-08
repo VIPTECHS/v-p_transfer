@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useI18n } from "../i18n/I18nContext";
+import { getLandingPagePath } from "../data/landingPages";
 import {
   absoluteUrl,
   applyLandingSeo,
@@ -15,10 +16,12 @@ export default function LandingPage({ page, onSearch }) {
   const { lang, t } = useI18n();
   const title = page.heroTitle[lang] || page.heroTitle.en;
   const subtitle = page.heroSubtitle[lang] || page.heroSubtitle.en;
+  const duration = typeof page.duration === "string" ? page.duration : page.duration?.[lang] || page.duration?.en;
+  const highlights = Array.isArray(page.highlights) ? page.highlights : page.highlights?.[lang] || page.highlights?.en || [];
 
   useEffect(() => {
     applyLandingSeo(page.slug, lang);
-    const pageUrl = absoluteUrl(lang === "tr" ? `/${page.slug}` : `/${lang}/${page.slug}`);
+    const pageUrl = absoluteUrl(getLandingPagePath(page, lang));
     injectServiceLd({ name: title, description: subtitle, url: pageUrl });
     injectBreadcrumbLd([
       { name: "Home", url: absoluteUrl(lang === "tr" ? "/" : `/${lang}/`) },
@@ -28,7 +31,7 @@ export default function LandingPage({ page, onSearch }) {
       removeJsonLd("ld-service");
       removeJsonLd("ld-breadcrumb");
     };
-  }, [page.slug, lang, title, subtitle]);
+  }, [page, lang, title, subtitle]);
 
   return (
     <main className="landing-page">
@@ -37,11 +40,11 @@ export default function LandingPage({ page, onSearch }) {
           <p className="landing-eyebrow">VIP TRANSFER</p>
           <h1>{title}</h1>
           <p className="landing-subtitle">{subtitle}</p>
-          {page.duration && (
-            <p className="landing-duration">⏱ {page.duration}</p>
+          {duration && (
+            <p className="landing-duration">⏱ {duration}</p>
           )}
           <ul className="landing-highlights">
-            {page.highlights.map((item) => (
+            {highlights.map((item) => (
               <li key={item}>{item}</li>
             ))}
           </ul>
