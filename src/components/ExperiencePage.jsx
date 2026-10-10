@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { useI18n } from "../i18n/I18nContext";
+import { absoluteUrl, applyPageSeo, buildAlternates } from "../i18n/seo";
 
 const FRAME_COUNT = 181;
 // Sampled from the source frames (center-top ≈ #030b0d). The page background is
@@ -8,6 +10,7 @@ const frameSrc = (index) => `/frames/ezgif-frame-${String(index + 1).padStart(3,
 const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 
 export default function ExperiencePage({ onBook }) {
+  const { lang } = useI18n();
   const sectionRef = useRef(null);
   const stageRef = useRef(null);
   const canvasRef = useRef(null);
@@ -23,18 +26,20 @@ export default function ExperiencePage({ onBook }) {
   const [entered, setEntered] = useState(false);
 
   useEffect(() => {
-    document.title = "The Experience | VIP Transfer — Cinematic Chauffeur Journey";
-    const description = document.querySelector('meta[name="description"]');
-    if (description) {
-      description.setAttribute(
-        "content",
-        "A cinematic, scroll-linked VIP Transfer experience — from exterior presence to the private cabin, rendered frame-by-frame on canvas for buttery 60fps.",
-      );
-    }
+    const title = "The Experience | VIP Transfer — Cinematic Chauffeur Journey";
+    const description =
+      "A cinematic, scroll-linked VIP Transfer experience — from exterior presence to the private cabin, rendered frame-by-frame on canvas for buttery 60fps.";
+    const pathFor = (locale) => (locale === "tr" ? "/deneyim" : `/${locale}/deneyim`);
+    applyPageSeo({
+      title,
+      description,
+      canonical: absoluteUrl(pathFor(lang)),
+      alternates: buildAlternates(pathFor),
+    });
     // Trigger the hero entrance on the next frame so transitions run.
     const raf = requestAnimationFrame(() => setEntered(true));
     return () => cancelAnimationFrame(raf);
-  }, []);
+  }, [lang]);
 
   useEffect(() => {
     const section = sectionRef.current;

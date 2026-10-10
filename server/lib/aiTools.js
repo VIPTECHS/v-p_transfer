@@ -5,7 +5,7 @@ import { signAdminToken } from "../middleware/auth.js";
 const ALLOWED_PREFIXES = [
   "reservations", "customers", "suppliers", "agencies", "drivers", "vehicles",
   "operations", "payments", "ledger", "documents", "reports", "stats", "flights",
-  "bookings", "enquiries", "countries", "cities", "districts", "locations", "pages",
+  "bookings", "enquiries", "countries", "cities", "districts", "locations", "pages", "blog-posts",
 ];
 const BLOCKED_PATTERNS = [/reset-password/i];
 const MAX_RESULT_CHARS = 14_000;
@@ -64,7 +64,7 @@ export const TOOL_DEFINITIONS = [
     function: {
       name: "api_get",
       description:
-        "Panel verisini OKUR (rezervasyon, müşteri, tedarikçi, acente, sürücü, araç, operasyon, ödeme, cari, rapor...). Sadece GET. Onay gerektirmez. Liste uçlarında arama/filtre query parametrelerini kullan.",
+        "Panel verisini OKUR (rezervasyon, müşteri, tedarikçi, acente, sürücü, araç, operasyon, ödeme, cari, rapor, SEO ve blog yazıları...). Sadece GET. Onay gerektirmez. Liste uçlarında arama/filtre query parametrelerini kullan.",
       parameters: {
         type: "object",
         properties: {
@@ -79,7 +79,7 @@ export const TOOL_DEFINITIONS = [
     function: {
       name: "propose_change",
       description:
-        "Veriyi DEĞİŞTİRECEK bir işlem için onay kartı hazırlar (ekleme POST, düzenleme PATCH, silme DELETE). İşlem KENDİLİĞİNDEN ÇALIŞMAZ; kullanıcı kartı onaylayınca çalışır. Her değişiklik için ayrı çağır.",
+        "Veriyi DEĞİŞTİRECEK bir işlem için onay kartı hazırlar (ekleme POST, düzenleme PATCH, silme DELETE). Blog yazısı eklerken /blog-posts POST gövdesinde slug ve translations.tr (title, excerpt, lead, sections[{heading, paragraphs}], isteğe bağlı conclusion) kullan; coverImage ve translations.en/de isteğe bağlıdır. İşlem KENDİLİĞİNDEN ÇALIŞMAZ; kullanıcı kartı onaylayınca çalışır. Her değişiklik için ayrı çağır.",
       parameters: {
         type: "object",
         properties: {

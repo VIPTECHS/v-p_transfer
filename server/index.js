@@ -7,6 +7,10 @@ import express from "express";
 import helmet from "helmet";
 import bookingsRouter from "./routes/bookings.js";
 import enquiriesRouter from "./routes/enquiries.js";
+import partnerApplicationsRouter from "./routes/partner-applications.js";
+import transporterApplicationsRouter from "./routes/transporter-applications.js";
+import policyContentRouter from "./routes/policy-content.js";
+import blogPostsRouter from "./routes/blog-posts.js";
 import statsRouter from "./routes/stats.js";
 import driversRouter from "./routes/drivers.js";
 import vehiclesRouter from "./routes/vehicles.js";
@@ -30,6 +34,7 @@ import pagesRouter from "./routes/pages.js";
 import aiRouter from "./routes/ai.js";
 import prisma from "./lib/prisma.js";
 import { renderCustomPageHtml } from "./lib/renderCustomPage.js";
+import { populatedSlugs, langPath, resolveByLangSlug } from "./lib/pageSlugs.js";
 import { rematchBookingsWithoutCity } from "./lib/cityMatcher.js";
 import { ensureMigrations } from "./lib/ensureMigrations.js";
 import { rateLimit } from "./middleware/rateLimit.js";
@@ -57,6 +62,92 @@ try {
 
 const app = express();
 app.set("trust proxy", 1);
+
+// API yanıtları ve panel host'u arama motorlarına kapalı.
+app.use((req, res, next) => {
+  if (req.path.startsWith("/api") || isAdminHost(req)) {
+    res.set("X-Robots-Tag", "noindex, nofollow");
+  }
+  next();
+});
+
+// Tek kanonik adres: www.viptransfer.com -> https://viptransfer.com (path/query korunur).
+app.use((req, res, next) => {
+  if ((req.hostname || "").toLowerCase() === "www.viptransfer.com") {
+    return res.redirect(301, `https://viptransfer.com${req.originalUrl}`);
+  }
+  next();
+});
+
+const legacyLandingRedirects = new Map([
+  ["/istanbul-airport-transfer", "/istanbul-airport-vip-transfer"],
+  ["/en/istanbul-airport-transfer", "/en/istanbul-airport-vip-transfer"],
+  ["/de/istanbul-airport-transfer", "/de/flughafen-istanbul-vip-transfer"],
+]);
+
+const legacyWordPressPath = /^\/(?:wp-json|wp-admin|wp-content|wp-includes|xmlrpc\.php|wp-login\.php)(?:\/|$)/i;
+const legacyDateArchivePath = /^\/\d{4}\/(?:0?[1-9]|1[0-2])(?:\/(?:0?[1-9]|[12]\d|3[01]))?(?:\/|$)/;
+
+// Retired WordPress endpoints and date archives must remain genuine 404s,
+// even if a future static asset or SPA fallback happens to match the path.
+app.use((req, res, next) => {
+  if (req.method !== "GET" && req.method !== "HEAD") return next();
+  if (legacyWordPressPath.test(req.path) || legacyDateArchivePath.test(req.path)) {
+    return send404(res);
+  }
+  next();
+});
+
+const apiRoutePrefixes = [
+  "/auth", "/bookings", "/enquiries", "/partner-applications",
+  "/transporter-applications", "/policy-content", "/blog-posts", "/stats",
+  "/drivers", "/vehicles", "/operations", "/countries", "/cities",
+  "/districts", "/locations", "/agencies", "/agency", "/reservations",
+  "/customers", "/suppliers", "/payments", "/ledger", "/documents",
+  "/pages", "/reports", "/flights",
+];
+
+app.use((req, res, next) => {
+  const pathname = req.path.replace(/\/+$/, "") || "/";
+  const destination = legacyLandingRedirects.get(pathname);
+  if (!destination) return next();
+
+  const queryIndex = req.originalUrl.indexOf("?");
+  const query = queryIndex >= 0 ? req.originalUrl.slice(queryIndex) : "";
+  return res.redirect(301, `${destination}${query}`);
+});
+
+// Public page URLs use a slashless canonical form. Keep the localized home
+// pages (/en/ and /de/) as exceptions because their canonical URLs include a
+// trailing slash. Do not normalize API, panel, health, upload, or file paths.
+app.use((req, res, next) => {
+  if (req.method !== "GET" && req.method !== "HEAD") return next();
+  if (isAdminHost(req)) return next();
+
+  const pathname = req.path;
+  if (
+    pathname === "/" ||
+    pathname === "/en/" ||
+    pathname === "/de/" ||
+    pathname.startsWith("/api/") ||
+    pathname === "/api" ||
+    apiRoutePrefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)) ||
+    pathname.startsWith("/admin/") ||
+    pathname === "/admin" ||
+    pathname.startsWith("/uploads/") ||
+    pathname.startsWith("/health") ||
+    path.extname(pathname)
+  ) {
+    return next();
+  }
+
+  const normalizedPath = pathname.replace(/\/+$/, "") || "/";
+  if (normalizedPath === pathname) return next();
+
+  const queryIndex = req.originalUrl.indexOf("?");
+  const query = queryIndex >= 0 ? req.originalUrl.slice(queryIndex) : "";
+  return res.redirect(301, `${normalizedPath}${query}`);
+});
 
 // Operasyon paneli ve AI sohbet panelinin subdomain'leri. Birden fazla host
 // virgülle verilebilir. İkisi de aynı panel bundle'ını (admin.html) servis eder;
@@ -168,8 +259,9 @@ app.use((req, res, next) =>
 );
 app.use(rateLimit);
 
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-app.use("/api/uploads", express.static(path.join(__dirname, "uploads")));
+// Yüklenen belgeler (ruhsat, vergi levhası vb.) yalnızca yönetici oturumuyla açılır.
+app.use("/uploads", requireAdmin, express.static(path.join(__dirname, "uploads")));
+app.use("/api/uploads", requireAdmin, express.static(path.join(__dirname, "uploads")));
 
 app.get("/health", (_req, res) => {
   res.json({ ok: true, env: process.env.NODE_ENV || "development" });
@@ -201,6 +293,10 @@ function mountRoutes(basePath, router, ...middleware) {
 mountRoutes("/auth", authRouter);
 mountRoutes("/bookings", bookingsRouter);
 mountRoutes("/enquiries", enquiriesRouter);
+mountRoutes("/partner-applications", partnerApplicationsRouter);
+mountRoutes("/transporter-applications", transporterApplicationsRouter);
+mountRoutes("/policy-content", policyContentRouter);
+mountRoutes("/blog-posts", blogPostsRouter);
 mountRoutes("/stats", statsRouter, requireAdmin);
 mountRoutes("/drivers", driversRouter);
 mountRoutes("/vehicles", vehiclesRouter);
@@ -256,22 +352,24 @@ if (serveFrontend && existsSync(distPath)) {
   app.get("/sitemap.xml", async (_req, res) => {
     try {
       const base = readFileSync(path.join(distPath, "sitemap.xml"), "utf-8");
-      const pages = await prisma.customPage.findMany({ where: { status: "published" } });
+      const [pages, blogArticles] = await Promise.all([
+        prisma.customPage.findMany({ where: { status: "published" } }),
+        prisma.blogArticle.findMany({ where: { status: "published" } }),
+      ]);
       const SITE = "https://viptransfer.com";
       const lastmod = new Date().toISOString().split("T")[0];
-      const extra = pages
+      const pageUrls = pages
         .map((page) => {
-          let tr = {};
-          try {
-            tr = JSON.parse(page.translations || "{}");
-          } catch {
-            tr = {};
-          }
-          const langs = ["tr", "en", "de"].filter((l) => tr[l] && (tr[l].title || tr[l].bodyHtml));
+          const slugs = populatedSlugs(page);
+          const langs = Object.keys(slugs);
           if (!langs.length) return "";
-          const href = (l) => (l === "tr" ? `${SITE}/${page.slug}` : `${SITE}/${l}/${page.slug}`);
-          const alts = langs
-            .map((l) => `    <xhtml:link rel="alternate" hreflang="${l}" href="${href(l)}"/>`)
+          const href = (l) => `${SITE}${langPath(l, slugs[l])}`;
+          const xDefaultLang = langs.includes("en") ? "en" : langs[0];
+          const alts = [...langs, "x-default"]
+            .map((lang) => {
+              const targetLang = lang === "x-default" ? xDefaultLang : lang;
+              return `    <xhtml:link rel="alternate" hreflang="${lang}" href="${href(targetLang)}"/>`;
+            })
             .join("\n");
           return langs
             .map(
@@ -281,7 +379,31 @@ if (serveFrontend && existsSync(distPath)) {
         })
         .filter(Boolean)
         .join("\n");
-      const merged = extra ? base.replace(/<\/urlset>\s*$/, `${extra}\n</urlset>`) : base;
+      const blogUrls = blogArticles
+        .map((article) => {
+          let translations = {};
+          try { translations = JSON.parse(article.translations || "{}"); } catch {}
+          const langs = ["tr", "en", "de"].filter((lang) => translations[lang]?.title);
+          if (!langs.length) return "";
+          const href = (lang) => `${SITE}${lang === "tr" ? "" : `/${lang}`}/blog/${article.slug}`;
+          const alts = [...langs, "x-default"]
+            .map((lang) => {
+              const targetLang = lang === "x-default" ? (langs.includes("en") ? "en" : langs[0]) : lang;
+              return `    <xhtml:link rel="alternate" hreflang="${lang}" href="${href(targetLang)}"/>`;
+            })
+            .join("\n");
+          return langs
+            .map((lang) => `  <url>\n    <loc>${href(lang)}</loc>\n    <lastmod>${new Date(article.updatedAt).toISOString().split("T")[0]}</lastmod>\n${alts}\n  </url>`)
+            .join("\n");
+        })
+        .filter(Boolean)
+        .join("\n");
+      const extra = [pageUrls, blogUrls].filter(Boolean).join("\n");
+      const merged = extra
+        ? base
+            .replace(/<urlset(?![^>]*xmlns:xhtml)/, '<urlset xmlns:xhtml="http://www.w3.org/1999/xhtml"')
+            .replace(/<\/urlset>\s*$/, `${extra}\n</urlset>`)
+        : base;
       res.set("Content-Type", "application/xml; charset=utf-8");
       return res.send(merged);
     } catch (error) {
@@ -328,14 +450,11 @@ if (serveFrontend && existsSync(distPath)) {
     const candidate = parseCustomPagePath(urlPath);
     if (candidate) {
       try {
-        const page = await prisma.customPage.findUnique({ where: { slug: candidate.slug } });
-        if (page && page.status === "published") {
-          let translations = {};
-          try {
-            translations = JSON.parse(page.translations || "{}");
-          } catch {
-            translations = {};
-          }
+        const pages = await prisma.customPage.findMany({ where: { status: "published" } });
+        const match = resolveByLangSlug(pages, candidate.lang, candidate.slug);
+        if (match?.redirectTo) return res.redirect(301, match.redirectTo);
+        if (match) {
+          const { page, translations } = match;
           const shellPath = existsSync(path.join(distPath, "app-shell.html"))
             ? path.join(distPath, "app-shell.html")
             : path.join(distPath, "index.html");
@@ -344,14 +463,24 @@ if (serveFrontend && existsSync(distPath)) {
           res.set("Content-Type", "text/html; charset=utf-8");
           return res.send(html);
         }
+        // Slug exists but not in this language: no duplicate/foreign-language
+        // content for crawlers. The SPA shell still boots so the in-app
+        // language switcher keeps working.
+        if (pages.some((p) => p.slug === candidate.slug || Object.values(populatedSlugs(p)).includes(candidate.slug))) {
+          return res.status(404).sendFile(path.join(distPath, "index.html"));
+        }
       } catch (error) {
         console.error("custom page render", urlPath, error);
       }
     }
 
-    // Unknown path: still boot the SPA (deep links, client routes)
+    // Client-only routes + home keep returning 200; anything else is a real
+    // 404 (the SPA shell still boots so the user sees the in-app 404 view).
     if (!path.extname(urlPath)) {
-      return res.sendFile(path.join(distPath, "index.html"));
+      const knownClientRoute = /^\/(?:(?:en|de)\/)?(?:blog\/[a-z0-9-]+|(?:yardim|medyada-biz|deneyim))\/?$/i.test(urlPath)
+        || /^\/(?:(?:en|de)\/)?$/.test(urlPath);
+      const file = path.join(distPath, "index.html");
+      return knownClientRoute ? res.sendFile(file) : res.status(404).sendFile(file);
     }
 
     return next();

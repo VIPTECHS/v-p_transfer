@@ -844,7 +844,7 @@ export const translations = {
       patentLabel: "Marka tescil belgesi",
       patentClose: "Kapat",
       partner: {
-        title: "Partner Ağımıza Katılın",
+        title: "Taşımacı Partner Ağımıza Katılın",
         text: "Dünyanın her yerindeki transfer operasyonlarınızı büyütmek için bizimle çalışın.",
         cta: "Partner Ol",
         statsAria: "Partner ağı istatistikleri",

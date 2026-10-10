@@ -1,2 +1,50 @@
-# SPA fallback (Render Static Site) — existing files in dist are served first
-/*    /index.html   200
+# Legacy landing redirects and explicit client routes for static hosts.
+/istanbul-airport-transfer /istanbul-airport-vip-transfer 301
+/istanbul-airport-transfer/ /istanbul-airport-vip-transfer 301
+/en/istanbul-airport-transfer /en/istanbul-airport-vip-transfer 301
+/en/istanbul-airport-transfer/ /en/istanbul-airport-vip-transfer 301
+/de/istanbul-airport-transfer /de/flughafen-istanbul-vip-transfer 301
+/de/istanbul-airport-transfer/ /de/flughafen-istanbul-vip-transfer 301
+
+# These valid client-side pages are not all prerendered. Keep their direct
+# entry points working while leaving every other missing URL as a real 404.
+/yardim /index.html 200
+/yardim/ /index.html 200
+/medyada-biz /index.html 200
+/medyada-biz/ /index.html 200
+/deneyim /index.html 200
+/deneyim/ /index.html 200
+/partner-application /index.html 200
+/partner-application/ /index.html 200
+/transporter-application /index.html 200
+/transporter-application/ /index.html 200
+/tr/yardim /index.html 200
+/tr/yardim/ /index.html 200
+/tr/medyada-biz /index.html 200
+/tr/medyada-biz/ /index.html 200
+/tr/deneyim /index.html 200
+/tr/deneyim/ /index.html 200
+/tr/partner-application /index.html 200
+/tr/partner-application/ /index.html 200
+/tr/transporter-application /index.html 200
+/tr/transporter-application/ /index.html 200
+/en/yardim /index.html 200
+/en/yardim/ /index.html 200
+/en/medyada-biz /index.html 200
+/en/medyada-biz/ /index.html 200
+/en/deneyim /index.html 200
+/en/deneyim/ /index.html 200
+/en/partner-application /index.html 200
+/en/partner-application/ /index.html 200
+/en/transporter-application /index.html 200
+/en/transporter-application/ /index.html 200
+/de/yardim /index.html 200
+/de/yardim/ /index.html 200
+/de/medyada-biz /index.html 200
+/de/medyada-biz/ /index.html 200
+/de/deneyim /index.html 200
+/de/deneyim/ /index.html 200
+/de/partner-application /index.html 200
+/de/partner-application/ /index.html 200
+/de/transporter-application /index.html 200
+/de/transporter-application/ /index.html 200

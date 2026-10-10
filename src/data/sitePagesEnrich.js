@@ -301,7 +301,7 @@ export const enrichedSitePages = [
           {
             heading: "Become a partner",
             paragraphs: [
-              "Interested in working together? Reach out via WhatsApp and our partnerships team will set up a tailored collaboration for your business.",
+              "Interested in working together? Submit our short partner application and our partnerships team will get in touch to discuss a tailored collaboration.",
             ],
           },
         ],
@@ -342,7 +342,7 @@ export const enrichedSitePages = [
           {
             heading: "Ortak olun",
             paragraphs: [
-              "Birlikte çalışmak ister misiniz? WhatsApp üzerinden bize ulaşın; ortaklıklar ekibimiz işletmeniz için özel bir iş birliği kuracaktır.",
+              "Birlikte çalışmak ister misiniz? Kısa partner başvuru formumuzu doldurun; ortaklıklar ekibimiz size özel iş birliğini görüşmek için sizinle iletişime geçsin.",
             ],
           },
         ],
@@ -383,7 +383,7 @@ export const enrichedSitePages = [
           {
             heading: "Partner werden",
             paragraphs: [
-              "Interesse an einer Zusammenarbeit? Kontaktieren Sie uns per WhatsApp, und unser Partnerschaftsteam richtet eine maßgeschneiderte Kooperation für Ihr Unternehmen ein.",
+              "Möchten Sie mit uns zusammenarbeiten? Senden Sie die kurze Partnerbewerbung. Unser Team meldet sich, um eine passende Zusammenarbeit mit Ihnen zu besprechen.",
             ],
           },
         ],

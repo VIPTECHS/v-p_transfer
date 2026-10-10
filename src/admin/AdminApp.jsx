@@ -23,6 +23,10 @@ import SettingsView from "./SettingsView";
 import PagesList from "./PagesList";
 import AdminLogin from "./AdminLogin";
 import AiChat from "./AiChat";
+import PartnerApplicationsList from "./PartnerApplicationsList";
+import TransporterApplicationsList from "./TransporterApplicationsList";
+import PolicyContentEditor from "./PolicyContentEditor";
+import BlogArticlesList from "./BlogArticlesList";
 import { clearAdminPassword, hasAdminPassword, getSessionRole } from "../api/admin";
 import { LANG_PREFIX_RE } from "../i18n/locale";
 import "./admin.css";
@@ -40,8 +44,12 @@ const VIEWS = {
   payments: PaymentsView,
   reports: ReportsView,
   pages: PagesList,
+  "blog-articles": BlogArticlesList,
   settings: SettingsView,
   ai: AiChat,
+  "partner-applications": PartnerApplicationsList,
+  "transporter-applications": TransporterApplicationsList,
+  "policy-content": PolicyContentEditor,
 };
 
 const NAV_GROUPS = [
@@ -66,6 +74,8 @@ const NAV_GROUPS = [
       { id: "customers", label: "Müşteriler", icon: Users },
       { id: "suppliers", label: "Tedarikçiler", icon: Building2 },
       { id: "agencies", label: "Acenteler", icon: Briefcase },
+      { id: "partner-applications", label: "Partner Başvuruları", icon: ClipboardList },
+      { id: "transporter-applications", label: "Taşımacı Başvuruları", icon: Car },
       { id: "payments", label: "Ödemeler", icon: CreditCard },
     ],
   },
@@ -81,6 +91,8 @@ const NAV_GROUPS = [
     items: [
       { id: "reports", label: "Raporlar", icon: BarChart3 },
       { id: "pages", label: "Sayfalar", icon: FileText },
+      { id: "blog-articles", label: "Blog Yazıları", icon: FileText },
+      { id: "policy-content", label: "Yasal Metinler", icon: FileText },
       { id: "settings", label: "Ayarlar", icon: Settings },
     ],
   },
@@ -99,6 +111,10 @@ const PAGE_META = {
   payments: { title: "Ödemeler", subtitle: "Cari hesap ve tahsilat takibi" },
   reports: { title: "Raporlar", subtitle: "Gelir ve performans analizi" },
   pages: { title: "Sayfalar", subtitle: "Kendi SEO sayfalarınızı oluşturun ve yönetin" },
+  "blog-articles": { title: "Blog Yazıları", subtitle: "AI tarafından oluşturulan yazıları inceleyin ve yayınlayın" },
+  "partner-applications": { title: "Partner Başvuruları", subtitle: "Acente partner başvurularını inceleyin ve durumlarını yönetin" },
+  "transporter-applications": { title: "Taşımacı Başvuruları", subtitle: "Taşımacı partner başvurularını inceleyin ve durumlarını yönetin" },
+  "policy-content": { title: "Yasal Metinler", subtitle: "İptal koşulları ve site politikalarını diller bazında düzenleyin" },
   ai: { title: "AI Asistan", subtitle: "Panelin her şeyini yazarak yönetin" },
   settings: { title: "Ayarlar", subtitle: "Lokasyon ve sistem yapılandırması" },
 };

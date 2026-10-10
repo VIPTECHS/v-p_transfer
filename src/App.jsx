@@ -18,6 +18,8 @@ import Testimonials from "./components/Testimonials";
 import MediaPage from "./components/MediaPage";
 import FAQPage from "./components/FAQPage";
 import ExperiencePage from "./components/ExperiencePage";
+import PartnerApplicationPage from "./components/PartnerApplicationPage";
+import TransporterApplicationPage from "./components/TransporterApplicationPage";
 import { getLandingPage } from "./data/landingPages";
 import { getSitePage } from "./data/sitePages";
 import { LANG_PREFIX_RE } from "./i18n/locale";
@@ -48,6 +50,9 @@ function parseRoute(pathname) {
 
   if (clean === "/yardim") return { type: "faq" };
 
+  if (clean === "/partner-application") return { type: "partner-application" };
+  if (clean === "/transporter-application") return { type: "transporter-application" };
+
   const landing = getLandingPage(slug);
   if (landing) return { type: "landing", page: landing };
 
@@ -58,6 +63,9 @@ function parseRoute(pathname) {
   if (slug && /^[a-z0-9-]+$/i.test(slug)) {
     return { type: "custom", slug };
   }
+
+  // Bilinmeyen çok segmentli yol: ana sayfa yerine 404 görünümü.
+  if (slug) return { type: "custom", slug: "not-found" };
 
   return { type: "home" };
 }
@@ -151,6 +159,14 @@ export default function App() {
         <WhatsAppCTA />
       </div>
     );
+  }
+
+  if (route.type === "partner-application") {
+    return <PartnerApplicationPage navigate={navigate} onBook={startBooking} />;
+  }
+
+  if (route.type === "transporter-application") {
+    return <TransporterApplicationPage navigate={navigate} onBook={startBooking} />;
   }
 
   if (route.type === "experience") {

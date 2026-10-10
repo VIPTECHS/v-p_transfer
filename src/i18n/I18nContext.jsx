@@ -1,10 +1,9 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { getNested, interpolate, translations } from "./translations";
-import { detectBrowserLang, OG_LOCALES } from "./locale";
+import { OG_LOCALES } from "./locale";
 import { upsertJsonLd } from "./seo";
 
 const I18nContext = createContext(null);
-const STORAGE_KEY = "viptransfer-lang";
 
 function getLangFromPath() {
   if (typeof window === "undefined") return null;
@@ -15,9 +14,10 @@ function getLangFromPath() {
 function getInitialLang() {
   const fromPath = getLangFromPath();
   if (fromPath) return fromPath;
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved && translations[saved]) return saved;
-  return detectBrowserLang();
+  // Unprefixed routes are the Turkish canonical URLs. Locale selection is
+  // represented by /en/ and /de/ paths, so browser or saved locale must not
+  // change the content served at a Turkish canonical URL.
+  return "tr";
 }
 
 function setMeta(selector, attr, value) {
@@ -49,7 +49,6 @@ export function I18nProvider({ children }) {
   const setLang = (next) => {
     if (!translations[next]) return;
     setLangState(next);
-    localStorage.setItem(STORAGE_KEY, next);
   };
 
   useEffect(() => {

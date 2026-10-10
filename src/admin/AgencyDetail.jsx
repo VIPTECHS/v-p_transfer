@@ -10,6 +10,7 @@ import BankAccountsSection from "./components/BankAccountsSection";
 import DocumentsSection from "./components/DocumentsSection";
 import LedgerStatement from "./components/LedgerStatement";
 import StatusBadge from "./components/StatusBadge";
+import PaymentBadge from "./components/PaymentBadge";
 
 const TABS = [
   { id: "company", label: "Firma Bilgileri" },
@@ -155,7 +156,7 @@ export default function AgencyDetail({ id, onBack, navigate }) {
       {tab === "reservations" && (
         <div className="admin-card">
           <table className="admin-table">
-            <thead><tr><th>Ref</th><th>Müşteri</th><th>Transfer Tarihi</th><th>Satış</th><th>Durum</th></tr></thead>
+            <thead><tr><th>Ref</th><th>Müşteri</th><th>Transfer Tarihi</th><th>Satış</th><th>Tahsilat</th><th>Durum</th></tr></thead>
             <tbody>
               {reservations.map((r) => (
                 <tr key={r.id} style={{ cursor: "pointer" }} onClick={() => navigate("reservation-detail", r.id)}>
@@ -163,10 +164,11 @@ export default function AgencyDetail({ id, onBack, navigate }) {
                   <td>{r.customer ? `${r.customer.firstName} ${r.customer.lastName || ""}`.trim() : "—"}</td>
                   <td>{formatDate(r.firstTransferDate)}</td>
                   <td>{r.salePrice != null ? `${r.saleCurrency} ${r.salePrice}` : "—"}</td>
+                  <td><PaymentBadge status={r.customerPaymentStatus} /></td>
                   <td><StatusBadge status={r.status} /></td>
                 </tr>
               ))}
-              {reservations.length === 0 && <tr><td colSpan={5} className="admin-empty">Rezervasyon yok</td></tr>}
+              {reservations.length === 0 && <tr><td colSpan={6} className="admin-empty">Rezervasyon yok</td></tr>}
             </tbody>
           </table>
         </div>

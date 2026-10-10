@@ -26,6 +26,7 @@ export default function Hero({ onSearch }) {
             <br />
             {t("hero.vipPost")}
           </h1>
+          <img className="hero-brand-logo" src="/images/viptransfer-logo.png" alt="VIPTransfer.com" />
         </div>
 
         <BookingForm visible onSearch={onSearch} />

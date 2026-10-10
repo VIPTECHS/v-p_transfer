@@ -1,5 +1,5 @@
 import { getPostBySlug } from "../data/blogPosts";
-import { getLandingPage } from "../data/landingPages";
+import { getLandingPage, getLandingPagePath } from "../data/landingPages";
 import { getSitePage } from "../data/sitePages";
 import { translations } from "./translations";
 
@@ -13,12 +13,12 @@ export function absoluteUrl(path) {
   return `${SITE_URL}${clean === "/" ? "/" : clean}`;
 }
 
-export function buildAlternates(pathBuilder) {
+export function buildAlternates(pathBuilder, xDefaultLang = "en") {
   const alternates = LANGS.map((lang) => ({
     hreflang: lang,
     href: absoluteUrl(pathBuilder(lang)),
   }));
-  alternates.push({ hreflang: "x-default", href: absoluteUrl(pathBuilder("tr")) });
+  alternates.push({ hreflang: "x-default", href: absoluteUrl(pathBuilder(xDefaultLang)) });
   return alternates;
 }
 
@@ -116,7 +116,7 @@ export function applyLandingSeo(slug, lang) {
   if (!page) return;
   const title = page.heroTitle[lang] || page.heroTitle.en;
   const description = page.heroSubtitle[lang] || page.heroSubtitle.en;
-  const pathFor = (l) => (l === "tr" ? `/${slug}` : `/${l}/${slug}`);
+  const pathFor = (l) => getLandingPagePath(page, l);
   applyPageSeo({
     title: `${title} | VIP Transfer`,
     description,

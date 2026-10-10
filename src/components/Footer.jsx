@@ -195,7 +195,7 @@ export default function Footer({ navigate }) {
 
   const goPartners = (event) => {
     event.preventDefault();
-    if (navigate) navigate("/travel-partners");
+    if (navigate) navigate("/transporter-application");
   };
 
   return (
@@ -208,7 +208,7 @@ export default function Footer({ navigate }) {
             </span>
             <h2>{t("footer.partner.title")}</h2>
             <p>{t("footer.partner.text")}</p>
-            <a className="footer-partner-cta" href="/travel-partners" onClick={goPartners}>
+            <a className="footer-partner-cta" href="/transporter-application" onClick={goPartners}>
               {t("footer.partner.cta")}
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
                 <path d="M5 12h14M13 6l6 6-6 6" />

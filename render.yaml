@@ -29,6 +29,18 @@ services:
     runtime: static
     buildCommand: npm install && npm run build
     staticPublishPath: dist
+    routes:
+      # Route rules are kept here so they are versioned with the static site.
+      # Preserve the localized home URLs, whose canonicals intentionally end in /.
+      - type: redirect
+        source: /en/*/
+        destination: /en/*
+      - type: redirect
+        source: /de/*/
+        destination: /de/*
+      - type: redirect
+        source: /*/
+        destination: /*
     envVars:
       - key: VITE_BOOKING_API_URL
         fromService:

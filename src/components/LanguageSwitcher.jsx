@@ -1,6 +1,7 @@
 import { languages } from "../i18n/translations";
 import { useI18n } from "../i18n/I18nContext";
 import { LANG_PREFIX_RE } from "../i18n/locale";
+import { getLandingPage, getLandingPagePath } from "../data/landingPages";
 
 export default function LanguageSwitcher() {
   const { lang, setLang } = useI18n();
@@ -10,7 +11,13 @@ export default function LanguageSwitcher() {
     // URL'i dil önekiyle güncelle (hreflang varyantlarıyla tutarlı)
     if (typeof window !== "undefined") {
       const rest = window.location.pathname.replace(LANG_PREFIX_RE, "");
-      const next = `/${code}${rest || "/"}`.replace(/\/{2,}/g, "/");
+      const slug = rest.replace(/^\/+|\/+$/g, "");
+      const landingPage = getLandingPage(slug);
+      const next = landingPage
+        ? getLandingPagePath(landingPage, code)
+        : code === "tr"
+          ? rest || "/"
+          : `/${code}${rest || "/"}`.replace(/\/{2,}/g, "/");
       window.history.replaceState(null, "", next + window.location.search + window.location.hash);
     }
   };

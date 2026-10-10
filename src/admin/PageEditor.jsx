@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft, Save, ExternalLink } from "lucide-react";
 import RichTextEditor from "./RichTextEditor";
 import { getPage, createPage, updatePage } from "../api/pages";
@@ -11,7 +11,7 @@ const LANGS = [
 
 const SITE_URL = "https://viptransfer.com";
 
-const EMPTY_TR = () => ({ title: "", metaDescription: "", bodyHtml: "" });
+const EMPTY_TR = () => ({ slug: "", title: "", metaDescription: "", bodyHtml: "" });
 const emptyTranslations = () => ({ tr: EMPTY_TR(), en: EMPTY_TR(), de: EMPTY_TR() });
 
 function slugify(raw) {
@@ -68,10 +68,11 @@ export default function PageEditor({ id, onBack }) {
   const setField = (lang, field, val) =>
     setTranslations((prev) => ({ ...prev, [lang]: { ...prev[lang], [field]: val } }));
 
-  const previewUrl = useMemo(
-    () => `${SITE_URL}${slug ? `/${slug}` : ""}`,
-    [slug],
-  );
+  // Each language tab has its own URL: tr = base slug, en/de = own slug or the base one.
+  const langSlug = (lang) => (lang === "tr" ? slug : translations[lang].slug || slug);
+  const langUrl = (lang) =>
+    `${SITE_URL}${lang === "tr" ? "" : `/${lang}`}${langSlug(lang) ? `/${langSlug(lang)}` : ""}`;
+  const previewUrl = langUrl(activeLang);
 
   const save = async (publish) => {
     setError(null);
@@ -124,21 +125,6 @@ export default function PageEditor({ id, onBack }) {
 
       <div className="page-editor__grid">
         <div className="page-editor__main">
-          <div className="admin-field">
-            <label>URL uzantısı</label>
-            <div className="page-editor__slug">
-              <span>{SITE_URL}/</span>
-              <input
-                value={slug}
-                onChange={(e) => { setSlug(slugify(e.target.value)); setSlugEdited(true); }}
-                placeholder="ornek-sayfa"
-              />
-            </div>
-            <a className="page-editor__preview" href={previewUrl} target="_blank" rel="noreferrer">
-              {previewUrl} <ExternalLink size={12} />
-            </a>
-          </div>
-
           <div className="page-editor__langtabs">
             {LANGS.map((l) => (
               <button
@@ -151,6 +137,32 @@ export default function PageEditor({ id, onBack }) {
                 {translations[l.code].title ? <span className="dot" /> : null}
               </button>
             ))}
+          </div>
+
+          <div className="admin-field">
+            <label>URL uzantısı — {activeLang.toUpperCase()}</label>
+            <div className="page-editor__slug">
+              <span>{SITE_URL}{activeLang === "tr" ? "" : `/${activeLang}`}/</span>
+              {activeLang === "tr" ? (
+                <input
+                  value={slug}
+                  onChange={(e) => { setSlug(slugify(e.target.value)); setSlugEdited(true); }}
+                  placeholder="ornek-sayfa"
+                />
+              ) : (
+                <input
+                  value={t.slug}
+                  onChange={(e) => setField(activeLang, "slug", slugify(e.target.value))}
+                  placeholder={slug || "ornek-sayfa"}
+                />
+              )}
+            </div>
+            {activeLang !== "tr" && !t.slug && (
+              <small>Boş bırakılırsa Türkçe uzantı ({slug || "…"}) kullanılır; dile özgü URL önerilir.</small>
+            )}
+            <a className="page-editor__preview" href={previewUrl} target="_blank" rel="noreferrer">
+              {previewUrl} <ExternalLink size={12} />
+            </a>
           </div>
 
           <div className="admin-field">
