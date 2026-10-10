@@ -5108,6 +5108,20 @@ main, section, footer, .section, .section > *, .section-heading,
   border: 1px solid var(--line-strong); border-radius: 10px;
   color: var(--text); background: rgba(255,255,255,.045); font: inherit; font-size: 14px;
 }
+.partner-application-fields .transporter-vehicle-option input[type="checkbox"],
+.partner-application-fields .partner-application-radio-option input[type="radio"] {
+  appearance: auto; flex: 0 0 18px; width: 18px; height: 18px; min-height: 18px;
+  margin: 0; padding: 0; border: 0; border-radius: 3px; background: transparent;
+  box-shadow: none; accent-color: var(--gold); cursor: pointer;
+}
+.partner-application-fields .transporter-vehicle-option span,
+.partner-application-fields .partner-application-radio-option span {
+  min-width: 0; line-height: 1.35; overflow-wrap: anywhere;
+}
+.partner-application-fields .transporter-vehicle-option input:focus-visible,
+.partner-application-fields .partner-application-radio-option input:focus-visible {
+  outline: 3px solid rgba(212,175,55,.35); outline-offset: 3px; box-shadow: none;
+}
 .partner-application-fields select { color-scheme: dark; }
 .partner-application-fields select option { color: #f7f5f0; background: #141414; }
 .partner-application-fields textarea { min-height: 104px; resize: vertical; line-height: 1.5; }
