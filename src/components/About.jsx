@@ -5,7 +5,7 @@ export default function About() {
   const { t, dict } = useI18n();
 
   return (
-    <section className="trust about" id="corporate">
+    <section className="trust about rh-container" id="corporate">
       <div className="trust-image">
         <video
           className="trust-image-video"

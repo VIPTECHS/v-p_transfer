@@ -490,6 +490,11 @@
 .rh-page .footer-main h3 { font-family: var(--font-body); }
 .rh-page .footer-trust,.rh-page .footer-bottom { padding-inline: max(5%,calc((100% - 1440px)/2)); }
 .rh-page .eyebrow { font-size: 11px; color: #8a743f; letter-spacing: .08em; }
+@media (max-width: 760px) {
+  .rh-page .about .trust-image { min-height: 0; aspect-ratio: 16 / 9; }
+  .rh-page .about .experience { bottom: 12px; width: 96px; height: 96px; }
+  .rh-page .about .experience strong { font-size: 40px; }
+}
 @media (max-width:959px) {
   .rh-page .fleet-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .rh-page .contact-layout { grid-template-columns: minmax(0,1fr); }
@@ -510,7 +515,6 @@
   .rh-page .vehicle-card--booking { grid-column: 1/-1; }
   .rh-page .office-grid,.rh-page .contact-channels,.rh-page .blog-grid { grid-template-columns: minmax(0,1fr); }
   .rh-page .about { grid-template-columns: minmax(0,1fr); }
-  .rh-page .about .trust-image { min-height: 320px; }
   .rh-page .about .trust-content { padding: 45px 18px; }
   .rh-page .footer-partner-inner { padding-inline: 18px; }
   .rh-page .global-reach-grid { grid-template-columns: minmax(0,1fr); }
