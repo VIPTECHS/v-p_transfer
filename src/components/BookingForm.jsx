@@ -88,8 +88,8 @@ const TABS = [
   { id: "events", icon: EventsIcon },
 ];
 
-export default function BookingForm({ visible, onSearch }) {
-  const { t } = useI18n();
+export default function BookingForm({ visible, onSearch, layout = "default" }) {
+  const { t, lang } = useI18n();
   const [bookingType, setBookingType] = useState("transfer");
   const [pickupAt, setPickupAt] = useState(createDefaultPickupISO);
   const [fromPoint, setFromPoint] = useState(null);
@@ -161,6 +161,44 @@ export default function BookingForm({ visible, onSearch }) {
     window.scrollTo({ top: 0, behavior: "smooth" });
     onSearch(data);
   };
+
+  if (layout === "reference") {
+    return (
+      <form className="rh-reservation" id="booking" onSubmit={handleSubmit}>
+        <div className="rh-booking-tabs" role="tablist" aria-label={t("booking.pickupLabel")}>
+          {TABS.map(({ id, icon: TabIcon }) => (
+            <button key={id} type="button" role="tab" aria-selected={bookingType === id} className={bookingType === id ? "is-active" : ""} onClick={() => { setBookingType(id); setMessage(""); }}>
+              <TabIcon /><span>{t(`booking.typesShort.${id}`)}</span>
+            </button>
+          ))}
+        </div>
+        <div className="rh-booking-fields">
+          <div className="rh-booking-field rh-booking-from">
+            <LocationMapField id="from-where" variant="from" label={t("booking.fromLabel")} placeholder={t("booking.fromPlaceholder")} value={fromPoint} other={toPoint} onChange={setFromPoint} icon={<FromIcon />} destinationAirport={toAirport} />
+          </div>
+          <div className="rh-booking-field rh-booking-to">
+            {needsTo && <button className="rh-route-swap" type="button" aria-label={t("booking.swap")} onClick={swapDirections}><SwapIcon /></button>}
+            {needsTo ? <LocationMapField id="to-where" variant="to" label={t("booking.toLabel")} placeholder={t("booking.toPlaceholder")} value={toPoint} other={fromPoint} onChange={setToPoint} icon={<ToIcon />} destinationAirport={fromAirport} /> : <><label className="field-label" htmlFor="duration-hours">{t("booking.durationLabel")}</label><input id="duration-hours" type="number" min="1" max="24" value={durationHours} onChange={(event) => setDurationHours(event.target.value)} /></>}
+          </div>
+          <div className="rh-booking-field rh-booking-date"><PickupDateTimeField appearance="reference" value={pickupAt} onChange={setPickupAt} /></div>
+          <label className={`rh-booking-field rh-return ${roundTrip ? "is-active" : ""}`}>
+            <input type="checkbox" checked={roundTrip} onChange={(event) => setRoundTrip(event.target.checked)} />
+            <span aria-hidden="true">{roundTrip ? "✓" : "+"}</span>{t("booking.roundTrip")}
+          </label>
+          <div className="rh-booking-field rh-passengers">
+            <label className="field-label" htmlFor="passenger-count">{t("booking.passengersLabel")}</label>
+            <div className="rh-stepper">
+              <button type="button" disabled={Number(passengers) <= 1} onClick={() => setPassengers((count) => Math.max(1, Number(count || 1) - 1))} aria-label={t("booking.passengersLabel") + " −"}>−</button>
+              <input id="passenger-count" type="number" min="1" max={passengerMax} value={passengers} onChange={(event) => setPassengers(Math.min(passengerMax, Math.max(1, Number(event.target.value) || 1)))} />
+              <button type="button" disabled={Number(passengers) >= passengerMax} onClick={() => setPassengers((count) => Math.min(passengerMax, Number(count || 1) + 1))} aria-label={t("booking.passengersLabel") + " +"}>+</button>
+            </div>
+          </div>
+          <button className="rh-search" type="submit">{lang === "tr" ? "Fiyatları gör" : lang === "de" ? "Preise ansehen" : "See prices"} <span aria-hidden="true">→</span></button>
+        </div>
+        {message && <p className="rh-booking-error" role="alert">{message}</p>}
+      </form>
+    );
+  }
 
   return (
     <form className={`booking-form booking-form--bar ${visible ? "visible" : ""}`} id="booking" onSubmit={handleSubmit}>

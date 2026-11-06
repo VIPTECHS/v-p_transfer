@@ -38,11 +38,13 @@ export default function PickupDateTimeField({
   showEndTime = false,
   onDurationChange,
   mode = "datetime",
+  appearance = "default",
 }) {
   const { t, lang } = useI18n();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState(value);
   const [draftDuration, setDraftDuration] = useState(null);
+  const [popoverPosition, setPopoverPosition] = useState({});
   const rootRef = useRef(null);
   const popoverRef = useRef(null);
   const selectedDate = fromPickupISO(value);
@@ -90,6 +92,27 @@ export default function PickupDateTimeField({
     };
   }, [open]);
 
+  useEffect(() => {
+    if (!open || appearance !== "reference") return undefined;
+    const position = () => {
+      const rect = rootRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const width = Math.min(620, window.innerWidth - 32);
+      const height = Math.min(window.innerHeight - 32, window.innerWidth < 640 ? 435 : 440);
+      const left = Math.max(16, Math.min(rect.left, window.innerWidth - width - 16));
+      const below = rect.bottom + 12;
+      const top = below + height <= window.innerHeight - 16 ? below : Math.max(16, Math.min(rect.top - height - 12, window.innerHeight - height - 16));
+      setPopoverPosition({ "--rh-popup-left": `${left}px`, "--rh-popup-top": `${top}px` });
+    };
+    position();
+    window.addEventListener("resize", position);
+    window.addEventListener("scroll", position, true);
+    return () => {
+      window.removeEventListener("resize", position);
+      window.removeEventListener("scroll", position, true);
+    };
+  }, [open, appearance]);
+
   const handleCalendarChange = ({ pickupAt, startTime, endTime }) => {
     setDraft(toPickupISO(pickupAt));
     if (showEndTime) {
@@ -108,7 +131,8 @@ export default function PickupDateTimeField({
   const popover = open && typeof document !== "undefined"
     ? createPortal(
         <div
-          className="pickup-datetime-popover pickup-datetime-popover--portal"
+          className={`pickup-datetime-popover pickup-datetime-popover--portal ${appearance === "reference" ? "rh-calendar-popover" : ""}`}
+          style={appearance === "reference" ? popoverPosition : undefined}
           role="dialog"
           aria-label={label}
           ref={popoverRef}
@@ -117,6 +141,7 @@ export default function PickupDateTimeField({
             value={draftDate}
             showEndTime={showEndTime && !isDate && !isTime}
             mode={calendarMode}
+            monthsToShow={appearance === "reference" ? 2 : 1}
             onChange={handleCalendarChange}
           />
           <div className="pickup-datetime-footer">

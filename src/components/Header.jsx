@@ -4,9 +4,12 @@ import { useI18n } from "../i18n/I18nContext";
 import { LANG_PREFIX_RE } from "../i18n/locale";
 import Icon from "./Icon";
 import LanguageSwitcher from "./LanguageSwitcher";
+import ThemeToggle from "./ThemeToggle";
+import { useTheme } from "../lib/ThemeContext";
 
 export default function Header({ isHome = true, navigate, onBook }) {
   const { t, lang } = useI18n();
+  const { theme } = useTheme();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -54,7 +57,7 @@ export default function Header({ isHome = true, navigate, onBook }) {
         onClick={(e) => handleAnchor(e, "#top")}
       >
         <img
-          src="/images/viptransfer-logo.png"
+          src={isHome || theme === "dark" ? "/images/viptransfer-logo.png" : "/images/viptransfer-logo-black.png"}
           alt={t("brand.alt")}
         />
       </a>
@@ -84,6 +87,7 @@ export default function Header({ isHome = true, navigate, onBook }) {
         )}
       </nav>
       <div className="header-actions">
+        <ThemeToggle />
         <LanguageSwitcher />
         <a className="phone-link" href={`tel:${PHONE}`}>
           <Icon name="phone" size={16} /> {PHONE_DISPLAY}

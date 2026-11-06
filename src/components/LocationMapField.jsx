@@ -636,10 +636,15 @@ export default function LocationMapField({
     const width = maxWidth;
     const left = Math.min(Math.max(rect.left, 16), window.innerWidth - width - 16);
 
+    const availableBelow = window.innerHeight - rect.bottom - gap - 16;
+    const openAbove = availableBelow < 160 && rect.top > 200;
+    const maxHeight = Math.max(100, Math.min(360, openAbove ? rect.top - gap - 16 : availableBelow));
     setSuggestionStyle({
       left,
-      top: rect.bottom + gap,
+      top: openAbove ? Math.max(16, rect.top - maxHeight - gap) : rect.bottom + gap,
       width,
+      maxHeight,
+      overflowY: "auto",
     });
   };
 

@@ -33,9 +33,9 @@ export default function Checkout({ state, dispatch, onEdit, onSubmit, status, me
           />
           <span>
             {t("wizard.termsPrefix")}{" "}
-            <a href="/terms" target="_blank" rel="noopener">{t("wizard.termsOfService")}</a>
+            <a href="/terms-conditions" target="_blank" rel="noopener">{t("wizard.termsOfService")}</a>
             {" "}{t("wizard.and")}{" "}
-            <a href="/privacy" target="_blank" rel="noopener">{t("wizard.privacyPolicy")}</a>
+            <a href="/privacy-policy" target="_blank" rel="noopener">{t("wizard.privacyPolicy")}</a>
           </span>
         </label>
 
@@ -81,7 +81,7 @@ export default function Checkout({ state, dispatch, onEdit, onSubmit, status, me
                 <span>{stop}</span>
               </div>
             ))}
-            {tripData.type === "transfer" && (
+            {tripData.type !== "hourly" && (
               <div className="bw-review-loc">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" strokeWidth="3"><circle cx="12" cy="12" r="4"/></svg>
                 <div>
@@ -91,6 +91,7 @@ export default function Checkout({ state, dispatch, onEdit, onSubmit, status, me
             )}
           </div>
           <div className="bw-review-meta">
+            {tripData.type === "hourly" && <span>{t("booking.durationLabel")}: {tripData.durationHours}</span>}
             <span>👤 {passengers} {t("booking.details.passengers")}</span>
             <span>🧳 {luggage} {t("booking.details.luggage")}</span>
           </div>

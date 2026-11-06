@@ -1,0 +1,25 @@
+{
+  "sourcePage": "https://www.transfeero.com/en/",
+  "assets": [
+    {
+      "file": "standard.avif",
+      "url": "https://images.transfeero.com/e024607e-8976-4f97-6fd5-a63356d5ca00/w=260,dpr=2,format=auto"
+    },
+    {
+      "file": "first-class.avif",
+      "url": "https://images.transfeero.com/35e58d92-6242-4810-e7d6-4fd056cc6e00/w=260,dpr=2,format=auto"
+    },
+    {
+      "file": "van-standard.avif",
+      "url": "https://images.transfeero.com/bb43676e-a780-4476-9444-f564b2d9c300/w=260,dpr=2,format=auto"
+    },
+    {
+      "file": "van-first-class.avif",
+      "url": "https://images.transfeero.com/62138e03-e05c-4706-72a2-ca292a0b6a00/w=260,dpr=2,format=auto"
+    },
+    {
+      "file": "minibus.avif",
+      "url": "https://images.transfeero.com/b00d6070-f515-4c6b-a070-9573f492b500/w=260,dpr=2,format=auto"
+    }
+  ]
+}

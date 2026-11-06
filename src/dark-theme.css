@@ -1,0 +1,135 @@
+/* Appearance control is shared by the home, inner pages and booking header. */
+.public-ui .theme-toggle {
+  display: inline-flex; align-items: center; justify-content: center; flex: 0 0 36px;
+  width: 36px; height: 36px; padding: 0; border: 1px solid #d5d6ca;
+  border-radius: 9px; background: transparent; color: #33352c; cursor: pointer;
+}
+.public-ui .theme-toggle:hover { background: #00000008; }
+.rh-header .theme-toggle { border-color: #ffffff65; color: #fff; }
+.rh-header .theme-toggle:hover { background: #ffffff18; }
+.public-ui .theme-toggle:focus-visible { outline: 3px solid #ffbc40; outline-offset: 3px; }
+
+html[data-theme="dark"] {
+  --bg: #0d0e0e; --bg-alt: #151717; --bg-panel: #1b1d1d; --bg-card: #1b1d1d;
+  --bg-input: #232626; --bg-overlay: #111313f5; --text: #efefea; --text-primary: #efefea;
+  --text-heading: #f7f7f1; --text-secondary: #c3c7c1; --text-muted: #a5ada5;
+  --text-dim: #939c93; --text-faint: #8b958c; --gold: #ffbc40; --gold-dark: #d99b29;
+  --line: #303535; --line-strong: #464e4a; --border-input: #424a46;
+  --shadow-lg: #0006; --shadow-md: #0003; --scheme: dark; color-scheme: dark;
+}
+html[data-theme="dark"] .public-ui,
+html[data-theme="dark"] .rh-page {
+  --rh-paper: #0d0e0e; --rh-ink: #efefea; --rh-muted: #a5ada5;
+  --bg: #0d0e0e; --bg-alt: #151717; --bg-panel: #1b1d1d; --bg-card: #1b1d1d;
+  --bg-input: #232626; --text: #efefea; --text-heading: #f7f7f1;
+  --text-secondary: #c3c7c1; --text-muted: #a5ada5; --text-dim: #939c93;
+  --line: #303535; --line-strong: #464e4a; --gold: #ffbc40; --scheme: dark;
+  color: var(--text); background: var(--bg); color-scheme: dark;
+}
+html[data-theme="dark"] .public-ui .theme-toggle { color: #efefea; border-color: #ffffff40; }
+html[data-theme="dark"] .public-ui .theme-toggle:hover { background: #ffffff0c; }
+/* The photograph keeps its cinematic treatment in both appearances. */
+html[data-theme="dark"] .rh-page .rh-hero { --text: #fff; --text-heading: #fff; }
+html[data-theme="dark"] .rh-page :is(.stats-strip,.fleet,.about,.contact) { background: #151717; border-color: #303535; }
+html[data-theme="dark"] .rh-page :is(.services,.testimonials,.global-reach,.blog,.agency-band) { background: #0d0e0e; }
+html[data-theme="dark"] .rh-page :is(.vehicle-card,.vehicle-info,.vehicle-card-booking-panel,.testimonial-card,.office-card,.channel,.blog-card) { background: #1b1d1d; color: #efefea; border-color: #303535; }
+html[data-theme="dark"] .rh-page :is(.vehicle-info h3,.vehicle-back-head h3,.global-reach-title,.blog-card h3,.about-note strong,.agency-band h3,.service-copy h3) { color: #f7f7f1; }
+html[data-theme="dark"] .rh-page :is(.service-copy p,.testimonial-text,.testimonial-card footer,.blog-card-body p,.global-reach-text,.agency-band p,.about-story p,.about .section-heading p) { color: #a5ada5; }
+html[data-theme="dark"] .rh-page :is(.vehicle-specs svg,.vehicle-book-field > span) { color: #a5ada5; }
+html[data-theme="dark"] .rh-page .vehicle-booking-close { background: #303535; color: #efefea; }
+/* Transparent fleet cutouts sit directly on a subtle charcoal spotlight. */
+html[data-theme="dark"] .public-ui .vehicle-visual {
+  background: radial-gradient(72% 48% at 50% 72%, #ffffff24, #ffffff00 70%);
+}
+html[data-theme="dark"] .public-ui .vehicle-visual img { filter: none; }
+/* Match the Maybach's framing and neutral lighting to the other sedan cutouts. */
+html[data-theme="dark"] .public-ui [data-vehicle="maybach"] .vehicle-visual img {
+  width: 100%; margin-inline: auto; filter: saturate(.15) brightness(.9) contrast(.95);
+}
+html[data-theme="dark"] .rh-page :is(.vehicle-book-field input,.vehicle-ac-list) { color: #efefea; background: #232626; border-color: #424a46; color-scheme: dark; }
+html[data-theme="dark"] .rh-page .vehicle-ac-option { color: #c3c7c1; }
+html[data-theme="dark"] .rh-page .vehicle-ac-option:hover { background: #343b33; color: #ffbc40; }
+html[data-theme="dark"] .rh-page .rh-dropdown > div { background: #1b1d1d; color: #efefea; border-color: #303535; }
+html[data-theme="dark"] .rh-page .rh-dropdown > div > a:hover { background: #303535; }
+html[data-theme="dark"] .rh-language .lang-switcher button { color: #b9c2b8; }
+html[data-theme="dark"] .rh-language .lang-switcher button.active { background: #383f37; color: #fff; }
+html[data-theme="dark"] .rh-page .rh-destination-list > a { border-color: #303535; }
+html[data-theme="dark"] .rh-page .rh-destination-list > a:hover { color: #ffbc40; }
+/* Booking bar: preserve all control sizes, IDs, popover anchors and handlers. */
+html[data-theme="dark"] .rh-booking-tabs { background: #151717; color: #efefea; border: 1px solid #424a46; padding: 3px; }
+html[data-theme="dark"] .rh-booking-tabs button { color: #b9c2b8; }
+html[data-theme="dark"] .rh-booking-tabs button.is-active { background: #f5f5ef; color: #171715; }
+html[data-theme="dark"] .rh-booking-fields { background: #111313; color: #efefea; border-color: #424a46; }
+html[data-theme="dark"] .rh-booking-field { border-color: #343b37; }
+html[data-theme="dark"] .rh-reservation :is(.location-field-trigger,.pickup-datetime-trigger,.rh-stepper > input,.rh-booking-to > input) { color: #efefea; }
+html[data-theme="dark"] .rh-reservation :is(.field-label,.field-icon,.map-btn) { color: #a5ada5; }
+html[data-theme="dark"] .rh-reservation input { color-scheme: dark; }
+html[data-theme="dark"] .rh-reservation input::placeholder { color: #b0b8af; }
+html[data-theme="dark"] .rh-stepper > button { background: #1b1d1d; border-color: #596457; color: #efefea; }
+html[data-theme="dark"] .rh-route-swap { background: #232626; border-color: #596457; color: #c3c7c1; }
+html[data-theme="dark"] .rh-return.is-active,
+html[data-theme="dark"] .rh-return.is-active > span { color: #ffbc40; }
+html[data-theme="dark"] .rh-booking-error { color: #ffbcb4; background: #422722; }
+/* The journey illustrations use the same charcoal surfaces as the cards. */
+html[data-theme="dark"] .rh-step-art { background: #191c1b; border-color: #303535; }
+html[data-theme="dark"] :is(.rh-mini-booking,.rh-name-board) { background: #272c29; color: #efefea; }
+html[data-theme="dark"] :is(.rh-mini-route,.rh-mini-car) { border-color: #464e4a; }
+html[data-theme="dark"] .rh-mini-car span,
+html[data-theme="dark"] .rh-name-board span { color: #b9c2b8; }
+html[data-theme="dark"] .rh-step-art--map > svg:first-child { filter: brightness(.35); }
+html[data-theme="dark"] .rh-map-caption { background: linear-gradient(transparent,#191c1b 60%); }
+html[data-theme="dark"] .rh-map-caption span { color: #a5ada5; }
+/* Portals are rendered under body, so they need their own theme scope. */
+html[data-theme="dark"] :is(.location-suggestions,.location-map-popover,.pickup-datetime-popover,.pickup-datetime-popover--portal.rh-calendar-popover) { background: #1b1d1d; color: #efefea; border-color: #464e4a; color-scheme: dark; }
+html[data-theme="dark"] .location-suggestions { box-shadow: 0 15px 45px #0008; }
+html[data-theme="dark"] :is(.location-suggestion,.location-map-result-item) { color: #efefea; }
+html[data-theme="dark"] :is(.location-suggestions-title,.location-suggestion-hint,.location-suggestion-empty,.location-map-hint,.location-map-selection) { color: #b0b8af; }
+html[data-theme="dark"] .location-suggestion:hover,
+html[data-theme="dark"] .location-suggestion:focus-visible { background: #343b33; color: #ffbc40; }
+html[data-theme="dark"] :is(.location-map-search-inner,.location-map-search-input,.location-map-results,.location-map-footer) { background: #232626; color: #efefea; border-color: #464e4a; }
+html[data-theme="dark"] .rh-calendar-header > button,
+html[data-theme="dark"] .rh-calendar-grid > button { color: #efefea; }
+html[data-theme="dark"] .rh-calendar-grid > button:disabled { color: #6d776d; }
+html[data-theme="dark"] .rh-calendar-grid > button:hover:not(:disabled),
+html[data-theme="dark"] .rh-calendar-header > button:hover { background: #3b4339; }
+html[data-theme="dark"] .rh-calendar-grid > button[aria-pressed="true"] { background: #ffbc40; color: #171715; }
+html[data-theme="dark"] :is(.rh-calendar-weekdays,.rh-calendar-time,.rh-calendar-popover .pickup-datetime-preview) { color: #b0b8af; border-color: #464e4a; }
+html[data-theme="dark"] .rh-calendar-time > input { background: #303535; color: #efefea; border-color: #596457; color-scheme: dark; }
+html[data-theme="dark"] .pickup-datetime-popover--portal.rh-calendar-popover .pickup-datetime-footer { background: #1b1d1d !important; border-color: #464e4a; }
+/* Shared header and inner pages follow the saved appearance too. */
+html[data-theme="dark"] .public-ui :is(.header,.header.scrolled,.header .nav.open) { background: #111313f5; border-color: #303535; }
+html[data-theme="dark"] .public-ui .header :is(.nav a,.phone-link,.menu-toggle) { color: #efefea; }
+html[data-theme="dark"] .public-ui .header .phone-link { background: #232626; border-color: #424a46; }
+html[data-theme="dark"] .public-ui .header .lang-switcher button { color: #b9c2b8; }
+html[data-theme="dark"] .public-ui .header .lang-switcher button.active { background: #383f37; color: #fff; }
+html[data-theme="dark"] .public-ui :is(.blogpost,.social-feed) { background: #0d0e0e; }
+html[data-theme="dark"] .public-ui :is(.sitepage-hero,.landing-hero,.blogpost-conclusion,.blogpost-cta,.faq,.faq-more) { background: #151717; color: #c3c7c1; border-color: #303535; }
+html[data-theme="dark"] .public-ui :is(.blogpost-title,.landing-hero h1,.blogpost-cta-text h3,.blogpost-inner > section h2,.sitepage .blogpost-inner section h2) { color: #f7f7f1; }
+html[data-theme="dark"] .public-ui :is(.blogpost-lead,.landing-subtitle,.custom-page__body,.sitepage .blogpost-inner section p,.blogpost-inner > section p,.blogpost-cta p) { color: #b0b8af; }
+html[data-theme="dark"] .public-ui :is(.blogpost-back,.sitepage .blogpost-inner section,.landing-highlights li,.faq-item,.ig-post-head,.ig-actions,.ig-body) { background: #1b1d1d; border-color: #303535; color: #efefea; }
+html[data-theme="dark"] .public-ui :is(.partner-application-fields input,.partner-application-fields select,.partner-application-fields textarea,.partner-application-choice-field,.transporter-vehicle-option,.partner-application-radio-option) { background: #232626; color: #efefea; border-color: #424a46; color-scheme: dark; }
+html[data-theme="dark"] .public-ui :is(.partner-application-fields label > span,.partner-application-fields legend,.partner-application-consent) { color: #c3c7c1; }
+html[data-theme="dark"] .public-ui .partner-application-fields select option { background: #232626; color: #efefea; }
+html[data-theme="dark"] .public-ui .partner-application-fields :is(.transporter-vehicle-option,.partner-application-radio-option):has(input:checked) { background: #3e3420; border-color: #ffbc40; }
+html[data-theme="dark"] .public-ui :is(.faq-item button,.faq-item button span,.faq-more h3) { color: #efefea; }
+html[data-theme="dark"] .public-ui :is(.faq-answer p,.faq-more p,.ig-caption,.ig-likes) { color: #b0b8af; }
+/* The wizard already has dark styles; override the public light-only additions. */
+html[data-theme="dark"] .public-ui .bw-page { background: #0d0e0e; color: #efefea; }
+html[data-theme="dark"] .public-ui :is(.bw-sidebar,.bw-content,.bw-trip-card,.bw-review-card,.bw-checkout-card,.bw-vehicle-row,.bw-main .bw-section) { background: #1b1d1d; border-color: #303535; }
+html[data-theme="dark"] .public-ui :is(.bw-title,.bw-content h2,.bw-content h3,.bw-page-title,.bw-section-title,.bw-breadcrumb-btn--active) { color: #f7f7f1; }
+html[data-theme="dark"] .public-ui :is(.bw-bottom-bar,.bw-sticky-bar) { background: #111313f5; border-color: #303535; }
+html[data-theme="dark"] .public-ui :is(.bw-trip-tabs,.bw-vehicle-row-img) { background: #292e29; }
+html[data-theme="dark"] .public-ui .bw-trip-tabs button { color: #b9c2b8; }
+html[data-theme="dark"] .public-ui .bw-trip-tabs button.active { background: #f5f5ef; color: #171715; }
+html[data-theme="dark"] .public-ui :is(.bw-vehicle-row--selected,.bw-vehicle-row.selected,.bw-vehicle-row--active) { background: #332c1c; border-color: #ffbc40; }
+html[data-theme="dark"] .public-ui .bw-vehicle-row-badge { color: #ffce72; background: #493c21; }
+html[data-theme="dark"] .public-ui :is(.bw-field input,.bw-textarea,.bw-select,.bw-phone-row input) { background: #232626; color: #efefea; border-color: #424a46; color-scheme: dark; }
+html[data-theme="dark"] .public-ui :is(.bw-sidebar-edit,.bw-add-stops,.bw-review-edit,.bw-stop-add) { color: #ffce72; }
+html[data-theme="dark"] .public-ui .bw-sticky-btn:disabled { background: #303535; color: #a5ada5; }
+@media(max-width:639px) {
+  .public-ui .theme-toggle { width: 32px; height: 34px; flex-basis: 32px; }
+  .rh-header-actions { gap: 5px; }
+}
+@media(max-width:379px) {
+  .public-ui .header .phone-link { display: none; }
+}

@@ -44,7 +44,7 @@ function reducer(state, action) {
     case "SET_VEHICLE": return { ...state, selectedVehicle: action.payload };
     case "SET_PASSENGERS": return { ...state, passengers: action.payload };
     case "SET_LUGGAGE": return { ...state, luggage: action.payload };
-    case "SET_CHILD_SEAT": return { ...state, childSeat: action.payload };
+    case "SET_CHILD_SEAT": return { ...state, childSeat: Math.min(4, Math.max(0, action.payload)) };
     case "SET_CONTACT": return { ...state, contact: action.payload };
     case "SET_FLIGHT": return { ...state, flightNumber: action.payload };
     case "SET_MEET_GREET_SELECTED": return {
@@ -71,6 +71,7 @@ export default function BookingWizard({ bookingData, onBack }) {
     tripData: bookingData || { type: "transfer" },
     step: hasTrip ? 2 : 1,
     selectedVehicle: bookingData?.vehicle || null,
+    returnTransfer: Boolean(bookingData?.roundTrip || bookingData?.returnTransfer),
     // Carry passenger/luggage counts through from the home form so the user
     // does not have to re-enter them (previously they were reset to 1/1 here).
     passengers: Math.max(1, Number(bookingData?.passengers) || initialState.passengers),

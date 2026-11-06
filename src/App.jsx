@@ -1,20 +1,11 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import Header from "./components/Header";
-import Hero from "./components/Hero.jsx?scroll-sequence-v=4";
-import AirportTransfer from "./components/AirportTransfer";
-import StatsStrip from "./components/StatsStrip";
-import Services from "./components/Services";
-import Fleet from "./components/Fleet";
-import About from "./components/About";
-import Blog from "./components/Blog";
-import Contact from "./components/Contact";
 import Footer from "./components/Footer";
 import WhatsAppCTA from "./components/WhatsAppCTA";
 import BlogPost from "./components/BlogPost";
 import LandingPage from "./components/LandingPage";
 import SitePage from "./components/SitePage";
 import CustomPage from "./components/CustomPage";
-import Testimonials from "./components/Testimonials";
 import MediaPage from "./components/MediaPage";
 import FAQPage from "./components/FAQPage";
 import ExperiencePage from "./components/ExperiencePage";
@@ -25,6 +16,7 @@ import { getSitePage } from "./data/sitePages";
 import { LANG_PREFIX_RE } from "./i18n/locale";
 import { useI18n } from "./i18n/I18nContext";
 import { applyHomeSeo } from "./i18n/seo";
+import ReferenceHome from "./components/ReferenceHome";
 
 const BookingWizard = lazy(() => import("./components/booking/BookingWizard"));
 
@@ -128,7 +120,7 @@ export default function App() {
     );
   }
 
-  if (route.type === "landing") {
+  if (route.type === "landing" && !bookingData) {
     return (
       <div id="top">
         <Header isHome={false} navigate={navigate} onBook={startBooking} />
@@ -193,20 +185,7 @@ export default function App() {
   return (
     <div id="top">
       <HomeSeo />
-      <Header isHome navigate={navigate} onBook={startBooking} />
-      <main>
-        <Hero onSearch={setBookingData} />
-        <StatsStrip />
-        <AirportTransfer />
-        <Fleet onSearch={setBookingData} />
-        <Services />
-        <About />
-        <Testimonials />
-        <Blog navigate={navigate} />
-        <Contact />
-      </main>
-      <Footer navigate={navigate} />
-      <WhatsAppCTA />
+      <ReferenceHome onSearch={setBookingData} navigate={navigate} />
     </div>
   );
 }

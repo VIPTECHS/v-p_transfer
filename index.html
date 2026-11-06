@@ -3,6 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      // Apply the saved appearance before styles load to avoid a light flash.
+      try {
+        const theme = localStorage.getItem("viptransfer-theme") === "dark" ? "dark" : "light";
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = theme;
+      } catch { document.documentElement.dataset.theme = "light"; }
+    </script>
     <meta name="referrer" content="origin" />
     <meta name="theme-color" content="#050505" />
 

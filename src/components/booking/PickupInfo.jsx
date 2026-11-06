@@ -258,7 +258,7 @@ export default function PickupInfo({ state, dispatch }) {
               <div className="bw-extra-counter">
                 <button type="button" className="bw-counter-btn" onClick={() => dispatch({ type: "SET_CHILD_SEAT", payload: Math.max(0, state.childSeat - 1) })} disabled={state.childSeat === 0}>−</button>
                 <span className="bw-counter-value">{state.childSeat}</span>
-                <button type="button" className="bw-counter-btn" onClick={() => dispatch({ type: "SET_CHILD_SEAT", payload: state.childSeat + 1 })}>+</button>
+                <button type="button" className="bw-counter-btn" onClick={() => dispatch({ type: "SET_CHILD_SEAT", payload: state.childSeat + 1 })} disabled={state.childSeat >= 4}>+</button>
               </div>
             </div>
 

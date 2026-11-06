@@ -52,7 +52,7 @@ export default function LandingPage({ page, onSearch }) {
       </section>
 
       <section className="landing-booking" id="booking">
-        <BookingForm visible onSearch={onSearch} />
+        <BookingForm visible layout="reference" onSearch={onSearch} />
       </section>
 
       <Fleet onSearch={onSearch} />

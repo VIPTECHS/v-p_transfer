@@ -251,6 +251,7 @@ export default function CalendarWithTime({
   onChange,
   showEndTime = false,
   mode = "full",
+  monthsToShow = 1,
   minDate = startOfDay(new Date()),
 }) {
   const dateOnly = mode === "date";
@@ -334,6 +335,31 @@ export default function CalendarWithTime({
       emitChange(value, startTime, timeStr);
     }
   };
+
+  if (monthsToShow === 2 && !timeOnly) {
+    return (
+      <div className="rh-calendar">
+        <div className="rh-calendar-months">
+          {[0, 1].map((offset) => {
+            const month = new Date(viewDate.getFullYear(), viewDate.getMonth() + offset, 1);
+            const title = new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" }).format(month);
+            return <div className={`rh-calendar-month ${offset ? "rh-calendar-month--second" : ""}`} key={offset}>
+              <div className="rh-calendar-header">
+                {offset === 0 ? <button type="button" onClick={() => shiftMonth(-1)} aria-label={t("calendar.prevMonth")}><ChevronIcon /></button> : <span />}
+                <strong>{title}</strong>
+                <button className={offset === 0 ? "rh-calendar-next-mobile" : ""} type="button" onClick={() => shiftMonth(1)} aria-label={t("calendar.nextMonth")}><ChevronIcon direction="right" /></button>
+              </div>
+              <div className="rh-calendar-weekdays">{weekdays.map((day) => <span key={day}>{day}</span>)}</div>
+              <div className="rh-calendar-grid" role="group" aria-label={title}>
+                {getMonthMatrix(month).map((date, index) => date ? <button key={index} type="button" disabled={isBeforeDay(date, minDate)} aria-pressed={isSameDay(date, value)} aria-label={new Intl.DateTimeFormat(locale, { dateStyle: "full" }).format(date)} onClick={() => selectDate(date)}>{date.getDate()}</button> : <span key={index} />)}
+              </div>
+            </div>;
+          })}
+        </div>
+        {!dateOnly && <label className="rh-calendar-time">{t("calendar.startTime")}<input type="time" value={startTime} onChange={(event) => { if (event.target.value) { setStartTime(event.target.value); emitChange(value, event.target.value, endTime); } }} /></label>}
+      </div>
+    );
+  }
 
   if (timeOnly) {
     return (

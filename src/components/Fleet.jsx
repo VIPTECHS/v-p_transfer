@@ -1,13 +1,17 @@
 import { useMemo, useState } from "react";
 import { fleetItems, fleetPreviewKeys } from "../data/content";
 import { useI18n } from "../i18n/I18nContext";
+import { useTheme } from "../lib/ThemeContext";
+import { fleetDarkImages } from "../data/fleetDarkImages";
 import Icon from "./Icon";
 import LocationAutocomplete from "./LocationAutocomplete";
 import { defaultPickupDate, toPickupISO } from "../utils/datetime";
 
 function VehicleCard({ item, onSearch }) {
   const { t } = useI18n();
-  const { key, image, hoverImage, popular } = item;
+  const { key, hoverImage, popular } = item;
+  const { theme } = useTheme();
+  const image = theme === "dark" ? fleetDarkImages[key] || item.image : item.image;
 
   const [isExpanded, setIsExpanded] = useState(false);
   const [pickupAt, setPickupAt] = useState(() => toPickupISO(defaultPickupDate()));
@@ -44,6 +48,7 @@ function VehicleCard({ item, onSearch }) {
 
   return (
     <article
+      data-vehicle={key}
       className={`vehicle-card ${popular ? "vehicle-card--popular" : ""}${hoverImage ? " vehicle-card--has-flip" : ""}${isExpanded ? " vehicle-card--booking" : ""}`}
     >
       <div className="vehicle-card-front">
@@ -140,9 +145,9 @@ function VehicleCard({ item, onSearch }) {
   );
 }
 
-export default function Fleet({ onSearch }) {
+export default function Fleet({ onSearch, imageOverrides, initiallyExpanded = false }) {
   const { t } = useI18n();
-  const [showAll, setShowAll] = useState(false);
+  const [showAll, setShowAll] = useState(initiallyExpanded);
 
   const previewItems = useMemo(() => {
     const byKey = new Map(fleetItems.map((item) => [item.key, item]));
@@ -197,7 +202,7 @@ export default function Fleet({ onSearch }) {
       </div>
       <div className={`fleet-grid${showAll ? " fleet-grid--all" : " fleet-grid--preview"}`}>
         {visibleItems.map((item) => (
-          <VehicleCard key={item.key} item={item} onSearch={onSearch} />
+          <VehicleCard key={item.key} item={imageOverrides?.[item.key] ? { ...item, image: imageOverrides[item.key] } : item} onSearch={onSearch} />
         ))}
       </div>
     </section>
