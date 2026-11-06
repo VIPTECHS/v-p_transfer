@@ -1,4 +1,4 @@
-FROM node:20-alpine AS base
+FROM node:22-alpine AS base
 WORKDIR /app
 
 # Install dependencies
@@ -13,13 +13,14 @@ COPY . .
 RUN npm run build:novsg
 
 # Production image
-FROM node:20-alpine AS production
+FROM node:22-alpine AS production
 WORKDIR /app
 
 COPY --from=base /app/package.json /app/package-lock.json ./
 COPY --from=base /app/node_modules ./node_modules
 COPY --from=base /app/dist ./dist
 COPY --from=base /app/server ./server
+COPY --from=base /app/src/data/pricing.js ./src/data/pricing.js
 
 ENV NODE_ENV=production
 ENV PORT=3001

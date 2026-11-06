@@ -41,3 +41,4 @@ server/prisma/.env
 *.sqlite
 server/uploads/
 data/
+!/src/data/
